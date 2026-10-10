@@ -80,7 +80,7 @@ Structure:
 | `migrations/` | Numbered SQL migrations |
 | `config/`, `storage/` | Created/used at runtime, not public |
 
-Releases are built by GitHub Actions when a tag `v*` is pushed; the ZIP includes `vendor/` with the versions pinned in `composer.lock`.
+Releases are built by GitHub Actions: set the version in `src/App.php` (`App::VERSION`), then open **Actions › Release › Run workflow** on GitHub and enter that version (or push a tag `v<version>`). The workflow runs the tests, builds the ZIP including `vendor/` with the versions pinned in `composer.lock`, creates the tag and publishes the release.
 
 ## License
 

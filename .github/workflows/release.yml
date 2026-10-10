@@ -1,7 +1,25 @@
 name: Release
 
-# Push a tag like v0.1.0 to build the ZIP with all libraries and attach it to a GitHub release.
+# Builds the release ZIP (application + all libraries from composer.lock) and publishes
+# it as a GitHub release. Two ways to start it:
+#
+#  1. In the browser: Actions › Release › "Run workflow", enter the version (e.g. 0.2.0).
+#     The workflow creates the tag v<version> on main and the release.
+#  2. With git: push a tag like v0.2.0.
+#
+# The version must match LapFund\App::VERSION in src/App.php.
 on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version without "v", e.g. 0.2.0 (must match App::VERSION)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        type: boolean
+        default: false
   push:
     tags: ['v*']
 
@@ -13,11 +31,51 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+
+      - name: Determine version
+        id: v
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+              echo "::error::Start the release from the main branch."; exit 1
+            fi
+            VERSION="${INPUT_VERSION#v}"
+          else
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$'; then
+            echo "::error::Version '$VERSION' is not of the form 1.2.3 or 1.2.3-beta.1"; exit 1
+          fi
+          APP_VERSION=$(php -r 'require "src/App.php"; echo LapFund\App::VERSION;')
+          if [ "$APP_VERSION" != "$VERSION" ]; then
+            echo "::error::Version $VERSION does not match App::VERSION ($APP_VERSION) in src/App.php. Update src/App.php first."; exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Check that the release does not exist yet
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${{ steps.v.outputs.tag }}" > /dev/null 2>&1; then
+            echo "::error::Release ${{ steps.v.outputs.tag }} already exists."; exit 1
+          fi
+
       - name: Tests
         run: composer install --no-interaction --no-progress && vendor/bin/phpunit && composer audit --no-dev
+
       - name: Build ZIP
-        run: bin/build-release.sh "${GITHUB_REF_NAME#v}"
+        run: bin/build-release.sh "${{ steps.v.outputs.version }}"
+
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" "build/lapfund-${GITHUB_REF_NAME#v}.zip" --title "LapFund $GITHUB_REF_NAME" --generate-notes
+          PRERELEASE: ${{ inputs.prerelease && '--prerelease' || '' }}
+        run: |
+          gh release create "${{ steps.v.outputs.tag }}" \
+            "build/lapfund-${{ steps.v.outputs.version }}.zip" \
+            --target "$GITHUB_SHA" \
+            --title "LapFund ${{ steps.v.outputs.tag }}" \
+            --generate-notes $PRERELEASE

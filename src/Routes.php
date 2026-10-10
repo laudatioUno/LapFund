@@ -7,8 +7,12 @@ namespace LapFund;
 use LapFund\Controller\AdminController;
 use LapFund\Controller\AssetController;
 use LapFund\Controller\AuthController;
+use LapFund\Controller\EventController;
 use LapFund\Controller\InstallController;
+use LapFund\Controller\ParticipantController;
+use LapFund\Controller\PoolController;
 use LapFund\Controller\SettingsController;
+use LapFund\Controller\TeamController;
 use LapFund\Controller\UserController;
 use LapFund\Http\Router;
 
@@ -60,6 +64,34 @@ final class Routes
         $r->post('/admin/users/{id}/reset-totp', $c(UserController::class, 'resetTotp'));
         $r->post('/admin/users/{id}/unlock', $c(UserController::class, 'unlock'));
         $r->post('/admin/users/{id}/active', $c(UserController::class, 'toggleActive'));
+
+        // Events (stage 2)
+        $r->get('/admin/events', $c(EventController::class, 'index'));
+        $r->get('/admin/events/new', $c(EventController::class, 'create'));
+        $r->post('/admin/events/new', $c(EventController::class, 'store'));
+        $r->get('/admin/events/{id}', $c(EventController::class, 'show'));
+        $r->post('/admin/events/{id}/status', $c(EventController::class, 'status'));
+        $r->post('/admin/events/{id}/archive', $c(EventController::class, 'archive'));
+        $r->get('/admin/events/{id}/settings', $c(EventController::class, 'settings'));
+        $r->post('/admin/events/{id}/settings', $c(EventController::class, 'updateSettings'));
+
+        $r->get('/admin/events/{id}/teams', $c(TeamController::class, 'index'));
+        $r->post('/admin/events/{id}/teams', $c(TeamController::class, 'store'));
+        $r->post('/admin/events/{id}/teams/{teamId:[1-9][0-9]*}', $c(TeamController::class, 'update'));
+
+        $r->get('/admin/events/{id}/participants', $c(ParticipantController::class, 'index'));
+        $r->get('/admin/events/{id}/participants/add', $c(ParticipantController::class, 'add'));
+        $r->post('/admin/events/{id}/participants/add', $c(ParticipantController::class, 'storeNew'));
+        $r->post('/admin/events/{id}/participants/add-from-pool', $c(ParticipantController::class, 'storeFromPool'));
+        $r->get('/admin/events/{id}/participants/import', $c(ParticipantController::class, 'importForm'));
+        $r->post('/admin/events/{id}/participants/import', $c(ParticipantController::class, 'importPreview'));
+        $r->post('/admin/events/{id}/participants/import/apply', $c(ParticipantController::class, 'importApply'));
+        $r->get('/admin/events/{id}/participants/copy', $c(ParticipantController::class, 'copyForm'));
+        $r->post('/admin/events/{id}/participants/copy', $c(ParticipantController::class, 'copyApply'));
+        $r->get('/admin/events/{id}/participants/{pid:[1-9][0-9]*}', $c(ParticipantController::class, 'edit'));
+        $r->post('/admin/events/{id}/participants/{pid:[1-9][0-9]*}', $c(ParticipantController::class, 'update'));
+
+        $r->get('/admin/participants', $c(PoolController::class, 'index'));
 
         $r->get('/admin/settings', $c(SettingsController::class, 'edit'));
         $r->post('/admin/settings', $c(SettingsController::class, 'update'));

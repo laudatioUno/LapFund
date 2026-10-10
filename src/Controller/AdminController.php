@@ -33,6 +33,8 @@ final class AdminController extends Controller
         }
 
         return $this->render('admin/dashboard.html.twig', [
+            'events' => array_slice($this->app->events()->listFor($user), 0, 6),
+            'can_create' => $isClub,
             'checklist' => $checklist,
             'pending_migrations' => $isClub ? $this->app->migrator()->pending() : [],
         ]);

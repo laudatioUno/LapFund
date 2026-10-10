@@ -21,8 +21,9 @@ git ls-files -z \
   | grep -zv -E '^(tests/|\.github/|phpunit\.xml\.dist$|\.gitignore$|bin/build-release\.sh$)' \
   | xargs -0 -I{} cp --parents {} "$STAGE"
 
-# Production libraries exactly as pinned in composer.lock.
-composer install --working-dir="$STAGE" --no-dev --optimize-autoloader --classmap-authoritative --no-interaction --no-progress --quiet
+# Production libraries exactly as pinned in composer.lock. No --classmap-authoritative:
+# classes missing from the class map (e.g. after a partial update) are still found via PSR-4.
+composer install --working-dir="$STAGE" --no-dev --optimize-autoloader --no-interaction --no-progress --quiet
 # Never ship version-control metadata of the libraries (present when installed from source).
 find "$STAGE/vendor" -type d -name .git -prune -exec rm -rf {} +
 

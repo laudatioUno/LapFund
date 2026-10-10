@@ -51,5 +51,6 @@
       sample.style.setProperty('color', (1.05 / (l + 0.05)) >= ((l + 0.05) / 0.0632) ? '#FFFFFF' : '#14212E');
     };
     color.addEventListener('input', update);
+    update();
   }
 })();

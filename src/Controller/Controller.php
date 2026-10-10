@@ -50,7 +50,24 @@ abstract class Controller
         if ($action !== null && !Permissions::can($user, $action)) {
             throw new HttpException(403);
         }
+        $this->guardPendingMigrations($user);
 
         return $user;
+    }
+
+    /**
+     * After an update with new database migrations, the app cannot work until they
+     * have run: club admins are sent to the system page, everyone else sees a notice.
+     */
+    private function guardPendingMigrations(array $user): void
+    {
+        if (str_starts_with($this->app->request->path, '/admin/system') || $this->app->migrator()->pending() === []) {
+            return;
+        }
+        if ($user['role'] === 'club_admin') {
+            $this->app->session->flash('warning', $this->t('admin.system.update_required'));
+            throw new RedirectException($this->app->request->url('/admin/system'));
+        }
+        throw new HttpException(503);
     }
 }

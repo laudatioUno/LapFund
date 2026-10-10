@@ -1,0 +1,72 @@
+{% extends 'layout/admin.html.twig' %}
+{% import 'partials/macros.html.twig' as m %}
+
+{% block title %}{{ t('participants.add') }} · {{ event.name }}{% endblock %}
+
+{% block content %}
+  {% include 'partials/event_header.html.twig' %}
+
+  <div class="cards cards--wide">
+    <section class="card stack" aria-labelledby="pool-title">
+      <h2 class="h2" id="pool-title">{{ t('participants.from_pool') }}</h2>
+      <p class="muted">{{ t('participants.from_pool_help') }}</p>
+      <form method="get" action="{{ url('/admin/events/' ~ event.id ~ '/participants/add') }}" role="search">
+        <div class="field">
+          <label for="f-pool-q">{{ t('participants.search') }}</label>
+          <div class="copy-row">
+            <input id="f-pool-q" name="q" type="search" value="{{ query }}" maxlength="100" placeholder="{{ t('participants.search_placeholder') }}">
+            <button type="submit" class="btn btn--secondary">{{ t('participants.search_button') }}</button>
+          </div>
+        </div>
+      </form>
+
+      {% if query != '' %}
+        {% if pool is empty %}
+          <p class="muted" role="status">{{ t('participants.pool_no_match') }}</p>
+        {% else %}
+          <ul class="pool-list">
+            {% for p in pool %}
+              <li class="pool-list__item">
+                <div>
+                  <strong>{{ p.first_name }} {{ p.last_name }}</strong><br>
+                  <span class="muted small break">{{ p.email }}</span>
+                  {% if p.last_event %}<br><span class="muted small">{{ t('participants.last_event', {name: p.last_event}) }}</span>{% endif %}
+                </div>
+                <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/participants/add-from-pool') }}" class="pool-list__form">
+                  {{ csrf_field() }}
+                  <input type="hidden" name="participant_id" value="{{ p.id }}">
+                  <input type="hidden" name="q" value="{{ query }}">
+                  {% if teams is not empty %}
+                    <label for="pool-team-{{ p.id }}" class="visually-hidden">{{ t('participants.team') }}</label>
+                    <select id="pool-team-{{ p.id }}" name="team_id">
+                      <option value="">{{ t('events.teams.none') }}</option>
+                      {% for team in teams %}<option value="{{ team.id }}">{{ team.name }}</option>{% endfor %}
+                    </select>
+                  {% endif %}
+                  <button type="submit" class="btn btn--secondary btn--small">{{ t('participants.add_short') }}<span class="visually-hidden"> {{ p.first_name }} {{ p.last_name }}</span></button>
+                </form>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endif %}
+    </section>
+
+    <section class="card stack" aria-labelledby="new-title">
+      <h2 class="h2" id="new-title">{{ t('participants.new_person') }}</h2>
+      <p class="muted">{{ t('participants.new_person_help') }}</p>
+      <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/participants/add') }}" class="stack" novalidate>
+        {{ csrf_field() }}
+        <div class="grid-2">
+          {{ m.field('first_name', t('participants.first_name'), input.first_name, errors, 'text', {required: true, maxlength: 80, autocomplete: 'off'}) }}
+          {{ m.field('last_name', t('participants.last_name'), input.last_name, errors, 'text', {required: true, maxlength: 80, autocomplete: 'off'}) }}
+        </div>
+        {{ m.field('email', t('participants.email'), input.email, errors, 'email', {required: true, maxlength: 190, autocomplete: 'off', help: t('participants.email_help')}) }}
+        {{ m.team_select('team_id', t('participants.team'), teams, input.team_id, errors) }}
+        <div><button type="submit" class="btn btn--primary">{{ t('participants.add') }}</button></div>
+      </form>
+    </section>
+  </div>
+
+  <p><a href="{{ url('/admin/events/' ~ event.id ~ '/participants') }}">← {{ t('participants.back_to_list') }}</a></p>
+{% endblock %}

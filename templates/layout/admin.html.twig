@@ -14,6 +14,8 @@
 
     <div class="nav__group">
       {{ m.nav_link('/admin', t('app.nav.dashboard'), current_path) }}
+      {{ m.nav_link('/admin/events', t('app.nav.events'), current_path) }}
+      {{ m.nav_link('/admin/participants', t('app.nav.pool'), current_path) }}
     </div>
 
     {% if is_club_admin %}

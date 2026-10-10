@@ -1,0 +1,39 @@
+{% extends 'layout/admin.html.twig' %}
+
+{% block title %}{{ t('participants.import.title') }} · {{ event.name }}{% endblock %}
+
+{% block content %}
+  {% include 'partials/event_header.html.twig' %}
+
+  <p><a href="{{ url('/admin/events/' ~ event.id ~ '/participants') }}">← {{ t('participants.back_to_list') }}</a></p>
+
+  <div class="cards cards--wide">
+    <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/participants/import') }}" enctype="multipart/form-data" class="card stack" novalidate>
+      {{ csrf_field() }}
+      <h2 class="h2">{{ t('participants.import.title') }}</h2>
+      <p class="muted">{{ t('participants.import.intro') }}</p>
+      <div class="field{{ error ? ' field--error' }}">
+        <label for="f-csv">{{ t('participants.import.file') }}</label>
+        <input id="f-csv" name="csv" type="file" accept=".csv,text/csv,text/plain"{% if error %} aria-invalid="true" aria-describedby="e-csv"{% endif %}>
+        {% if error %}<p class="field__error" id="e-csv">{{ t(error) }}</p>{% endif %}
+      </div>
+      <div><button type="submit" class="btn btn--primary">{{ t('participants.import.preview_button') }}</button></div>
+      <p class="muted small">{{ t('participants.import.no_changes_yet') }}</p>
+    </form>
+
+    <section class="card stack" aria-labelledby="format-title">
+      <h2 class="h2" id="format-title">{{ t('participants.import.format_title') }}</h2>
+      <p>{{ t('participants.import.format_text') }}</p>
+      <pre class="code-sample">Vorname;Name;E-Mail;Team
+Lea;Muster;familie.muster@example.ch;U11
+Noah;Muster;familie.muster@example.ch;U13
+Mia;Beispiel;mia.beispiel@example.ch;</pre>
+      <ul class="small">
+        <li>{{ t('participants.import.format_separator') }}</li>
+        <li>{{ t('participants.import.format_team') }}</li>
+        <li>{{ t('participants.import.format_match') }}</li>
+        <li>{{ t('participants.import.format_excel') }}</li>
+      </ul>
+    </section>
+  </div>
+{% endblock %}

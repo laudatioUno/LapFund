@@ -1,0 +1,54 @@
+{% extends 'layout/admin.html.twig' %}
+{% import 'partials/macros.html.twig' as m %}
+
+{% block title %}{{ p.first_name }} {{ p.last_name }} · {{ event.name }}{% endblock %}
+
+{% block content %}
+  {% include 'partials/event_header.html.twig' %}
+
+  <p><a href="{{ url('/admin/events/' ~ event.id ~ '/participants') }}">← {{ t('participants.back_to_list') }}</a></p>
+
+  <section class="card stack form-narrow" aria-labelledby="person-title">
+    <h2 class="h2" id="person-title">{{ p.first_name }} {{ p.last_name }}</h2>
+    <p class="muted small">
+      {{ t('participants.in_events', {count: p.event_count}) }} · {{ t('participants.pledge_count', {count: p.pledge_count}) }}
+    </p>
+
+    {% if perm.participants %}
+      <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/participants/' ~ p.id) }}" class="stack" novalidate>
+        {{ csrf_field() }}
+        <div class="grid-2">
+          {{ m.field('first_name', t('participants.first_name'), input.first_name, errors, 'text', {required: true, maxlength: 80, autocomplete: 'off'}) }}
+          {{ m.field('last_name', t('participants.last_name'), input.last_name, errors, 'text', {required: true, maxlength: 80, autocomplete: 'off'}) }}
+        </div>
+        {{ m.field('email', t('participants.email'), input.email, errors, 'email', {required: true, maxlength: 190, autocomplete: 'off'}) }}
+        {% if p.event_count > 1 %}<p class="notice notice--info small">{{ t('participants.shared_person_hint', {count: p.event_count}) }}</p>{% endif %}
+        {{ m.team_select('team_id', t('participants.team'), teams, input.team_id, errors) }}
+        <div><button type="submit" class="btn btn--primary">{{ t('app.save') }}</button></div>
+      </form>
+    {% else %}
+      <dl class="facts">
+        <div><dt>{{ t('participants.email') }}</dt><dd class="break">{{ p.email }}</dd></div>
+        <div><dt>{{ t('participants.team') }}</dt><dd>{{ p.team_name ?? '–' }}</dd></div>
+      </dl>
+    {% endif %}
+  </section>
+
+  {% if perm.participants %}
+    <section class="card stack form-narrow" aria-labelledby="remove-title">
+      <h2 class="h2" id="remove-title">{{ t('participants.remove_title') }}</h2>
+      {% if can_remove %}
+        <p class="muted">{{ t('participants.remove_help') }}</p>
+        <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/participants/' ~ p.id) }}" data-confirm="{{ t('participants.remove_confirm', {name: p.first_name ~ ' ' ~ p.last_name}) }}">
+          {{ csrf_field() }}
+          <input type="hidden" name="action" value="remove">
+          <button type="submit" class="btn btn--danger">{{ t('participants.remove') }}</button>
+        </form>
+      {% elseif p.pledge_count > 0 %}
+        <p class="muted">{{ t('participants.remove_has_pledges') }}</p>
+      {% else %}
+        <p class="muted">{{ t('participants.list_closed') }}</p>
+      {% endif %}
+    </section>
+  {% endif %}
+{% endblock %}

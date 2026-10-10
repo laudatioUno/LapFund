@@ -37,6 +37,38 @@ final class Branding
         ];
     }
 
+    /**
+     * Look of an event: its own values where set, otherwise the club's (PE-02, PE-03).
+     *
+     * @param array<string, mixed> $event
+     * @return array<string, string>
+     */
+    public function forEvent(array $event): array
+    {
+        $club = $this->club();
+        $color = self::validColor((string) ($event['primary_color'] ?? '')) ?? $club['primary_color'];
+        $texts = is_array($event['texts'] ?? null) ? $event['texts'] : [];
+
+        return [
+            'club_name' => $club['club_name'],
+            'event_name' => (string) $event['name'],
+            'contact_email' => $club['contact_email'],
+            'primary_color' => $color,
+            'on_primary' => self::textColorOn($color),
+            'primary_dark' => self::darken($color, 0.18),
+            'logo' => (string) ($event['logo_file'] ?? '') !== '' ? (string) $event['logo_file'] : $club['logo'],
+            'logo_is_event' => (string) ($event['logo_file'] ?? '') !== '' ? '1' : '',
+            'sender_name' => trim((string) ($event['sender_name'] ?? '')) !== ''
+                ? (string) $event['sender_name']
+                : $club['club_name'],
+            'welcome' => (string) ($texts['welcome'] ?? ''),
+            'purpose' => (string) ($texts['purpose'] ?? ''),
+            'mail_footer' => (string) ($texts['mail_footer'] ?? ''),
+            'privacy_url' => $club['privacy_url'],
+            'imprint_url' => $club['imprint_url'],
+        ];
+    }
+
     /** Only #RRGGBB is accepted, so the value is safe to put into CSS. */
     public static function validColor(string $value): ?string
     {

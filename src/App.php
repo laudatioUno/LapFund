@@ -15,6 +15,9 @@ use LapFund\I18n\Formatter;
 use LapFund\I18n\Translator;
 use LapFund\Repository\AdminUserRepository;
 use LapFund\Repository\AuditLog;
+use LapFund\Repository\EventRepository;
+use LapFund\Repository\ParticipantRepository;
+use LapFund\Repository\TeamRepository;
 use LapFund\Repository\SettingsRepository;
 use LapFund\Security\Auth;
 use LapFund\Security\Crypto;
@@ -24,6 +27,7 @@ use LapFund\Security\Totp;
 use LapFund\Service\AdminInvites;
 use LapFund\Service\Branding;
 use LapFund\Service\ImageUpload;
+use LapFund\Service\ParticipantService;
 use LapFund\View\View;
 
 /**
@@ -31,7 +35,7 @@ use LapFund\View\View;
  */
 final class App
 {
-    public const VERSION = '0.1.0';
+    public const VERSION = '0.2.0';
 
     public Config $config;
     public readonly Translator $translator;
@@ -155,6 +159,26 @@ final class App
         return $this->service(AuditLog::class, fn () => new AuditLog($this->db()));
     }
 
+    public function events(): EventRepository
+    {
+        return $this->service(EventRepository::class, fn () => new EventRepository($this->db()));
+    }
+
+    public function teams(): TeamRepository
+    {
+        return $this->service(TeamRepository::class, fn () => new TeamRepository($this->db()));
+    }
+
+    public function participants(): ParticipantRepository
+    {
+        return $this->service(ParticipantRepository::class, fn () => new ParticipantRepository($this->db()));
+    }
+
+    public function participantService(): ParticipantService
+    {
+        return $this->service(ParticipantService::class, fn () => new ParticipantService($this->db(), $this->participants(), $this->teams()));
+    }
+
     public function invites(): AdminInvites
     {
         return $this->service(AdminInvites::class, fn () => new AdminInvites($this->db()));
@@ -205,7 +229,7 @@ final class App
 
     public function errorResponse(int $status, ?string $detail = null): Response
     {
-        $key = in_array($status, [403, 404, 405, 419, 429], true) ? (string) $status : '500';
+        $key = in_array($status, [403, 404, 405, 419, 429, 503], true) ? (string) $status : '500';
         try {
             return $this->view()->render('error.html.twig', [
                 'status' => $status,

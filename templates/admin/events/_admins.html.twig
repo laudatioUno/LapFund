@@ -1,0 +1,13 @@
+{# Selection of the event admins. Needs: all_admins, selected (list of ids) #}
+<fieldset class="fieldset">
+  <legend>{{ t('events.field.admins') }}</legend>
+  <p class="field__help">{{ t('events.field.admins_help') }}</p>
+  <div class="checks-grid">
+    {% for a in all_admins %}
+      <label class="choice choice--compact">
+        <input type="checkbox" name="admins[]" value="{{ a.id }}"{{ a.id in selected ? ' checked' }}>
+        <span><strong>{{ a.display_name }}</strong><br><span class="muted small">{{ t('admin.roles.' ~ a.role) }}</span></span>
+      </label>
+    {% endfor %}
+  </div>
+</fieldset>

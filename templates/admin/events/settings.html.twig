@@ -1,0 +1,94 @@
+{% extends 'layout/admin.html.twig' %}
+{% import 'partials/macros.html.twig' as m %}
+
+{% block title %}{{ t('events.tab.settings') }} · {{ event.name }}{% endblock %}
+
+{% block content %}
+  {% include 'partials/event_header.html.twig' %}
+
+  <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/settings') }}" enctype="multipart/form-data" class="stack" novalidate>
+    {{ csrf_field() }}
+    {% if errors is not empty %}<div class="notice notice--error" role="alert">{{ t('events.form_has_errors') }}</div>{% endif %}
+
+    <section class="card stack" aria-labelledby="base-title">
+      <h2 class="h2" id="base-title">{{ t('events.section.base') }}</h2>
+      {{ m.field('name', t('events.field.name'), input.name, errors, 'text', {required: true, maxlength: 120}) }}
+      <div class="grid-2">
+        {{ m.field('event_date', t('events.field.date'), input.event_date, errors, 'date', {optional: true}) }}
+        {{ m.field('location', t('events.field.location'), input.location, errors, 'text', {optional: true, maxlength: 160}) }}
+      </div>
+      {{ m.textarea('description', t('events.field.description'), input.description, errors, {optional: true, rows: 3, help: t('events.field.description_help')}) }}
+    </section>
+
+    <section class="card stack" aria-labelledby="run-title">
+      <h2 class="h2" id="run-title">{{ t('events.section.run') }}</h2>
+      <div class="grid-2">
+        {{ m.field('lap_length_m', t('events.field.lap_length_m'), input.lap_length_m, errors, 'text', {optional: true, inputmode: 'numeric', help: t('events.field.lap_length_help')}) }}
+        {{ m.field('entry_deadline', t('events.field.entry_deadline'), input.entry_deadline, errors, 'datetime-local', {optional: true, help: t('events.field.entry_deadline_help')}) }}
+      </div>
+      {{ m.field('goal_chf', t('events.field.goal_chf'), input.goal_chf, errors, 'text', {optional: true, inputmode: 'numeric', help: t('events.field.goal_help')}) }}
+    </section>
+
+    <section class="card stack" id="texts" aria-labelledby="texts-title">
+      <h2 class="h2" id="texts-title">{{ t('events.section.texts') }}</h2>
+      <p class="muted">{{ t('events.section.texts_help') }}</p>
+      {{ m.textarea('welcome', t('events.field.welcome'), input.welcome, errors, {optional: true, rows: 3, maxlength: 1000, help: t('events.field.welcome_help')}) }}
+      {{ m.field('purpose', t('events.field.purpose'), input.purpose, errors, 'text', {optional: true, maxlength: 200, help: t('events.field.purpose_help')}) }}
+      {{ m.field('sender_name', t('events.field.sender_name'), input.sender_name, errors, 'text', {optional: true, maxlength: 120, help: t('events.field.sender_name_help', {club: club.club_name})}) }}
+      {{ m.textarea('mail_footer', t('events.field.mail_footer'), input.mail_footer, errors, {optional: true, rows: 2, maxlength: 1000, help: t('events.field.mail_footer_help')}) }}
+    </section>
+
+    <section class="card stack" aria-labelledby="look-title">
+      <h2 class="h2" id="look-title">{{ t('events.section.look') }}</h2>
+      <p class="muted">{{ t('events.section.look_help') }}</p>
+
+      <div class="field{{ errors.logo is defined ? ' field--error' }}">
+        <span class="label">{{ t('events.field.logo') }}</span>
+        <div class="logo-preview">
+          {% if look.logo %}<img src="{{ url('/media/' ~ look.logo) }}" alt="">{% else %}<span class="muted small">{{ t('events.no_logo') }}</span>{% endif %}
+        </div>
+        <p class="field__help">{{ look.logo_is_event ? t('events.logo_own') : t('events.logo_club') }}</p>
+        <label for="f-logo" class="visually-hidden">{{ t('events.field.logo') }}</label>
+        <input id="f-logo" name="logo" type="file" accept="image/png,image/jpeg">
+        {% if errors.logo is defined %}<p class="field__error">{{ t(errors.logo) }}</p>{% endif %}
+        {% if look.logo_is_event %}
+          <label class="inline-check"><input type="checkbox" name="remove_logo" value="1"> {{ t('events.remove_logo') }}</label>
+        {% endif %}
+      </div>
+
+      <div class="field{{ errors.primary_color is defined ? ' field--error' }}">
+        <label class="inline-check"><input type="checkbox" name="own_color" value="1"{{ input.own_color ? ' checked' }}> {{ t('events.own_color') }}</label>
+        <div class="color-row">
+          <label for="f-primary_color" class="visually-hidden">{{ t('admin.settings.color') }}</label>
+          <input id="f-primary_color" name="primary_color" type="color" value="{{ input.primary_color }}">
+          <output class="swatch-sample" for="f-primary_color" data-color-sample>{{ t('admin.settings.color_sample') }}</output>
+        </div>
+        {% if errors.primary_color is defined %}<p class="field__error">{{ t(errors.primary_color) }}</p>{% endif %}
+      </div>
+    </section>
+
+    <section class="card stack" id="twint" aria-labelledby="twint-title">
+      <h2 class="h2" id="twint-title">{{ t('events.section.twint') }}</h2>
+      <p class="muted">{{ t('events.section.twint_help') }}</p>
+      <div class="field{{ errors.twint_qr is defined ? ' field--error' }}">
+        {% if event.twint_qr_file %}
+          <div class="logo-preview logo-preview--qr"><img src="{{ url('/media/' ~ event.twint_qr_file) }}" alt="{{ t('events.twint_current') }}"></div>
+        {% endif %}
+        <label for="f-twint_qr">{{ event.twint_qr_file ? t('events.twint_replace') : t('events.twint_upload') }}</label>
+        <input id="f-twint_qr" name="twint_qr" type="file" accept="image/png,image/jpeg">
+        {% if errors.twint_qr is defined %}<p class="field__error">{{ t(errors.twint_qr) }}</p>{% endif %}
+        {% if event.twint_qr_file %}
+          <label class="inline-check"><input type="checkbox" name="remove_twint_qr" value="1"> {{ t('events.remove_twint') }}</label>
+        {% endif %}
+      </div>
+    </section>
+
+    {% if perm.assign_admins %}
+      <section class="card stack">
+        {% include 'admin/events/_admins.html.twig' with {selected: input.admins} %}
+      </section>
+    {% endif %}
+
+    <div><button type="submit" class="btn btn--primary">{{ t('app.save') }}</button></div>
+  </form>
+{% endblock %}

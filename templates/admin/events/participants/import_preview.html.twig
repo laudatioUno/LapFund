@@ -1,0 +1,63 @@
+{% extends 'layout/admin.html.twig' %}
+
+{% block title %}{{ t('participants.import.preview_title') }} · {{ event.name }}{% endblock %}
+
+{% block content %}
+  {% include 'partials/event_header.html.twig' %}
+
+  <section class="card stack" aria-labelledby="summary-title">
+    <h2 class="h2" id="summary-title">{{ t('participants.import.preview_title') }}</h2>
+    <ul class="summary-chips">
+      <li class="chip chip--new">{{ t('participants.import.summary.new', {count: summary.new}) }}</li>
+      <li class="chip chip--existing">{{ t('participants.import.summary.existing', {count: summary.existing}) }}</li>
+      {% if summary.in_event > 0 %}<li class="chip">{{ t('participants.import.summary.in_event', {count: summary.in_event}) }}</li>{% endif %}
+      {% if summary.duplicate > 0 %}<li class="chip">{{ t('participants.import.summary.duplicate', {count: summary.duplicate}) }}</li>{% endif %}
+      {% if summary.invalid > 0 %}<li class="chip chip--error">{{ t('participants.import.summary.invalid', {count: summary.invalid}) }}</li>{% endif %}
+    </ul>
+    {% if new_teams is not empty %}
+      <p>{{ t('participants.import.new_teams', {teams: new_teams|join(', ')}) }}</p>
+    {% endif %}
+
+    {% set to_add = summary.new + summary.existing %}
+    {% if to_add > 0 %}
+      <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/participants/import/apply') }}" class="button-row">
+        {{ csrf_field() }}
+        <input type="hidden" name="token" value="{{ token }}">
+        <button type="submit" class="btn btn--primary">{{ t('participants.import.apply_button', {count: to_add}) }}</button>
+        <a href="{{ url('/admin/events/' ~ event.id ~ '/participants/import') }}" class="btn btn--secondary">{{ t('app.cancel') }}</a>
+      </form>
+      {% if summary.invalid > 0 %}<p class="muted small">{{ t('participants.import.invalid_skipped') }}</p>{% endif %}
+    {% else %}
+      <p class="notice notice--info">{{ t('participants.import.nothing_to_add') }}</p>
+      <p><a href="{{ url('/admin/events/' ~ event.id ~ '/participants/import') }}" class="btn btn--secondary">{{ t('participants.import.other_file') }}</a></p>
+    {% endif %}
+  </section>
+
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col" class="num">{{ t('participants.import.line') }}</th>
+          <th scope="col">{{ t('participants.name') }}</th>
+          <th scope="col">{{ t('participants.email') }}</th>
+          <th scope="col">{{ t('participants.team') }}</th>
+          <th scope="col">{{ t('participants.import.status_col') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+          <tr class="import-row import-row--{{ r.status }}">
+            <td class="num">{{ r.line }}</td>
+            <td>{{ r.first_name }} {{ r.last_name }}</td>
+            <td class="break">{{ r.email }}</td>
+            <td>{{ r.team ?: '–' }}</td>
+            <td>
+              <span class="badge badge--import-{{ r.status }}">{{ t('participants.import.status.' ~ r.status) }}</span>
+              {% if r.error %}<br><span class="field__error small">{{ t(r.error) }}</span>{% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

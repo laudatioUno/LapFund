@@ -28,6 +28,41 @@ final class Validation
         return mb_strlen($value) > $max ? 'validation.too_long' : null;
     }
 
+    /** Empty or a real calendar date in the form YYYY-MM-DD. */
+    public static function optionalDate(string $value): ?string
+    {
+        if ($value === '') {
+            return null;
+        }
+        $d = \DateTimeImmutable::createFromFormat('!Y-m-d', $value);
+
+        return ($d !== false && $d->format('Y-m-d') === $value) ? null : 'validation.date';
+    }
+
+    /** Empty or a date-time from an <input type="datetime-local">. */
+    public static function optionalDateTime(string $value): ?string
+    {
+        if ($value === '') {
+            return null;
+        }
+        $d = \DateTimeImmutable::createFromFormat('!Y-m-d\TH:i', $value);
+
+        return ($d !== false && $d->format('Y-m-d\TH:i') === $value) ? null : 'validation.date';
+    }
+
+    /** Empty or a whole number between $min and $max. */
+    public static function optionalInt(string $value, int $min, int $max): ?string
+    {
+        if ($value === '') {
+            return null;
+        }
+        if (!preg_match('/^\d{1,9}$/', $value) || (int) $value < $min || (int) $value > $max) {
+            return 'validation.number';
+        }
+
+        return null;
+    }
+
     /** Empty is allowed; otherwise only http(s) URLs. */
     public static function optionalUrl(string $value): ?string
     {

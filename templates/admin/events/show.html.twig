@@ -1,0 +1,94 @@
+{% extends 'layout/admin.html.twig' %}
+
+{% block title %}{{ event.name }}{% endblock %}
+
+{% block content %}
+  {% include 'partials/event_header.html.twig' %}
+
+  <section class="card stack" aria-labelledby="status-title">
+    <h2 class="h2" id="status-title">{{ t('events.status_title') }}</h2>
+    <ol class="stepper">
+      {% for s in statuses %}
+        <li class="stepper__step{{ loop.index0 < status_index ? ' is-done' }}{{ loop.index0 == status_index ? ' is-current' }}"{% if loop.index0 == status_index %} aria-current="step"{% endif %}>
+          <span class="stepper__dot" aria-hidden="true">{{ loop.index0 < status_index ? '✓' : loop.index }}</span>
+          <span class="stepper__label">{{ t('events.status.' ~ s) }}</span>
+        </li>
+      {% endfor %}
+    </ol>
+    <p>{{ t('events.status_help.' ~ event.status) }}</p>
+
+    {% if perm.status %}
+      <div class="button-row">
+        {% if next_status %}
+          <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/status') }}" data-confirm="{{ t('events.confirm_next.' ~ next_status) }}">
+            {{ csrf_field() }}
+            <input type="hidden" name="status" value="{{ next_status }}">
+            <button type="submit" class="btn btn--primary">{{ t('events.move_to', {status: t('events.status.' ~ next_status)}) }}</button>
+          </form>
+        {% endif %}
+        {% if previous_status %}
+          <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/status') }}" data-confirm="{{ t('events.confirm_back', {status: t('events.status.' ~ previous_status)}) }}">
+            {{ csrf_field() }}
+            <input type="hidden" name="status" value="{{ previous_status }}">
+            <button type="submit" class="btn btn--secondary">{{ t('events.move_back', {status: t('events.status.' ~ previous_status)}) }}</button>
+          </form>
+        {% endif %}
+      </div>
+    {% else %}
+      <p class="muted small">{{ t('events.status_only_event_admin') }}</p>
+    {% endif %}
+  </section>
+
+  <div class="cards">
+    <section class="card stack" aria-labelledby="facts-title">
+      <h2 class="h2" id="facts-title">{{ t('events.facts_title') }}</h2>
+      <dl class="facts">
+        <div><dt>{{ t('events.tab.participants') }}</dt><dd><a href="{{ url('/admin/events/' ~ event.id ~ '/participants') }}">{{ participant_count }}</a></dd></div>
+        <div><dt>{{ t('events.tab.teams') }}</dt><dd><a href="{{ url('/admin/events/' ~ event.id ~ '/teams') }}">{{ teams|length }}</a></dd></div>
+        <div><dt>{{ t('events.field.lap_length') }}</dt><dd>{{ event.lap_length_m ? event.lap_length_m ~ ' m' : '–' }}</dd></div>
+        <div><dt>{{ t('events.field.entry_deadline') }}</dt><dd>{{ event.entry_deadline ? event.entry_deadline|datetime : '–' }}</dd></div>
+        <div><dt>{{ t('events.field.goal') }}</dt><dd>{{ event.goal_cents ? event.goal_cents|money : '–' }}</dd></div>
+        <div><dt>{{ t('events.field.admins') }}</dt><dd>{% for a in admins %}{{ a.display_name }}{{ not loop.last ? ', ' }}{% else %}<span class="field__error">{{ t('events.no_admins') }}</span>{% endfor %}</dd></div>
+      </dl>
+    </section>
+
+    {% if perm.edit %}
+      <section class="card stack" aria-labelledby="todo-title">
+        <h2 class="h2" id="todo-title">{{ t('events.checklist_title') }}</h2>
+        <ul class="checklist">
+          {% for item in checklist %}
+            <li class="checklist__item {{ item.done ? 'is-done' : '' }}">
+              <span class="checklist__icon" aria-hidden="true">{{ item.done ? '✓' : '○' }}</span>
+              {% if item.done %}<span>{{ t(item.label) }} <span class="visually-hidden">({{ t('admin.dashboard.done') }})</span></span>
+              {% else %}<a href="{{ url(item.link) }}">{{ t(item.label) }}</a>{% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+        <p class="muted small">{{ t('events.checklist_hint') }}</p>
+      </section>
+    {% endif %}
+  </div>
+
+  {% if perm.archive %}
+    <section class="card stack" aria-labelledby="archive-title">
+      <h2 class="h2" id="archive-title">{{ t('events.archive_title') }}</h2>
+      {% if event.archived_at %}
+        <p>{{ t('events.archived_since', {date: event.archived_at|date_ch}) }}</p>
+        <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/archive') }}">
+          {{ csrf_field() }}
+          <input type="hidden" name="archive" value="0">
+          <button type="submit" class="btn btn--secondary">{{ t('events.unarchive') }}</button>
+        </form>
+      {% elseif can_archive %}
+        <p class="muted">{{ t('events.archive_help') }}</p>
+        <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/archive') }}" data-confirm="{{ t('events.archive_confirm') }}">
+          {{ csrf_field() }}
+          <input type="hidden" name="archive" value="1">
+          <button type="submit" class="btn btn--secondary">{{ t('events.archive') }}</button>
+        </form>
+      {% else %}
+        <p class="muted">{{ t('events.archive_later') }}</p>
+      {% endif %}
+    </section>
+  {% endif %}
+{% endblock %}

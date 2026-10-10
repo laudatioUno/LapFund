@@ -39,3 +39,28 @@
   {% set active = current_path == path or (path != '/admin' and current_path starts with path ~ '/') %}
   <a href="{{ url(path) }}" class="nav__link{{ active ? ' is-active' }}"{% if active %} aria-current="page"{% endif %}>{{ label }}</a>
 {% endmacro %}
+
+{% macro textarea(name, label, value, errors, opts = {}) %}
+  {% set error = errors[name] ?? null %}
+  <div class="field{{ error ? ' field--error' }}">
+    <label for="f-{{ name }}">{{ label }}{% if opts.optional ?? false %} <span class="muted">{{ t('app.optional') }}</span>{% endif %}</label>
+    <textarea id="f-{{ name }}" name="{{ name }}" rows="{{ opts.rows ?? 3 }}"
+      {%- if opts.maxlength is defined %} maxlength="{{ opts.maxlength }}"{% endif %}
+      {%- if error or opts.help is defined %} aria-describedby="{{ error ? 'e-' ~ name : 'h-' ~ name }}"{% endif %}
+      {%- if error %} aria-invalid="true"{% endif %}>{{ value }}</textarea>
+    {% if error %}<p class="field__error" id="e-{{ name }}">{{ t(error) }}</p>
+    {% elseif opts.help is defined %}<p class="field__help" id="h-{{ name }}">{{ opts.help }}</p>{% endif %}
+  </div>
+{% endmacro %}
+
+{% macro team_select(name, label, teams, selected, errors = {}, opts = {}) %}
+  <div class="field">
+    <label for="{{ opts.id ?? 'f-' ~ name }}">{{ label }}{% if opts.optional ?? true %} <span class="muted">{{ t('app.optional') }}</span>{% endif %}</label>
+    <select id="{{ opts.id ?? 'f-' ~ name }}" name="{{ name }}">
+      <option value="">{{ t('events.teams.none') }}</option>
+      {% for team in teams %}
+        <option value="{{ team.id }}"{{ selected ~ '' == team.id ~ '' ? ' selected' }}>{{ team.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+{% endmacro %}

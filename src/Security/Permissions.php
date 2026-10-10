@@ -7,9 +7,6 @@ namespace LapFund\Security;
 /**
  * Central permission check (architecture chapter 6). Every admin route and
  * service asks here, never only the templates.
- *
- * Stage 1 covers the club-wide actions; event actions follow in stage 2
- * (event_admins assignment).
  */
 final class Permissions
 {
@@ -26,6 +23,22 @@ final class Permissions
     private const ANY_ADMIN = [
         'dashboard.view',
         'account.view',
+        'events.list',
+        'pool.view',        // F16: all admins see the participant pool (name, e-mail)
+    ];
+
+    /**
+     * Event actions and who may do them:
+     *  - 'club': club admins on every event
+     *  - 'assigned': admins assigned to the event (a club admin only if assigned, AR-02)
+     */
+    private const EVENT = [
+        'event.view' => ['club', 'assigned'],
+        'event.edit' => ['club', 'assigned'],          // master data, look, texts, Twint QR
+        'event.participants' => ['club', 'assigned'],  // add, import, take over, teams
+        'event.status' => ['assigned'],                // move the status
+        'event.assign_admins' => ['club'],
+        'event.archive' => ['club'],
     ];
 
     /** @param array<string, mixed> $user */
@@ -42,5 +55,30 @@ final class Permissions
         }
 
         return false;
+    }
+
+    /** @param array<string, mixed> $user */
+    public static function canOnEvent(array $user, string $action, bool $assigned): bool
+    {
+        if ((int) ($user['active'] ?? 0) !== 1 || !isset(self::EVENT[$action])) {
+            return false;
+        }
+        $who = self::EVENT[$action];
+        if (in_array('assigned', $who, true) && $assigned) {
+            return true;
+        }
+
+        return in_array('club', $who, true) && ($user['role'] ?? '') === 'club_admin';
+    }
+
+    /** @return array<string, bool> all event permissions for templates */
+    public static function eventFlags(array $user, bool $assigned): array
+    {
+        $flags = [];
+        foreach (array_keys(self::EVENT) as $action) {
+            $flags[str_replace('event.', '', $action)] = self::canOnEvent($user, $action, $assigned);
+        }
+
+        return $flags;
     }
 }

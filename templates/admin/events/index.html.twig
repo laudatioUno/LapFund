@@ -1,0 +1,48 @@
+{% extends 'layout/admin.html.twig' %}
+
+{% block title %}{{ t('app.nav.events') }}{% endblock %}
+
+{% block content %}
+  <header class="page-head">
+    <h1 class="h1">{{ t('app.nav.events') }}</h1>
+    {% if can_create %}<a href="{{ url('/admin/events/new') }}" class="btn btn--primary">{{ t('events.create') }}</a>{% endif %}
+  </header>
+
+  {% if can_create %}
+    <p class="small">
+      {% if show_archived %}
+        <a href="{{ url('/admin/events') }}">{{ t('events.hide_archived') }}</a>
+      {% else %}
+        <a href="{{ url('/admin/events?archived=1') }}">{{ t('events.show_archived') }}</a>
+      {% endif %}
+    </p>
+  {% endif %}
+
+  {% if events is empty %}
+    <section class="card empty">
+      <h2 class="h2">{{ t('events.none_title') }}</h2>
+      <p class="muted">{{ can_create ? t('events.none_club') : t('events.none_event_admin') }}</p>
+      {% if can_create %}<p><a href="{{ url('/admin/events/new') }}" class="btn btn--primary">{{ t('events.create') }}</a></p>{% endif %}
+    </section>
+  {% else %}
+    <div class="event-cards">
+      {% for e in events %}
+        <a href="{{ url('/admin/events/' ~ e.id) }}" class="card event-card{{ e.archived_at ? ' is-archived' }}">
+          <span class="event-card__top">
+            <span class="badge badge--status-{{ e.status }}">{{ t('events.status.' ~ e.status) }}</span>
+            {% if e.archived_at %}<span class="badge badge--inactive">{{ t('events.archived_badge') }}</span>{% endif %}
+            {% if e.is_assigned %}<span class="badge badge--assigned">{{ t('events.you_are_admin') }}</span>{% endif %}
+          </span>
+          <span class="event-card__name">{{ e.name }}</span>
+          <span class="muted small">
+            {% if e.event_date %}{{ e.event_date|date('d.m.Y') }}{% else %}{{ t('events.no_date') }}{% endif %}{% if e.location %} · {{ e.location }}{% endif %}
+          </span>
+          <span class="event-card__stats small">
+            <span>{{ t('events.count_participants', {count: e.participant_count}) }}</span>
+            <span>{{ t('events.count_teams', {count: e.team_count}) }}</span>
+          </span>
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endblock %}

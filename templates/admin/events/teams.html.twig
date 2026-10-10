@@ -1,0 +1,72 @@
+{% extends 'layout/admin.html.twig' %}
+{% import 'partials/macros.html.twig' as m %}
+
+{% block title %}{{ t('events.tab.teams') }} · {{ event.name }}{% endblock %}
+
+{% block content %}
+  {% include 'partials/event_header.html.twig' %}
+
+  <p class="muted">{{ t('events.teams.intro') }}</p>
+
+  {% if perm.participants %}
+    <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/teams') }}" class="card inline-add" novalidate>
+      {{ csrf_field() }}
+      <div class="field{{ errors.name is defined ? ' field--error' }}">
+        <label for="f-team-new">{{ t('events.teams.new') }}</label>
+        <div class="copy-row">
+          <input id="f-team-new" name="name" type="text" value="{{ new_name }}" maxlength="80" placeholder="{{ t('events.teams.placeholder') }}"{% if errors.name is defined %} aria-invalid="true" aria-describedby="e-team-new"{% endif %}>
+          <button type="submit" class="btn btn--primary">{{ t('events.teams.add') }}</button>
+        </div>
+        {% if errors.name is defined %}<p class="field__error" id="e-team-new">{{ t(errors.name) }}</p>{% endif %}
+      </div>
+    </form>
+  {% endif %}
+
+  {% if teams is empty %}
+    <section class="card"><p class="muted">{{ t('events.teams.empty') }}</p></section>
+  {% else %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">{{ t('events.teams.name') }}</th>
+            <th scope="col" class="num">{{ t('events.tab.participants') }}</th>
+            {% if perm.participants %}<th scope="col"><span class="visually-hidden">{{ t('events.teams.actions') }}</span></th>{% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for team in teams %}
+            <tr>
+              <td>
+                {% if perm.participants %}
+                  <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/teams/' ~ team.id) }}" class="rename-row">
+                    {{ csrf_field() }}
+                    <label for="team-{{ team.id }}" class="visually-hidden">{{ t('events.teams.rename_label', {name: team.name}) }}</label>
+                    <input id="team-{{ team.id }}" name="name" type="text" value="{{ team.name }}" maxlength="80">
+                    <button type="submit" name="action" value="rename" class="btn btn--secondary btn--small">{{ t('app.save') }}</button>
+                  </form>
+                {% else %}
+                  <strong>{{ team.name }}</strong>
+                {% endif %}
+              </td>
+              <td class="num"><a href="{{ url('/admin/events/' ~ event.id ~ '/participants?team=' ~ team.id) }}">{{ team.participant_count }}</a></td>
+              {% if perm.participants %}
+                <td class="actions">
+                  <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/teams/' ~ team.id) }}" class="icon-actions">
+                    {{ csrf_field() }}
+                    <button type="submit" name="action" value="up" class="btn btn--icon" aria-label="{{ t('events.teams.move_up', {name: team.name}) }}"{{ loop.first ? ' disabled' }}>↑</button>
+                    <button type="submit" name="action" value="down" class="btn btn--icon" aria-label="{{ t('events.teams.move_down', {name: team.name}) }}"{{ loop.last ? ' disabled' }}>↓</button>
+                  </form>
+                  <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/teams/' ~ team.id) }}" data-confirm="{{ team.participant_count > 0 ? t('events.teams.delete_confirm_used', {count: team.participant_count}) : t('events.teams.delete_confirm') }}">
+                    {{ csrf_field() }}
+                    <button type="submit" name="action" value="delete" class="btn btn--link btn--danger-link">{{ t('events.teams.delete') }}</button>
+                  </form>
+                </td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+{% endblock %}

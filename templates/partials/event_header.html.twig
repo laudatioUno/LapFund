@@ -1,0 +1,31 @@
+{# Header and tab navigation for all pages of one event. Needs: event, perm, event_tab #}
+<header class="page-head page-head--event">
+  <div>
+    <a href="{{ url('/admin/events') }}" class="back">← {{ t('app.nav.events') }}</a>
+    <h1 class="h1">{{ event.name }}</h1>
+    <p class="muted event-meta">
+      {% if event.event_date %}{{ event.event_date|date('d.m.Y') }}{% else %}{{ t('events.no_date') }}{% endif %}
+      {% if event.location %} · {{ event.location }}{% endif %}
+    </p>
+  </div>
+  <div class="page-head__badges">
+    {% if event.archived_at %}<span class="badge badge--inactive">{{ t('events.archived_badge') }}</span>{% endif %}
+    <span class="badge badge--status-{{ event.status }}">{{ t('events.status.' ~ event.status) }}</span>
+  </div>
+</header>
+
+{% if not perm.assigned and perm.edit %}
+  <div class="notice notice--info">{{ t('events.not_assigned_hint') }}</div>
+{% endif %}
+
+<nav class="tabs" aria-label="{{ t('events.tabs_label') }}">
+  {% set tabs = [
+    {key: 'overview', path: '', label: t('events.tab.overview')},
+    {key: 'participants', path: '/participants', label: t('events.tab.participants')},
+    {key: 'teams', path: '/teams', label: t('events.tab.teams')},
+  ] %}
+  {% if perm.edit %}{% set tabs = tabs|merge([{key: 'settings', path: '/settings', label: t('events.tab.settings')}]) %}{% endif %}
+  {% for tab in tabs %}
+    <a href="{{ url('/admin/events/' ~ event.id ~ tab.path) }}" class="tabs__link{{ event_tab == tab.key ? ' is-active' }}"{% if event_tab == tab.key %} aria-current="page"{% endif %}>{{ tab.label }}</a>
+  {% endfor %}
+</nav>

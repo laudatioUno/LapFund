@@ -15,4 +15,7 @@ return [
     'copy' => 'Kopieren',
     'copied' => 'Kopiert',
     'save' => 'Speichern',
+    'cancel' => 'Abbrechen',
+    'nav.events' => 'Events',
+    'nav.pool' => 'Personen',
 ];

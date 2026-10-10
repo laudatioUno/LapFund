@@ -1,0 +1,73 @@
+{% extends 'layout/admin.html.twig' %}
+
+{% block title %}{{ t('events.tab.participants') }} · {{ event.name }}{% endblock %}
+
+{% block content %}
+  {% include 'partials/event_header.html.twig' %}
+
+  {% if perm.participants %}
+    {% if can_change %}
+      <div class="button-row">
+        <a href="{{ url('/admin/events/' ~ event.id ~ '/participants/add') }}" class="btn btn--primary">{{ t('participants.add') }}</a>
+        <a href="{{ url('/admin/events/' ~ event.id ~ '/participants/import') }}" class="btn btn--secondary">{{ t('participants.import.title') }}</a>
+        <a href="{{ url('/admin/events/' ~ event.id ~ '/participants/copy') }}" class="btn btn--secondary">{{ t('participants.copy.title') }}</a>
+      </div>
+    {% else %}
+      <div class="notice notice--info">{{ t('participants.list_closed') }}</div>
+    {% endif %}
+  {% endif %}
+
+  <form method="get" action="{{ url('/admin/events/' ~ event.id ~ '/participants') }}" class="filter-bar" role="search">
+    <div class="field">
+      <label for="f-team">{{ t('participants.filter_team') }}</label>
+      <select id="f-team" name="team">
+        <option value="">{{ t('participants.filter_all_teams') }}</option>
+        {% for team in teams %}
+          <option value="{{ team.id }}"{{ team_filter == team.id ~ '' ? ' selected' }}>{{ team.name }} ({{ team.participant_count }})</option>
+        {% endfor %}
+        <option value="none"{{ team_filter == 'none' ? ' selected' }}>{{ t('participants.filter_no_team') }}</option>
+      </select>
+    </div>
+    <div class="field filter-bar__grow">
+      <label for="f-q">{{ t('participants.search') }}</label>
+      <input id="f-q" name="q" type="search" value="{{ query }}" maxlength="100" placeholder="{{ t('participants.search_placeholder') }}">
+    </div>
+    <div class="filter-bar__actions">
+      <button type="submit" class="btn btn--secondary">{{ t('participants.filter_apply') }}</button>
+      {% if team_filter != '' or query != '' %}<a href="{{ url('/admin/events/' ~ event.id ~ '/participants') }}" class="small">{{ t('participants.filter_reset') }}</a>{% endif %}
+    </div>
+  </form>
+
+  <p class="muted small" role="status">
+    {% if team_filter != '' or query != '' %}{{ t('participants.count_filtered', {count: rows|length, total: total}) }}{% else %}{{ t('participants.count', {count: total}) }}{% endif %}
+  </p>
+
+  {% if rows is empty %}
+    <section class="card empty">
+      <p class="muted">{{ total == 0 ? t('participants.empty') : t('participants.empty_filtered') }}</p>
+    </section>
+  {% else %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">{{ t('participants.name') }}</th>
+            <th scope="col">{{ t('participants.email') }}</th>
+            <th scope="col">{{ t('participants.team') }}</th>
+            <th scope="col" class="num">{{ t('participants.pledges') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+            <tr>
+              <td><a href="{{ url('/admin/events/' ~ event.id ~ '/participants/' ~ r.participation_id) }}"><strong>{{ r.first_name }} {{ r.last_name }}</strong></a></td>
+              <td class="break">{{ r.email }}</td>
+              <td>{{ r.team_name ?? '–' }}</td>
+              <td class="num">{{ r.pledge_count }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+{% endblock %}

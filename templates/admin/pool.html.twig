@@ -1,0 +1,53 @@
+{% extends 'layout/admin.html.twig' %}
+
+{% block title %}{{ t('app.nav.pool') }}{% endblock %}
+
+{% block content %}
+  <header class="page-head">
+    <h1 class="h1">{{ t('app.nav.pool') }}</h1>
+  </header>
+  <p class="muted">{{ t('participants.pool.intro') }}</p>
+
+  <form method="get" action="{{ url('/admin/participants') }}" class="filter-bar" role="search">
+    <div class="field filter-bar__grow">
+      <label for="f-q">{{ t('participants.search') }}</label>
+      <input id="f-q" name="q" type="search" value="{{ query }}" maxlength="100" placeholder="{{ t('participants.search_placeholder') }}">
+    </div>
+    <div class="filter-bar__actions">
+      <button type="submit" class="btn btn--secondary">{{ t('participants.search_button') }}</button>
+      {% if query != '' %}<a href="{{ url('/admin/participants') }}" class="small">{{ t('participants.filter_reset') }}</a>{% endif %}
+    </div>
+  </form>
+
+  <p class="muted small" role="status">
+    {% if query != '' %}{{ t('participants.count_filtered', {count: rows|length, total: total}) }}{% else %}{{ t('participants.pool.count', {count: total}) }}{% endif %}
+  </p>
+
+  {% if rows is empty %}
+    <section class="card empty"><p class="muted">{{ total == 0 ? t('participants.pool.empty') : t('participants.empty_filtered') }}</p></section>
+  {% else %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">{{ t('participants.name') }}</th>
+            <th scope="col">{{ t('participants.email') }}</th>
+            <th scope="col" class="num">{{ t('app.nav.events') }}</th>
+            <th scope="col">{{ t('participants.pool.last_event') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+            <tr>
+              <td><strong>{{ r.last_name }} {{ r.first_name }}</strong></td>
+              <td class="break">{{ r.email }}</td>
+              <td class="num">{{ r.event_count }}</td>
+              <td>{{ r.last_event ?? '–' }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if rows|length >= 300 %}<p class="muted small">{{ t('participants.pool.limited') }}</p>{% endif %}
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'layout/admin.html.twig' %}
+
+{% block title %}{{ t('participants.copy.title') }} · {{ event.name }}{% endblock %}
+
+{% block content %}
+  {% include 'partials/event_header.html.twig' %}
+
+  <p><a href="{{ url('/admin/events/' ~ event.id ~ '/participants') }}">← {{ t('participants.back_to_list') }}</a></p>
+
+  <section class="card stack" aria-labelledby="source-title">
+    <h2 class="h2" id="source-title">{{ t('participants.copy.title') }}</h2>
+    {% if others is empty %}
+      <p class="muted">{{ t('participants.copy.no_other_events') }}</p>
+    {% else %}
+      <form method="get" action="{{ url('/admin/events/' ~ event.id ~ '/participants/copy') }}" class="copy-row copy-row--labelled">
+        <div class="field filter-bar__grow">
+          <label for="f-from">{{ t('participants.copy.source') }}</label>
+          <select id="f-from" name="from">
+            <option value="">{{ t('participants.copy.choose') }}</option>
+            {% for o in others %}
+              <option value="{{ o.id }}"{{ source and source.id == o.id ? ' selected' }}>{{ o.name }}{% if o.event_date %} ({{ o.event_date|date('d.m.Y') }}){% endif %} – {{ t('events.count_participants', {count: o.participant_count}) }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn btn--secondary">{{ t('participants.copy.show') }}</button>
+      </form>
+    {% endif %}
+  </section>
+
+  {% if source %}
+    {% if rows is empty %}
+      <section class="card"><p class="muted">{{ t('participants.copy.source_empty') }}</p></section>
+    {% else %}
+      <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/participants/copy') }}" class="stack">
+        {{ csrf_field() }}
+        <input type="hidden" name="from" value="{{ source.id }}">
+        <div class="card stack">
+          <label class="inline-check"><input type="checkbox" name="keep_teams" value="1" checked> {{ t('participants.copy.keep_teams') }}</label>
+          <p class="muted small">{{ t('participants.copy.keep_teams_help') }}</p>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col" class="check-col"><span class="visually-hidden">{{ t('participants.copy.select') }}</span></th>
+                <th scope="col">{{ t('participants.name') }}</th>
+                <th scope="col">{{ t('participants.email') }}</th>
+                <th scope="col">{{ t('participants.copy.team_before') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in rows %}
+                <tr{{ r.already_in_target ? ' class="is-muted"' }}>
+                  <td class="check-col">
+                    <input type="checkbox" id="cp-{{ r.participant_id }}" name="participants[]" value="{{ r.participant_id }}"{{ r.already_in_target ? ' disabled' : ' checked' }}>
+                  </td>
+                  <td>
+                    <label for="cp-{{ r.participant_id }}">{{ r.first_name }} {{ r.last_name }}</label>
+                    {% if r.already_in_target %}<br><span class="muted small">{{ t('participants.copy.already') }}</span>{% endif %}
+                  </td>
+                  <td class="break">{{ r.email }}</td>
+                  <td>{{ r.team_name ?? '–' }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div><button type="submit" class="btn btn--primary">{{ t('participants.copy.apply') }}</button></div>
+      </form>
+    {% endif %}
+  {% endif %}
+{% endblock %}

@@ -2,9 +2,11 @@
 
 **LapFund** is a self-hosted web tool for sponsored runs ("Sponsorenlauf"): participants share a personal link, sponsors pledge online – a fixed amount or an amount per lap – and the club records laps and keeps track of payments. Made for clubs that want to replace paper lists without paying platform fees.
 
-> Status: **stage 1 of 6 (foundation)**. Installer, admin login with two-factor authentication, admin accounts and club branding work. Events, participants, sponsors and payments follow in the next stages.
+> Status: **stage 2 of 6**. Installer, admin login with two-factor authentication, admin accounts, club branding, events, teams and participants work. Invitations, sponsor pages, laps and payments follow in the next stages.
 
-## Features (stage 1)
+## Features
+
+Stage 1 – foundation
 
 - Web installer: checks the server, creates the tables, writes the configuration and the first club admin
 - Admin login with username, password **and TOTP** (RFC 6238, any authenticator app), one-time recovery codes, lockout after repeated failures
@@ -13,6 +15,14 @@
 - Club branding: name, logo (PNG/JPG), club color with automatic text contrast, links to privacy policy and imprint
 - Audit log of admin actions
 - German user interface; all texts in `lang/de/*.php`, ready for further languages
+
+Stage 2 – events and participants
+- Events with date, location, lap length, entry deadline and an optional goal; created by the club admin, who assigns the event admins
+- Event status in five steps (preparation, sponsor search, run done, billing, closed), one step forward or back; archive for finished events
+- Per-event look and texts: logo, color, welcome text, purpose, mail sender name and footer, Twint QR code; empty values fall back to the club's
+- Teams per event with custom order
+- One participant pool for all events: add people one by one, from the pool, by CSV import with a preview (separator and Windows/Excel encoding detected), or by taking them over from an earlier event, with or without their teams
+- Participant list with team filter and search
 
 ## Requirements
 
@@ -51,7 +61,7 @@ location ~ \.php$ {
 
 1. Back up the database and the folders `config/` and `storage/`.
 2. Upload the new release over the old files (keep `config/` and `storage/`).
-3. In the admin console open **System** and run the pending database updates, or run `php bin/migrate.php`.
+3. In the admin console open **System** and run the pending database updates, or run `php bin/migrate.php`. Until then, club admins are sent to the System page and event admins see a maintenance notice.
 
 ## Security
 

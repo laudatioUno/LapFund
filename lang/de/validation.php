@@ -8,4 +8,6 @@ return [
     'url' => 'Bitte eine vollständige Adresse eingeben, die mit https:// beginnt.',
     'port' => 'Bitte eine Portnummer eingeben, meist 3306.',
     'color' => 'Bitte eine Farbe auswählen.',
+    'date' => 'Bitte ein gültiges Datum eingeben.',
+    'number' => 'Bitte eine ganze Zahl im erlaubten Bereich eingeben.',
 ];

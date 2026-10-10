@@ -1,0 +1,28 @@
+{% extends 'layout/admin.html.twig' %}
+{% import 'partials/macros.html.twig' as m %}
+
+{% block title %}{{ t('events.create') }}{% endblock %}
+
+{% block content %}
+  <header class="page-head">
+    <div>
+      <a href="{{ url('/admin/events') }}" class="back">← {{ t('app.nav.events') }}</a>
+      <h1 class="h1">{{ t('events.create') }}</h1>
+    </div>
+  </header>
+
+  <form method="post" action="{{ url('/admin/events/new') }}" class="card stack form-narrow" novalidate>
+    {{ csrf_field() }}
+    {{ m.field('name', t('events.field.name'), input.name, errors, 'text', {required: true, maxlength: 120, help: t('events.field.name_help')}) }}
+    <div class="grid-2">
+      {{ m.field('event_date', t('events.field.date'), input.event_date, errors, 'date', {optional: true}) }}
+      {{ m.field('location', t('events.field.location'), input.location, errors, 'text', {optional: true, maxlength: 160}) }}
+    </div>
+    {{ m.textarea('description', t('events.field.description'), input.description, errors, {optional: true, rows: 3, help: t('events.field.description_help')}) }}
+
+    {% include 'admin/events/_admins.html.twig' with {selected: input.admins} %}
+
+    <div><button type="submit" class="btn btn--primary">{{ t('events.create') }}</button></div>
+    <p class="muted small">{{ t('events.create_hint') }}</p>
+  </form>
+{% endblock %}

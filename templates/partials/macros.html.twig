@@ -1,0 +1,41 @@
+{# Form helpers. errors holds translation keys per field. #}
+
+{% macro field(name, label, value, errors, type = 'text', opts = {}) %}
+  {% set error = errors[name] ?? null %}
+  <div class="field{{ error ? ' field--error' }}">
+    <label for="f-{{ name }}">{{ label }}{% if opts.optional ?? false %} <span class="muted">{{ t('app.optional') }}</span>{% endif %}</label>
+    <input id="f-{{ name }}" name="{{ name }}" type="{{ type }}"
+      {%- if type != 'password' %} value="{{ value }}"{% endif %}
+      {%- if opts.autocomplete is defined %} autocomplete="{{ opts.autocomplete }}"{% endif %}
+      {%- if opts.required ?? false %} required{% endif %}
+      {%- if opts.autofocus ?? false %} autofocus{% endif %}
+      {%- if opts.inputmode is defined %} inputmode="{{ opts.inputmode }}"{% endif %}
+      {%- if opts.pattern is defined %} pattern="{{ opts.pattern }}"{% endif %}
+      {%- if opts.maxlength is defined %} maxlength="{{ opts.maxlength }}"{% endif %}
+      {%- if error or opts.help is defined %} aria-describedby="{{ error ? 'e-' ~ name : 'h-' ~ name }}"{% endif %}
+      {%- if error %} aria-invalid="true"{% endif %}>
+    {% if error %}<p class="field__error" id="e-{{ name }}">{{ t(error) }}</p>
+    {% elseif opts.help is defined %}<p class="field__help" id="h-{{ name }}">{{ opts.help }}</p>{% endif %}
+  </div>
+{% endmacro %}
+
+{% macro flashes(flashes) %}
+  {% for f in flashes %}
+    <div class="notice notice--{{ f.type }}" role="{{ f.type == 'error' ? 'alert' : 'status' }}">{{ f.message }}</div>
+  {% endfor %}
+{% endmacro %}
+
+{% macro form_error(errors) %}
+  {% if errors._form is defined %}
+    <div class="notice notice--error" role="alert">{{ t(errors._form) }}</div>
+  {% endif %}
+{% endmacro %}
+
+{% macro status_badge(status) %}
+  <span class="badge badge--{{ status }}">{{ t('admin.users.status_' ~ status) }}</span>
+{% endmacro %}
+
+{% macro nav_link(path, label, current_path) %}
+  {% set active = current_path == path or (path != '/admin' and current_path starts with path ~ '/') %}
+  <a href="{{ url(path) }}" class="nav__link{{ active ? ' is-active' }}"{% if active %} aria-current="page"{% endif %}>{{ label }}</a>
+{% endmacro %}

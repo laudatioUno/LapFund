@@ -1,0 +1,10 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+  <h1 class="h1">{{ title }}</h1>
+  <p>{{ message }}</p>
+  {% if detail %}<pre class="debug">{{ detail }}</pre>{% endif %}
+  <p><a href="{{ url('/admin') }}" class="btn btn--secondary">{{ t('errors.back') }}</a></p>
+{% endblock %}

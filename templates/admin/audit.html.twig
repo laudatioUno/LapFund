@@ -1,0 +1,32 @@
+{% extends 'layout/admin.html.twig' %}
+
+{% block title %}{{ t('app.nav.audit') }}{% endblock %}
+
+{% block content %}
+  <header class="page-head"><h1 class="h1">{{ t('app.nav.audit') }}</h1></header>
+  <p class="muted">{{ t('admin.audit.intro') }}</p>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">{{ t('admin.audit.when') }}</th>
+          <th scope="col">{{ t('admin.audit.who') }}</th>
+          <th scope="col">{{ t('admin.audit.what') }}</th>
+          <th scope="col">{{ t('admin.audit.object') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in entries %}
+          <tr>
+            <td class="nowrap">{{ e.created_at|datetime }}</td>
+            <td>{{ e.display_name ?? '–' }}</td>
+            <td>{{ t('admin.audit.action.' ~ e.action) }}</td>
+            <td class="muted">{{ e.entity_type }}{% if e.entity_id %} #{{ e.entity_id }}{% endif %}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4">{{ t('admin.audit.empty') }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

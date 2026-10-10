@@ -1,0 +1,20 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}{{ t('auth.codes_title') }}{% endblock %}
+
+{% block content %}
+  <h1 class="h1">{{ t('auth.codes_title') }}</h1>
+  <p>{{ t('auth.codes_text') }}</p>
+  <ul class="codes" id="recovery-codes">
+    {% for code in codes %}<li><code>{{ code }}</code></li>{% endfor %}
+  </ul>
+  <p>
+    <button type="button" class="btn btn--secondary" data-copy-target="recovery-codes" data-copied="{{ t('app.copied') }}">{{ t('auth.codes_copy') }}</button>
+    <button type="button" class="btn btn--secondary" data-print>{{ t('auth.codes_print') }}</button>
+  </p>
+  <div class="notice notice--warning">{{ t('auth.codes_warning') }}</div>
+  <form method="post" action="{{ url('/admin/login/recovery-codes') }}">
+    {{ csrf_field() }}
+    <button type="submit" class="btn btn--primary btn--block">{{ t('auth.codes_done') }}</button>
+  </form>
+{% endblock %}

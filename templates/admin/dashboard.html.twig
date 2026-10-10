@@ -1,0 +1,41 @@
+{% extends 'layout/admin.html.twig' %}
+
+{% block title %}{{ t('app.nav.dashboard') }}{% endblock %}
+
+{% block content %}
+  <header class="page-head">
+    <h1 class="h1">{{ t('admin.dashboard.hello', {name: current_user.display_name}) }}</h1>
+  </header>
+
+  {% if pending_migrations is not empty %}
+    <div class="notice notice--warning">
+      {{ t('admin.dashboard.migrations_pending', {count: pending_migrations|length}) }}
+      <a href="{{ url('/admin/system') }}">{{ t('admin.dashboard.to_system') }}</a>
+    </div>
+  {% endif %}
+
+  <div class="cards">
+    <section class="card" aria-labelledby="events-title">
+      <h2 class="h2" id="events-title">{{ t('admin.dashboard.events_title') }}</h2>
+      <p class="muted">{{ t('admin.dashboard.events_soon') }}</p>
+    </section>
+
+    {% if checklist is not empty %}
+      <section class="card" aria-labelledby="setup-title">
+        <h2 class="h2" id="setup-title">{{ t('admin.dashboard.setup_title') }}</h2>
+        <ul class="checklist">
+          {% for item in checklist %}
+            <li class="checklist__item {{ item.done ? 'is-done' : '' }}">
+              <span class="checklist__icon" aria-hidden="true">{{ item.done ? '✓' : '○' }}</span>
+              {% if item.done %}
+                <span>{{ item.label }} <span class="visually-hidden">({{ t('admin.dashboard.done') }})</span></span>
+              {% else %}
+                <a href="{{ url(item.link) }}">{{ item.label }}</a>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+  </div>
+{% endblock %}

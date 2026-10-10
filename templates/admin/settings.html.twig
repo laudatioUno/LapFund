@@ -1,0 +1,62 @@
+{% extends 'layout/admin.html.twig' %}
+{% import 'partials/macros.html.twig' as m %}
+
+{% block title %}{{ t('app.nav.settings') }}{% endblock %}
+
+{% block content %}
+  <header class="page-head"><h1 class="h1">{{ t('app.nav.settings') }}</h1></header>
+
+  <form method="post" action="{{ url('/admin/settings') }}" enctype="multipart/form-data" class="stack" novalidate>
+    {{ csrf_field() }}
+
+    <section class="card stack" aria-labelledby="club-title">
+      <h2 class="h2" id="club-title">{{ t('admin.settings.club') }}</h2>
+      {{ m.field('club_name', t('install.club_name'), input.club_name, errors, 'text', {required: true, maxlength: 120}) }}
+      {{ m.field('contact_email', t('admin.settings.contact_email'), input.contact_email, errors, 'email', {required: true, help: t('admin.settings.contact_email_help')}) }}
+      {{ m.field('club_website', t('admin.settings.website'), input.club_website, errors, 'url', {optional: true}) }}
+    </section>
+
+    <section class="card stack" aria-labelledby="look-title">
+      <h2 class="h2" id="look-title">{{ t('admin.settings.look') }}</h2>
+
+      <div class="field{{ errors.logo is defined ? ' field--error' }}">
+        <span class="label">{{ t('admin.settings.logo') }}</span>
+        {% if logo %}
+          <div class="logo-preview">
+            <img src="{{ url('/media/' ~ logo) }}" alt="{{ t('admin.settings.logo_current') }}">
+          </div>
+        {% endif %}
+        <label for="f-logo" class="visually-hidden">{{ t('admin.settings.logo') }}</label>
+        <input id="f-logo" name="logo" type="file" accept="image/png,image/jpeg" aria-describedby="h-logo">
+        {% if errors.logo is defined %}<p class="field__error">{{ t(errors.logo) }}</p>
+        {% else %}<p class="field__help" id="h-logo">{{ t('admin.settings.logo_help') }}</p>{% endif %}
+      </div>
+
+      <div class="field{{ errors.primary_color is defined ? ' field--error' }}">
+        <label for="f-primary_color">{{ t('admin.settings.color') }}</label>
+        <div class="color-row">
+          <input id="f-primary_color" name="primary_color" type="color" value="{{ input.primary_color }}" aria-describedby="h-color">
+          <output class="swatch-sample" for="f-primary_color" data-color-sample>{{ t('admin.settings.color_sample') }}</output>
+        </div>
+        {% if errors.primary_color is defined %}<p class="field__error">{{ t(errors.primary_color) }}</p>
+        {% else %}<p class="field__help" id="h-color">{{ t('admin.settings.color_help') }}</p>{% endif %}
+      </div>
+    </section>
+
+    <section class="card stack" aria-labelledby="legal-title">
+      <h2 class="h2" id="legal-title">{{ t('admin.settings.legal') }}</h2>
+      <p class="muted">{{ t('admin.settings.legal_help') }}</p>
+      {{ m.field('privacy_url', t('admin.settings.privacy_url'), input.privacy_url, errors, 'url', {optional: true}) }}
+      {{ m.field('imprint_url', t('admin.settings.imprint_url'), input.imprint_url, errors, 'url', {optional: true}) }}
+    </section>
+
+    <div><button type="submit" class="btn btn--primary">{{ t('app.save') }}</button></div>
+  </form>
+
+  {% if logo %}
+    <form method="post" action="{{ url('/admin/settings/logo/delete') }}" class="inline-form" data-confirm="{{ t('admin.settings.logo_delete_confirm') }}">
+      {{ csrf_field() }}
+      <button type="submit" class="btn btn--link">{{ t('admin.settings.logo_delete') }}</button>
+    </form>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}{{ t('auth.setup_title') }}{% endblock %}
+
+{% block content %}
+  <h1 class="h1">{{ t('auth.setup_title') }}</h1>
+  <p>{{ t('auth.setup_intro', {name: user.display_name}) }}</p>
+  <ol class="steps">
+    <li>{{ t('auth.setup_step1') }}</li>
+    <li>{{ t('auth.setup_step2') }}</li>
+    <li>{{ t('auth.setup_step3') }}</li>
+  </ol>
+
+  <figure class="qr">
+    <img src="{{ qr }}" alt="{{ t('auth.setup_qr_alt') }}" width="240" height="240">
+    <figcaption class="small">
+      {{ t('auth.setup_manual') }}<br>
+      <code class="secret" data-copy-source>{{ secret_grouped }}</code>
+    </figcaption>
+  </figure>
+
+  {% if error %}<div class="notice notice--error" role="alert">{{ error }}</div>{% endif %}
+  <form method="post" action="{{ url('/admin/login/setup') }}" class="stack">
+    {{ csrf_field() }}
+    <div class="field">
+      <label for="f-code">{{ t('auth.setup_code') }}</label>
+      <input id="f-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="7" class="input--code" required>
+    </div>
+    <button type="submit" class="btn btn--primary btn--block">{{ t('auth.setup_submit') }}</button>
+  </form>
+{% endblock %}

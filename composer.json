@@ -1,0 +1,40 @@
+{
+    "name": "lapfund/lapfund",
+    "description": "LapFund - self-hosted web tool for sponsored runs: sponsors pledge online, clubs track laps and payments.",
+    "type": "project",
+    "license": "MIT",
+    "homepage": "https://github.com/laudatioUno/lapfund",
+    "require": {
+        "php": ">=8.3",
+        "ext-gd": "*",
+        "ext-mbstring": "*",
+        "ext-pdo_mysql": "*",
+        "ext-sodium": "*",
+        "twig/twig": "^3.29",
+        "spomky-labs/otphp": "^11.5",
+        "chillerlan/php-qrcode": "^6.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "LapFund\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LapFund\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true,
+        "platform": {
+            "php": "8.3.0"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    }
+}

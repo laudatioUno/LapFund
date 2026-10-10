@@ -1,0 +1,21 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}{{ t('auth.login_title') }}{% endblock %}
+
+{% block content %}
+  <h1 class="h1">{{ t('auth.login_title') }}</h1>
+  {% if error is defined %}<div class="notice notice--error" role="alert">{{ error }}</div>{% endif %}
+  <form method="post" action="{{ url('/admin/login') }}" class="stack">
+    {{ csrf_field() }}
+    <div class="field">
+      <label for="f-username">{{ t('admin.users.username') }}</label>
+      <input id="f-username" name="username" type="text" value="{{ username }}" autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus>
+    </div>
+    <div class="field">
+      <label for="f-password">{{ t('auth.password') }}</label>
+      <input id="f-password" name="password" type="password" autocomplete="current-password" required>
+    </div>
+    <button type="submit" class="btn btn--primary btn--block">{{ t('auth.continue') }}</button>
+  </form>
+  <p class="muted small">{{ t('auth.login_hint') }}</p>
+{% endblock %}

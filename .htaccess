@@ -1,0 +1,10 @@
+# LapFund: used when the web root cannot point to public/.
+# Blocks every folder except public/ and forwards all requests there.
+Options -Indexes
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(config|src|templates|lang|migrations|storage|vendor|bin|tests|docs)(/|$) - [F,L]
+    RewriteRule ^(composer\.(json|lock)|README\.md|LICENSE|phpunit\.xml\.dist|\.git.*)$ - [F,L]
+    RewriteCond %{REQUEST_URI} !/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

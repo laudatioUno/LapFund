@@ -1,0 +1,44 @@
+{% extends 'layout/base.html.twig' %}
+{% import 'partials/macros.html.twig' as m %}
+
+{% block body_class %}page-admin{% endblock %}
+
+{% block body %}
+<a class="skip-link" href="#main">{{ t('app.skip_to_content') }}</a>
+<div class="shell">
+  <nav class="nav" aria-label="{{ t('app.main_navigation') }}">
+    <div class="nav__brand">
+      {% if brand.logo %}<img src="{{ url('/media/' ~ brand.logo) }}" alt="" class="nav__logo">{% endif %}
+      <span class="nav__club">{{ brand.club_name }}</span>
+    </div>
+
+    <div class="nav__group">
+      {{ m.nav_link('/admin', t('app.nav.dashboard'), current_path) }}
+    </div>
+
+    {% if is_club_admin %}
+      <div class="nav__group">
+        <span class="nav__heading">{{ t('app.nav.club') }}</span>
+        {{ m.nav_link('/admin/users', t('app.nav.users'), current_path) }}
+        {{ m.nav_link('/admin/settings', t('app.nav.settings'), current_path) }}
+        {{ m.nav_link('/admin/audit', t('app.nav.audit'), current_path) }}
+        {{ m.nav_link('/admin/system', t('app.nav.system'), current_path) }}
+      </div>
+    {% endif %}
+
+    <div class="nav__account">
+      <span class="nav__user">{{ current_user.display_name }}</span>
+      <span class="nav__role">{{ t('admin.roles.' ~ current_user.role) }}</span>
+      <form method="post" action="{{ url('/admin/logout') }}">
+        {{ csrf_field() }}
+        <button type="submit" class="nav__logout">{{ t('app.nav.logout') }}</button>
+      </form>
+    </div>
+  </nav>
+
+  <main class="main" id="main">
+    {{ m.flashes(flashes) }}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+{% endblock %}

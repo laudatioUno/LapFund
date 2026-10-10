@@ -23,3 +23,23 @@ jobs:
         run: vendor/bin/phpunit
       - name: Security advisories
         run: composer audit --no-dev
+
+  # Test package for pull requests: the same ZIP as a release, to try it on a server
+  # before merging. Download it on the PR's "Checks" tab › CI › Summary › Artifacts.
+  package:
+    if: github.event_name == 'pull_request'
+    needs: test
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build ZIP
+        id: build
+        run: |
+          VERSION="$(php -r 'require "src/App.php"; echo LapFund\App::VERSION;')-pr${{ github.event.pull_request.number }}"
+          bin/build-release.sh "$VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lapfund-${{ steps.build.outputs.version }}
+          path: build/lapfund-${{ steps.build.outputs.version }}.zip
+          retention-days: 14

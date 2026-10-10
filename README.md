@@ -61,6 +61,7 @@ location ~ \.php$ {
 
 1. Back up the database and the folders `config/` and `storage/`.
 2. Upload the new release over the old files (keep `config/` and `storage/`).
+   Use the release file `lapfund-<version>.zip` from the releases page. GitHub's "Download ZIP" and "Source code" archives do not contain the libraries (`vendor/`) and will not work.
 3. In the admin console open **System** and run the pending database updates, or run `php bin/migrate.php`. Until then, club admins are sent to the System page and event admins see a maintenance notice.
 
 ## Security

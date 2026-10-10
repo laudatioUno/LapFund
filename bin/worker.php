@@ -27,4 +27,14 @@ if ($result['locked']) {
     echo "Another worker is running.\n";
     exit(0);
 }
-printf("sent %d, failed %d, cancelled %d\n", $result['sent'], $result['failed'], $result['cancelled']);
+$counts = $app->mailQueue()->counts();
+printf(
+    "sent %d, failed %d, cancelled %d | queue: %d waiting, %d failed in total | limit left: %d%s\n",
+    $result['sent'],
+    $result['failed'],
+    $result['cancelled'],
+    $counts['queued'] + $counts['sending'],
+    $counts['failed'],
+    $result['allowance'],
+    $app->mailSettings()->isConfigured() ? '' : ' | mail settings incomplete',
+);

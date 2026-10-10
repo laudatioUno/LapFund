@@ -39,6 +39,13 @@
     {% endif %}
   </section>
 
+  {% if event.status == 'collecting' and uninvited > 0 %}
+    <div class="notice notice--warning">
+      {{ t('mails.invite.pending', {count: uninvited}) }}
+      <a href="{{ url('/admin/events/' ~ event.id ~ '/mails') }}">{{ perm.mail ? t('mails.invite.go_send') : t('mails.invite.go_view') }}</a>
+    </div>
+  {% endif %}
+
   <div class="cards">
     <section class="card stack" aria-labelledby="facts-title">
       <h2 class="h2" id="facts-title">{{ t('events.facts_title') }}</h2>

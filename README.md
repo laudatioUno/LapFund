@@ -2,7 +2,7 @@
 
 **LapFund** is a self-hosted web tool for sponsored runs ("Sponsorenlauf"): participants share a personal link, sponsors pledge online – a fixed amount or an amount per lap – and the club records laps and keeps track of payments. Made for clubs that want to replace paper lists without paying platform fees.
 
-> Status: **stage 2 of 6**. Installer, admin login with two-factor authentication, admin accounts, club branding, events, teams and participants work. Invitations, sponsor pages, laps and payments follow in the next stages.
+> Status: **stage 3 of 6**. Installer, admin login with two-factor authentication, admin accounts, club branding, events, teams, participants, mail sending, invitations with personal links and the participant page work. Sponsor pledges, laps and payments follow in the next stages.
 
 ## Features
 
@@ -24,9 +24,18 @@ Stage 2 – events and participants
 - One participant pool for all events: add people one by one, from the pool, by CSV import with a preview (separator and Windows/Excel encoding detected), or by taking them over from an earlier event, with or without their teams
 - Participant list with team filter and search
 
+Stage 3 – mail and participant access
+- Mail settings in the admin console: no-reply sender, SMTP server (SSL/TLS or STARTTLS), password stored encrypted, sending limit per minute and hour, test mail with understandable error messages
+- Mail queue with send waves, progress display and mail log; failed mails are retried and can be sent again
+- Invitation mail with a personal link (magic link) for every participant; participants added during the sponsor search are invited automatically; subject and intro editable per event
+- Participant page: sums, personal sponsor link with WhatsApp, e-mail and QR code, a message for sponsors; siblings on the same phone can switch between their pages
+- «Link lost» on the start page: one mail with the links of all participations of an address (siblings included), with the same answer for known and unknown addresses
+- The event admin can issue a new link for a participant; the old one stops working at once
+
 ## Requirements
 
-- PHP **8.3 or newer** with `pdo_mysql`, `sodium`, `gd`, `mbstring`
+- PHP **8.3 or newer** with `pdo_mysql`, `sodium`, `gd`, `mbstring`, `openssl`
+- An SMTP account for sending mails (a no-reply address of the club, the hosting provider's mail server or a mail service)
 - MySQL 8.0+ or MariaDB 10.6+ (an empty database)
 - HTTPS
 - Works on ordinary shared hosting: no root access, no containers, no Composer on the server
@@ -40,6 +49,14 @@ Stage 2 – events and participants
 4. Make `config/` and `storage/` writable for the web server.
 5. Open the site in the browser. The installer starts automatically. **Run it right after uploading**, because until it has run anyone could open it.
 6. After the installation, set up two-factor authentication with an authenticator app and store the recovery codes safely.
+7. Open **Mailversand** in the admin console, enter the SMTP account and send a test mail.
+8. Set up a cron job that sends the queued mails every minute (recommended):
+
+   ```
+   * * * * * php /path/to/lapfund/bin/worker.php
+   ```
+
+   If your hosting has no cron jobs, let an external cron service call the cron URL shown on the **Mailversand** page every minute. Without either, LapFund sends mails after page views (PHP-FPM) and while the progress page of a send wave is open.
 
 ### nginx
 
@@ -59,15 +76,36 @@ location ~ \.php$ {
 
 ## Updating
 
-1. Back up the database and the folders `config/` and `storage/`.
-2. Upload the new release over the old files (keep `config/` and `storage/`).
-   Use the release file `lapfund-<version>.zip` from the releases page. GitHub's "Download ZIP" and "Source code" archives do not contain the libraries (`vendor/`) and will not work.
-3. In the admin console open **System** and run the pending database updates, or run `php bin/migrate.php`. Until then, club admins are sent to the System page and event admins see a maintenance notice.
+Always use the release file `lapfund-<version>.zip` from the [releases](../../releases). GitHub's "Download ZIP" and "Source code" archives do not contain the libraries (`vendor/`) and will not work.
+
+**Keep these, everything else comes from the new release:**
+
+| Path | Content | Keep? |
+| --- | --- | --- |
+| `config/config.php` | Database access and the encryption key | **Yes, required.** Without it the installer starts again; without the key, two-factor logins and the SMTP password can no longer be read. |
+| `storage/uploads/` | Uploaded logos and Twint QR codes | **Yes** |
+| `storage/logs/` | Error logs | Optional |
+| `storage/cache/` | Template cache | No, it is rebuilt automatically |
+| everything else | Program files and libraries | No, replaced by the release |
+
+Steps:
+
+1. Back up the database (export as SQL) and the folders `config/` and `storage/`.
+2. Move the current installation into a folder **outside the website**, e.g. `lapfund-old` (inside the website, `config.php` with passwords would no longer be protected by the `.htaccess`).
+3. Unpack the new release ZIP. It contains a folder `lapfund/`: its **contents** go where the old installation was.
+4. Copy back `config/config.php` and the contents of `storage/uploads/` from the old folder (and `storage/logs/` if you want to keep the logs). Do this before opening the site, otherwise the installer appears.
+5. Check that `config/` and `storage/` with all subfolders are writable for the web server.
+6. Log in as club admin. If the release brings database updates, you are sent to **System**: run them there (or run `php bin/migrate.php`). Until then, event admins see a maintenance notice and public pages are not available.
+7. Delete the old folder. Keep a copy of `config/config.php` in a safe place.
+
+Unpacking the release directly over the old files also works; files that no longer exist in the new version simply stay behind. Custom changes to the `.htaccess` files are overwritten in both cases.
 
 ## Security
 
-- All secrets (TOTP keys) are encrypted with libsodium; the key is in `config/config.php`, outside the web root. **Never lose or change that key.**
-- Passwords: Argon2id. Links (invitations, later magic links): 256-bit random tokens, stored only as SHA-256 hashes.
+- All secrets (TOTP keys, SMTP password) are encrypted with libsodium; the key is in `config/config.php`, outside the web root. **Never lose or change that key.**
+- Passwords: Argon2id. Magic links and admin invitations: 256-bit random tokens, looked up by their SHA-256 hash; sponsor links: 128-bit random tokens, separate from the magic link.
+- Links in mails are built from the website address in the mail settings, never from the request's host name.
+- Public pages are not indexed by search engines and send no referrer.
 - Strict Content Security Policy: only resources from your own server, no inline scripts or styles.
 - Found a vulnerability? Please report it privately to the maintainer instead of opening a public issue.
 

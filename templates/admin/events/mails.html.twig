@@ -1,0 +1,74 @@
+{% extends 'layout/admin.html.twig' %}
+
+{% block title %}{{ t('events.tab.mails') }} · {{ event.name }}{% endblock %}
+
+{% block content %}
+  {% include 'partials/event_header.html.twig' %}
+
+  {% if not configured %}
+    <div class="notice notice--warning">{{ t('mails.not_configured') }}{% if is_club_admin %} <a href="{{ url('/admin/mail') }}">{{ t('mails.to_settings') }}</a>{% endif %}</div>
+  {% endif %}
+
+  <section class="card stack" aria-labelledby="inv-title">
+    <h2 class="h2" id="inv-title">{{ t('mails.invite.title') }}</h2>
+    <p>{{ t('mails.invite.text') }}</p>
+    {% if event.status == 'collecting' %}
+      {% if uninvited > 0 %}
+        <p class="strong">{{ t('mails.invite.pending', {count: uninvited}) }}</p>
+        {% if perm.mail %}
+          <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/invitations') }}" data-confirm="{{ t('mails.invite.confirm', {count: uninvited}) }}">
+            {{ csrf_field() }}
+            <button type="submit" class="btn btn--primary"{{ configured ? '' : ' disabled' }}>{{ t('mails.invite.send', {count: uninvited}) }}</button>
+          </form>
+        {% else %}
+          <p class="muted small">{{ t('mails.only_event_admin') }}</p>
+        {% endif %}
+      {% else %}
+        <p class="muted">{{ t('mails.invite.all_done') }}</p>
+      {% endif %}
+    {% elseif event.status == 'preparation' %}
+      <p class="muted">{{ t('mails.invite.not_yet') }}</p>
+    {% else %}
+      <p class="muted">{{ t('mails.invite.over') }}</p>
+    {% endif %}
+  </section>
+
+  <section class="card stack" aria-labelledby="prog-title">
+    <div class="page-head page-head--inline">
+      <h2 class="h2" id="prog-title">{{ t('mails.progress.title') }}</h2>
+      {% if perm.mail and counts.failed > 0 %}
+        <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/mails/retry') }}">
+          {{ csrf_field() }}
+          <button type="submit" class="btn btn--secondary btn--small">{{ t('mail.log.retry', {count: counts.failed}) }}</button>
+        </form>
+      {% endif %}
+    </div>
+    <dl class="mail-counts" data-mail-counts>
+      <div><dt>{{ t('mail.status.queued') }}</dt><dd data-count="pending">{{ counts.queued + counts.sending }}</dd></div>
+      <div><dt>{{ t('mail.status.sent') }}</dt><dd data-count="sent">{{ counts.sent }}</dd></div>
+      <div><dt>{{ t('mail.status.failed') }}</dt><dd data-count="failed">{{ counts.failed }}</dd></div>
+    </dl>
+    {% if in_progress %}
+      <p class="muted small" role="status" data-mail-status>{{ t('mails.progress.running') }}</p>
+      <form method="post" action="{{ url('/admin/mail/tick') }}" data-mail-tick hidden>
+        {{ csrf_field() }}
+        <input type="hidden" name="event" value="{{ event.id }}">
+      </form>
+    {% endif %}
+
+    {% for b in batches %}
+      {% set done = b.sent + b.failed + b.cancelled %}
+      <div class="batch">
+        <div class="batch__head">
+          <span class="strong">{{ t('mail.type.' ~ b.type) }}</span>
+          <span class="muted small">{{ b.created_at|datetime }}{% if b.created_by_name %} · {{ b.created_by_name }}{% endif %}</span>
+        </div>
+        <progress max="{{ max(b.total, 1) }}" value="{{ done }}">{{ done }} / {{ b.total }}</progress>
+        <span class="small">{{ t('mails.progress.batch', {sent: b.sent, total: b.total}) }}{% if b.failed > 0 %} · <span class="field__error">{{ t('mails.progress.failed', {count: b.failed}) }}</span>{% endif %}{% if b.cancelled > 0 %} · <span class="muted">{{ t('mails.progress.cancelled', {count: b.cancelled}) }}</span>{% endif %}</span>
+      </div>
+    {% endfor %}
+  </section>
+
+  <h2 class="h2">{{ t('mail.log.title') }}</h2>
+  {% include 'admin/mail/_log_table.html.twig' with {rows: rows, show_event: false} %}
+{% endblock %}

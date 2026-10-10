@@ -110,7 +110,7 @@ final class EventRepository
     private static function decode(array $row): array
     {
         $texts = is_string($row['texts'] ?? null) ? json_decode($row['texts'], true) : null;
-        $row['texts'] = array_merge(['welcome' => '', 'purpose' => '', 'mail_footer' => ''], is_array($texts) ? $texts : []);
+        $row['texts'] = array_merge(['welcome' => '', 'purpose' => '', 'mail_footer' => '', 'invite_subject' => '', 'invite_intro' => ''], is_array($texts) ? $texts : []);
 
         return $row;
     }

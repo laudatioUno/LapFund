@@ -1,0 +1,12 @@
+{% extends 'layout/public.html.twig' %}
+
+{% block title %}{{ t('public.link_sent.title') }}{% endblock %}
+
+{% block content %}
+  <section class="card stack">
+    <h1 class="h2">{{ t('public.link_sent.title') }}</h1>
+    <p>{{ t('public.link_sent.text') }}</p>
+    <p class="muted small">{{ t('public.link_sent.spam') }}</p>
+    <p><a href="{{ url('/') }}">{{ t('public.back_home') }}</a></p>
+  </section>
+{% endblock %}

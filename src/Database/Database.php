@@ -116,6 +116,9 @@ final class Database
      */
     public function transaction(callable $fn): mixed
     {
+        if ($this->pdo->inTransaction()) {
+            return $fn($this); // nested: part of the outer transaction
+        }
         $this->pdo->beginTransaction();
         try {
             $result = $fn($this);

@@ -8,9 +8,12 @@ use LapFund\Controller\AdminController;
 use LapFund\Controller\AssetController;
 use LapFund\Controller\AuthController;
 use LapFund\Controller\EventController;
+use LapFund\Controller\EventMailController;
 use LapFund\Controller\InstallController;
+use LapFund\Controller\MailController;
 use LapFund\Controller\ParticipantController;
 use LapFund\Controller\PoolController;
+use LapFund\Controller\PublicController;
 use LapFund\Controller\SettingsController;
 use LapFund\Controller\TeamController;
 use LapFund\Controller\UserController;
@@ -26,8 +29,17 @@ final class Routes
         $c = static fn (string $class, string $method): \Closure =>
             static fn ($request, array $params) => (new $class($app))->{$method}($request, $params);
 
-        // Public
-        $r->get('/', $c(AdminController::class, 'home'));
+        // Public and participants (stage 3)
+        $r->get('/', $c(PublicController::class, 'home'));
+        $r->post('/link', $c(PublicController::class, 'requestLinks'));
+        $r->get('/link/sent', $c(PublicController::class, 'linksSent'));
+        $r->get('/t/{token:[A-Za-z0-9_-]+}', $c(PublicController::class, 'magic'));
+        $r->get('/me', $c(PublicController::class, 'me'));
+        $r->post('/me/message', $c(PublicController::class, 'saveMessage'));
+        $r->post('/me/switch', $c(PublicController::class, 'switchParticipation'));
+        $r->post('/me/logout', $c(PublicController::class, 'logout'));
+        $r->get('/i/{token:[A-Za-z0-9_-]+}', $c(PublicController::class, 'invitation'));
+        $r->get('/cron/{key:[A-Za-z0-9]+}', $c(MailController::class, 'cron'));
         $r->get('/theme.css', $c(AssetController::class, 'theme'));
         $r->get('/media/{file:[a-f0-9]+\.png}', $c(AssetController::class, 'media'));
 
@@ -54,6 +66,12 @@ final class Routes
         $r->get('/admin/system', $c(AdminController::class, 'system'));
         $r->post('/admin/system/migrate', $c(AdminController::class, 'migrate'));
         $r->get('/admin/audit', $c(AdminController::class, 'audit'));
+        $r->get('/admin/mail', $c(MailController::class, 'edit'));
+        $r->post('/admin/mail', $c(MailController::class, 'update'));
+        $r->post('/admin/mail/test', $c(MailController::class, 'test'));
+        $r->get('/admin/mail/log', $c(MailController::class, 'log'));
+        $r->post('/admin/mail/retry', $c(MailController::class, 'retry'));
+        $r->post('/admin/mail/tick', $c(MailController::class, 'tick'));
 
         $r->get('/admin/users', $c(UserController::class, 'index'));
         $r->get('/admin/users/new', $c(UserController::class, 'create'));
@@ -90,6 +108,12 @@ final class Routes
         $r->post('/admin/events/{id}/participants/copy', $c(ParticipantController::class, 'copyApply'));
         $r->get('/admin/events/{id}/participants/{pid:[1-9][0-9]*}', $c(ParticipantController::class, 'edit'));
         $r->post('/admin/events/{id}/participants/{pid:[1-9][0-9]*}', $c(ParticipantController::class, 'update'));
+
+        $r->get('/admin/events/{id}/mails', $c(EventMailController::class, 'index'));
+        $r->post('/admin/events/{id}/invitations', $c(EventMailController::class, 'inviteAll'));
+        $r->post('/admin/events/{id}/mails/retry', $c(EventMailController::class, 'retry'));
+        $r->post('/admin/events/{id}/participants/{pid:[1-9][0-9]*}/invite', $c(ParticipantController::class, 'resendInvite'));
+        $r->post('/admin/events/{id}/participants/{pid:[1-9][0-9]*}/link', $c(ParticipantController::class, 'newLink'));
 
         $r->get('/admin/participants', $c(PoolController::class, 'index'));
 

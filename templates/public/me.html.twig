@@ -1,0 +1,110 @@
+{% extends 'layout/public.html.twig' %}
+
+{% block title %}{{ t('public.me.title', {name: p.first_name}) }}{% endblock %}
+
+{% block content %}
+  {% if siblings is not empty %}
+    <nav class="sibling-switch" aria-label="{{ t('public.me.switch_label') }}">
+      {% for s in siblings %}
+        <form method="post" action="{{ url('/me/switch') }}">
+          {{ csrf_field() }}
+          <input type="hidden" name="participation" value="{{ s.id }}">
+          <button type="submit" class="chip-btn{{ s.current ? ' is-current' }}"{% if s.current %} aria-current="true"{% endif %}>{{ s.first_name }}<span class="visually-hidden"> – {{ s.event_name }}</span></button>
+        </form>
+      {% endfor %}
+    </nav>
+  {% endif %}
+
+  <h1 class="pub-title">{{ t('public.me.hello', {name: p.first_name}) }}</h1>
+  <p><span class="badge badge--status-{{ event.status }}">{{ t('events.status.' ~ event.status) }}{% if event.event_date %} · {{ t('public.me.run_on', {date: event.event_date|date('d.m.Y')}) }}{% endif %}</span></p>
+
+  <section class="summary" aria-labelledby="sum-title">
+    <h2 class="summary__label" id="sum-title">{{ t('public.me.collected') }}</h2>
+    <div class="summary__grid">
+      <div><span class="summary__value">{{ totals.flat_cents|money }}</span><span class="summary__hint">{{ t('public.me.flat') }}</span></div>
+      <div><span class="summary__value">{{ totals.per_lap_cents|money }}</span><span class="summary__hint">{{ t('public.me.per_lap') }}</span></div>
+    </div>
+    <div class="summary__foot">
+      <span>{{ t('public.me.sponsor_count', {count: totals.count}) }}</span>
+      {% if totals.per_lap_cents > 0 %}
+        <span>{% for pr in projections %}{{ t('public.me.at_laps', {laps: pr.laps}) }} <strong>{{ pr.cents|money }}</strong>{{ not loop.last ? ' · ' }}{% endfor %}</span>
+      {% endif %}
+    </div>
+  </section>
+
+  {% if share %}
+    <section class="card stack" aria-labelledby="share-title">
+      <h2 class="h2" id="share-title">{{ t('public.me.find_sponsors') }}</h2>
+      <p>{{ t('public.me.find_sponsors_text') }}</p>
+      <div class="share-grid">
+        <a href="{{ share.whatsapp }}" class="share-btn" rel="noopener" target="_blank">
+          <svg viewBox="0 0 24 24" aria-hidden="true" class="share-btn__icon"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 18.7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          {{ t('public.me.whatsapp') }}
+        </a>
+        <a href="{{ share.mail }}" class="share-btn">
+          <svg viewBox="0 0 24 24" aria-hidden="true" class="share-btn__icon"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 6.5L12 13l8.5-6.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+          {{ t('public.me.email') }}
+        </a>
+        <button type="button" class="share-btn" data-copy-target="invite-link" data-copied="{{ t('app.copied') }}">
+          <svg viewBox="0 0 24 24" aria-hidden="true" class="share-btn__icon"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          {{ t('public.me.copy_link') }}
+        </button>
+      </div>
+      <div class="field">
+        <label for="invite-link">{{ t('public.me.your_link') }}</label>
+        <input id="invite-link" type="text" value="{{ share.url }}" readonly class="input--mono small">
+      </div>
+      <details class="qr-box">
+        <summary>{{ t('public.me.show_qr') }}</summary>
+        <img src="{{ share.qr }}" alt="{{ t('public.me.qr_alt') }}" width="240" height="240">
+        <p class="muted small">{{ t('public.me.qr_hint') }}</p>
+      </details>
+    </section>
+  {% else %}
+    <section class="card"><p class="muted">{{ t('public.me.search_over') }}</p></section>
+  {% endif %}
+
+  <section class="card stack" id="message" aria-labelledby="msg-title">
+    <h2 class="h2" id="msg-title">{{ t('public.me.message_title') }}</h2>
+    {% if can_edit_message %}
+      <form method="post" action="{{ url('/me/message') }}" class="stack">
+        {{ csrf_field() }}
+        <div class="field">
+          <label for="f-message">{{ t('public.me.message_label') }}</label>
+          <textarea id="f-message" name="message" rows="4" maxlength="{{ message_max }}" aria-describedby="h-message" placeholder="{{ t('public.me.message_placeholder') }}">{{ p.message }}</textarea>
+          <p class="field__help" id="h-message">{{ t('public.me.message_help', {max: message_max}) }}</p>
+        </div>
+        <div><button type="submit" class="btn btn--secondary">{{ t('public.me.message_save') }}</button></div>
+      </form>
+    {% elseif p.message %}
+      <p class="quote">«{{ p.message }}»</p>
+    {% else %}
+      <p class="muted">{{ t('public.me.no_message') }}</p>
+    {% endif %}
+  </section>
+
+  <section class="stack" aria-labelledby="sp-title">
+    <h2 class="h2" id="sp-title">{{ t('public.me.sponsors_title') }}</h2>
+    {% if pledges is empty %}
+      <div class="card"><p class="muted">{{ t('public.me.no_sponsors') }}</p></div>
+    {% else %}
+      <ul class="card pledge-list">
+        {% for pl in pledges %}
+          <li class="pledge-list__item">
+            <span class="strong">{{ pl.sponsor_name }}</span>
+            <span class="pledge-list__amount">{{ pl.amount_cents|money }}{% if pl.type == 'per_lap' %} {{ t('public.me.per_lap_short') }}{% endif %}</span>
+            <span class="muted small">{{ t('public.me.method.' ~ pl.payment_method) }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+{% endblock %}
+
+{% block footer_extra %}
+  <p>{{ t('public.me.keep_link') }}</p>
+  <form method="post" action="{{ url('/me/logout') }}" data-confirm="{{ t('public.me.logout_confirm') }}">
+    {{ csrf_field() }}
+    <button type="submit" class="btn btn--link small">{{ t('public.me.logout') }}</button>
+  </form>
+{% endblock %}

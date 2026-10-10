@@ -153,6 +153,7 @@ final class InstallController extends Controller
             ['label' => 'sodium', 'ok' => $ext('sodium'), 'detail' => ''],
             ['label' => 'gd', 'ok' => $ext('gd'), 'detail' => ''],
             ['label' => 'mbstring', 'ok' => $ext('mbstring'), 'detail' => ''],
+            ['label' => 'openssl', 'ok' => $ext('openssl'), 'detail' => ''],
             ['label' => 'Argon2id', 'ok' => defined('PASSWORD_ARGON2ID'), 'detail' => ''],
             ['label' => 'config/ ' . $this->t('install.writable'), 'ok' => is_writable($root . '/config'), 'detail' => ''],
             ['label' => 'storage/ ' . $this->t('install.writable'), 'ok' => is_writable($root . '/storage'), 'detail' => ''],

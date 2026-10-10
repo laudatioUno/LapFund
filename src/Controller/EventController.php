@@ -63,7 +63,7 @@ final class EventController extends EventScopedController
             'event_date' => $input['event_date'] !== '' ? $input['event_date'] : null,
             'location' => $input['location'],
             'description' => $input['description'] !== '' ? $input['description'] : null,
-            'texts' => ['welcome' => '', 'purpose' => '', 'mail_footer' => ''],
+            'texts' => ['welcome' => '', 'purpose' => '', 'mail_footer' => '', 'invite_subject' => '', 'invite_intro' => ''],
             'created_by' => (int) $user['id'],
         ]);
         $this->app->events()->setAdmins($id, $input['admins']);
@@ -101,6 +101,7 @@ final class EventController extends EventScopedController
             'participant_count' => $count,
             'admins' => $this->app->events()->admins($id),
             'checklist' => $checklist,
+            'uninvited' => $this->app->access()->uninvitedCount($id),
         ]);
     }
 
@@ -117,6 +118,9 @@ final class EventController extends EventScopedController
         $this->app->events()->update((int) $this->event['id'], ['status' => $to]);
         $this->audit('event_status_changed', 'event', (int) $this->event['id'], ['status' => $from], ['status' => $to]);
         $this->flash('success', 'events.status_changed', ['status' => $this->t('events.status.' . $to)]);
+        if ($to === 'collecting' && $this->app->access()->uninvitedCount((int) $this->event['id']) > 0) {
+            $this->flash('info', 'mails.invite.after_status');
+        }
 
         return $this->redirect($this->eventPath());
     }
@@ -160,6 +164,8 @@ final class EventController extends EventScopedController
             'own_color' => $request->input('own_color') === '1',
             'primary_color' => $request->input('primary_color'),
             'welcome' => $request->input('welcome'),
+            'invite_subject' => $request->input('invite_subject'),
+            'invite_intro' => $request->input('invite_intro'),
             'purpose' => $request->input('purpose'),
             'mail_footer' => $request->input('mail_footer'),
             'admins' => $this->perm['assign_admins'] ? $this->selectedAdmins($request) : $this->app->events()->adminIds((int) $event['id']),
@@ -181,7 +187,7 @@ final class EventController extends EventScopedController
         if ($e = Validation::optionalInt($input['goal_chf'], 1, 10000000)) {
             $errors['goal_chf'] = $e;
         }
-        foreach (['location' => 160, 'sender_name' => 120, 'welcome' => 1000, 'purpose' => 200, 'mail_footer' => 1000] as $field => $max) {
+        foreach (['location' => 160, 'sender_name' => 120, 'welcome' => 1000, 'purpose' => 200, 'mail_footer' => 1000, 'invite_subject' => 150, 'invite_intro' => 1000] as $field => $max) {
             if (mb_strlen($input[$field]) > $max) {
                 $errors[$field] = 'validation.too_long';
             }
@@ -223,7 +229,7 @@ final class EventController extends EventScopedController
             'goal_cents' => $input['goal_chf'] !== '' ? (int) $input['goal_chf'] * 100 : null,
             'sender_name' => $input['sender_name'] !== '' ? $input['sender_name'] : null,
             'primary_color' => $color,
-            'texts' => ['welcome' => $input['welcome'], 'purpose' => $input['purpose'], 'mail_footer' => $input['mail_footer']],
+            'texts' => ['welcome' => $input['welcome'], 'purpose' => $input['purpose'], 'mail_footer' => $input['mail_footer'], 'invite_subject' => $input['invite_subject'], 'invite_intro' => $input['invite_intro']],
         ];
         foreach (['logo' => 'logo_file', 'twint_qr' => 'twint_qr_file'] as $field => $column) {
             $remove = $request->input('remove_' . $field) === '1';
@@ -267,6 +273,8 @@ final class EventController extends EventScopedController
             'own_color' => $event['primary_color'] !== null,
             'primary_color' => (string) ($event['primary_color'] ?? $this->app->branding()->club()['primary_color']),
             'welcome' => $event['texts']['welcome'],
+            'invite_subject' => $event['texts']['invite_subject'],
+            'invite_intro' => $event['texts']['invite_intro'],
             'purpose' => $event['texts']['purpose'],
             'mail_footer' => $event['texts']['mail_footer'],
             'admins' => $this->app->events()->adminIds((int) $event['id']),

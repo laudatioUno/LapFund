@@ -53,4 +53,37 @@
     color.addEventListener('input', update);
     update();
   }
+
+  // Mail progress (fallback without cron): every few seconds one send step, then update the numbers.
+  var tick = document.querySelector('form[data-mail-tick]');
+  if (tick && window.fetch && window.FormData) {
+    var counts = document.querySelector('[data-mail-counts]');
+    var status = document.querySelector('[data-mail-status]');
+    var rounds = 0;
+    var step = function () {
+      rounds++;
+      fetch(tick.action, { method: 'POST', body: new FormData(tick), credentials: 'same-origin' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+          if (!data) { return; }
+          var c = data.counts;
+          var set = function (key, value) {
+            var el = counts && counts.querySelector('[data-count="' + key + '"]');
+            if (el) { el.textContent = value; }
+          };
+          set('pending', c.queued + c.sending);
+          set('sent', c.sent);
+          set('failed', c.failed);
+          if (c.queued + c.sending === 0) {
+            window.location.reload();
+          } else if (rounds < 400) {
+            setTimeout(step, 4000);
+          } else if (status) {
+            status.textContent = status.getAttribute('data-stopped') || '';
+          }
+        })
+        .catch(function () { if (rounds < 400) { setTimeout(step, 10000); } });
+    };
+    setTimeout(step, 1500);
+  }
 })();

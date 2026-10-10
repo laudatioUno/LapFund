@@ -33,6 +33,9 @@ final class ParticipantController extends EventScopedController
             'query' => $query,
             'total' => $this->app->participants()->countForEvent((int) $this->event['id']),
             'can_change' => $this->canChangeList(),
+            'invites' => $this->app->mailQueue()->lastInvitePerParticipation((int) $this->event['id']),
+            'uninvited' => $this->app->access()->uninvitedCount((int) $this->event['id']),
+            'mail_configured' => $this->app->mailSettings()->isConfigured(),
         ]);
     }
 
@@ -61,7 +64,8 @@ final class ParticipantController extends EventScopedController
         }
 
         $person = $this->app->participants()->findOrCreate($input['first_name'], $input['last_name'], $input['email']);
-        if (!$this->app->participants()->addToEvent((int) $this->event['id'], $person['id'], $teamId)) {
+        $participationId = $this->app->participants()->addToEvent((int) $this->event['id'], $person['id'], $teamId);
+        if ($participationId === null) {
             $this->flash('info', 'participants.already_in_event', ['name' => $input['first_name'] . ' ' . $input['last_name']]);
 
             return $this->redirect($this->eventPath('/participants/add'));
@@ -72,6 +76,7 @@ final class ParticipantController extends EventScopedController
         $this->flash('success', $person['created'] ? 'participants.added_new' : 'participants.added_existing', [
             'name' => $input['first_name'] . ' ' . $input['last_name'],
         ]);
+        $this->autoInvite([$participationId]);
 
         return $this->redirect($this->eventPath('/participants/add'));
     }
@@ -85,11 +90,13 @@ final class ParticipantController extends EventScopedController
             throw new HttpException(404);
         }
         $teamId = $this->teamIdOrNull($request->input('team_id'));
-        if ($this->app->participants()->addToEvent((int) $this->event['id'], (int) $person['id'], $teamId)) {
+        $participationId = $this->app->participants()->addToEvent((int) $this->event['id'], (int) $person['id'], $teamId);
+        if ($participationId !== null) {
             $this->audit('participant_added', 'participant', (int) $person['id'], null, [
                 'name' => $person['first_name'] . ' ' . $person['last_name'], 'from_pool' => true,
             ]);
             $this->flash('success', 'participants.added_existing', ['name' => $person['first_name'] . ' ' . $person['last_name']]);
+            $this->autoInvite([$participationId]);
         }
 
         return $this->redirect($this->eventPath('/participants/add?q=' . rawurlencode($request->input('q'))));
@@ -198,8 +205,9 @@ final class ParticipantController extends EventScopedController
         // Classify again: the pool may have changed since the preview.
         $rows = $this->app->participantService()->classifyImport((int) $this->event['id'], $pending['rows'])['rows'];
         $added = $this->app->participantService()->applyImport((int) $this->event['id'], $rows);
-        $this->audit('participants_imported', 'event', (int) $this->event['id'], null, ['added' => $added]);
-        $this->flash('success', 'participants.import.done', ['count' => $added]);
+        $this->audit('participants_imported', 'event', (int) $this->event['id'], null, ['added' => count($added)]);
+        $this->flash('success', 'participants.import.done', ['count' => count($added)]);
+        $this->autoInvite($added);
 
         return $this->redirect($this->eventPath('/participants'));
     }
@@ -249,10 +257,69 @@ final class ParticipantController extends EventScopedController
             return $this->redirect($this->eventPath('/participants/copy?from=' . $sourceId));
         }
         $added = $this->app->participantService()->copyFromEvent($sourceId, (int) $this->event['id'], $ids, $request->input('keep_teams') === '1');
-        $this->audit('participants_copied', 'event', (int) $this->event['id'], null, ['from_event' => $sourceId, 'added' => $added]);
-        $this->flash('success', 'participants.copy.done', ['count' => $added]);
+        $this->audit('participants_copied', 'event', (int) $this->event['id'], null, ['from_event' => $sourceId, 'added' => count($added)]);
+        $this->flash('success', 'participants.copy.done', ['count' => count($added)]);
+        $this->autoInvite($added);
 
         return $this->redirect($this->eventPath('/participants'));
+    }
+
+    // --- Access: invitation and magic link ----------------------------------------
+
+    /** Sends the invitation again, with the same magic link (TN-03). */
+    public function resendInvite(Request $request, array $params): Response
+    {
+        $this->loadEvent($params, 'event.mail');
+        $p = $this->participation($params);
+        if ($this->event['status'] !== 'collecting') {
+            $this->flash('error', 'mails.invite.only_collecting');
+        } elseif (!$this->app->mailSettings()->isConfigured()) {
+            $this->flash('error', 'mails.not_configured');
+        } elseif ($this->app->access()->queueInvite($this->event, (int) $p['id'], null, (int) $this->user['id'])) {
+            $this->audit('invitation_sent', 'participant', (int) $p['participant_id'], null, ['name' => $p['first_name'] . ' ' . $p['last_name']]);
+            $this->flash('success', 'participants.access.invite_queued', ['email' => $p['email']]);
+        }
+
+        return $this->redirect($this->eventPath('/participants/' . $p['id']));
+    }
+
+    /** New magic link; the old one stops working at once, the new one goes out by mail (ML-03). */
+    public function newLink(Request $request, array $params): Response
+    {
+        $this->loadEvent($params, 'event.mail');
+        $p = $this->participation($params);
+        if (!in_array($this->event['status'], ['collecting', 'run_done', 'billing'], true)) {
+            $this->flash('error', 'participants.access.link_not_now');
+        } elseif (!$this->app->mailSettings()->isConfigured()) {
+            $this->flash('error', 'mails.not_configured');
+        } elseif ($this->app->access()->regenerateAndSend($this->event, (int) $p['id'], (int) $this->user['id'])) {
+            $this->audit('magic_link_renewed', 'participant', (int) $p['participant_id'], null, ['name' => $p['first_name'] . ' ' . $p['last_name']]);
+            $this->flash('success', 'participants.access.link_renewed', ['email' => $p['email']]);
+        }
+
+        return $this->redirect($this->eventPath('/participants/' . $p['id']));
+    }
+
+    /**
+     * Participants added while sponsors are searched get their invitation right away (TN-03).
+     *
+     * @param list<int> $participationIds
+     */
+    private function autoInvite(array $participationIds): void
+    {
+        if ($participationIds === [] || $this->event['status'] !== 'collecting') {
+            return;
+        }
+        if (!$this->app->mailSettings()->isConfigured()) {
+            $this->flash('warning', 'participants.access.not_invited_no_mail');
+
+            return;
+        }
+        $result = $this->app->access()->inviteMany($this->event, $participationIds, (int) $this->user['id']);
+        if ($result !== null && $result['count'] > 0) {
+            $this->audit('invitations_sent', 'event', (int) $this->event['id'], null, ['count' => $result['count'], 'batch_id' => $result['batch_id']]);
+            $this->flash('info', 'participants.access.invited_auto', ['count' => $result['count']]);
+        }
     }
 
     // --- Helpers ----------------------------------------------------------------
@@ -278,6 +345,8 @@ final class ParticipantController extends EventScopedController
             'errors' => $errors,
             'teams' => $this->app->teams()->forEvent((int) $this->event['id']),
             'can_remove' => (int) $p['pledge_count'] === 0 && $this->canChangeList(),
+            'invite' => $this->app->mailQueue()->lastInvitePerParticipation((int) $this->event['id'])[(int) $p['id']] ?? null,
+            'mail_configured' => $this->app->mailSettings()->isConfigured(),
         ], $status);
     }
 

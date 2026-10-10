@@ -1,0 +1,15 @@
+{% extends 'mail/de/_layout.html.twig' %}
+{% block content %}
+<p style="margin:0 0 16px;font-size:20px;font-weight:bold;">{{ t('mail.hello', {name: names}) }}</p>
+<p style="margin:0 0 16px;">{{ links|length > 1 ? t('mail.links.text_many') : t('mail.links.text_one') }}</p>
+{% for l in links %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 12px;border:1px solid #DCE3EA;border-radius:10px;">
+<tr><td style="padding:14px 16px;">
+  <strong>{{ l.first_name }} {{ l.last_name }}</strong><br>
+  <span style="color:#586776;font-size:14px;">{{ l.event_name }}{% if l.event_date %} · {{ l.event_date }}{% endif %}</span><br>
+  <a href="{{ l.magic_url }}" style="display:inline-block;margin-top:10px;padding:10px 16px;background:{{ brand.primary_color }};color:{{ brand.on_primary }};font-weight:bold;text-decoration:none;border-radius:8px;">{{ t('mail.links.open', {name: l.first_name}) }}</a>
+</td></tr>
+</table>
+{% endfor %}
+<p style="margin:16px 0 0;font-size:14px;color:#3B4A58;">{{ t('mail.links.not_requested') }}</p>
+{% endblock %}

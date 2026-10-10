@@ -17,6 +17,7 @@ final class Permissions
         'system.manage',
         'audit.view',
         'events.create',
+        'mail.manage',      // mail settings, test mail, mail log of the installation
     ];
 
     /** Actions every admin may perform. */
@@ -37,6 +38,7 @@ final class Permissions
         'event.edit' => ['club', 'assigned'],          // master data, look, texts, Twint QR
         'event.participants' => ['club', 'assigned'],  // add, import, take over, teams
         'event.status' => ['assigned'],                // move the status
+        'event.mail' => ['assigned'],                  // invitations, new magic links (A7)
         'event.assign_admins' => ['club'],
         'event.archive' => ['club'],
     ];

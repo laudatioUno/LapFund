@@ -1,0 +1,11 @@
+{% block content %}{% endblock %}
+
+--
+{{ brand.club_name }}{% if brand.event_name ?? '' %} · {{ brand.event_name }}{% endif %}
+
+{% if brand.mail_footer ?? '' %}{{ brand.mail_footer }}
+
+{% endif %}
+{{ t('mail.footer.no_reply') }}{% if brand.contact_email %} {{ t('mail.footer.contact') }} {{ brand.contact_email }}{% endif %}
+
+{% if brand.privacy_url %}{{ t('mail.footer.privacy') }}: {{ brand.privacy_url }}{% endif %}

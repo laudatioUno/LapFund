@@ -1,0 +1,13 @@
+{% extends 'mail/de/_layout.txt.twig' %}
+{% block content %}{{ t('mail.hello', {name: names}) }}
+
+{{ links|length > 1 ? t('mail.links.text_many') : t('mail.links.text_one') }}
+{% for l in links %}
+
+{{ l.first_name }} {{ l.last_name }} – {{ l.event_name }}{% if l.event_date %} ({{ l.event_date }}){% endif %}
+
+{{ l.magic_url }}
+{% endfor %}
+
+{{ t('mail.links.not_requested') }}
+{% endblock %}

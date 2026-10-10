@@ -1,0 +1,278 @@
+<?php
+
+declare(strict_types=1);
+
+namespace LapFund\Service;
+
+use LapFund\Database\Database;
+use LapFund\I18n\Formatter;
+use LapFund\I18n\Translator;
+use LapFund\Mail\MailComposer;
+use LapFund\Mail\MailQueue;
+use LapFund\Mail\MailSettings;
+use LapFund\Repository\EventRepository;
+use LapFund\Security\Crypto;
+use LapFund\Security\Tokens;
+
+/**
+ * Links of a participation (architecture 7.1) and the mails that deliver them:
+ *  - magic link /t/{token}: 256 bit, stored as hash (lookup) and encrypted (to send it again)
+ *  - invitation link /i/{token}: 128 bit, stored as is, because it is shown on the participant page
+ */
+final class ParticipantAccess
+{
+    /** Event states in which participants can use their page. */
+    public const OPEN_STATES = ['collecting', 'run_done', 'billing', 'closed'];
+
+    public function __construct(
+        private readonly Database $db,
+        private readonly Crypto $crypto,
+        private readonly EventRepository $events,
+        private readonly MailQueue $queue,
+        private readonly MailComposer $composer,
+        private readonly MailSettings $mail,
+        private readonly Branding $branding,
+        private readonly Translator $translator,
+        private readonly Formatter $formatter,
+    ) {
+    }
+
+    // --- Lookups -----------------------------------------------------------------
+
+    /** @return array<string, mixed>|null participation with person and event data */
+    public function participation(int $participationId): ?array
+    {
+        return $this->db->one(self::SELECT . ' WHERE pa.id = ?', [$participationId]);
+    }
+
+    public function findByMagicToken(string $token): ?array
+    {
+        if (!self::wellFormed($token, 43)) {
+            return null;
+        }
+
+        return $this->db->one(self::SELECT . ' WHERE pa.magic_token_hash = ?', [Tokens::hash($token)]);
+    }
+
+    public function findByInviteToken(string $token): ?array
+    {
+        if (!self::wellFormed($token, 22)) {
+            return null;
+        }
+
+        return $this->db->one(self::SELECT . ' WHERE pa.invite_token = ?', [$token]);
+    }
+
+    /** Participations of all events with this address that participants can use (ML-02, ML-04). */
+    public function openParticipationsByEmail(string $email): array
+    {
+        return $this->db->all(
+            self::SELECT . " WHERE p.email = ? AND e.archived_at IS NULL AND e.status IN ('collecting', 'run_done', 'billing', 'closed')
+             ORDER BY e.event_date DESC, e.id DESC, p.first_name",
+            [mb_strtolower(trim($email))],
+        );
+    }
+
+    public function uninvitedCount(int $eventId): int
+    {
+        return (int) $this->db->value('SELECT COUNT(*) FROM participations WHERE event_id = ? AND invited_at IS NULL', [$eventId]);
+    }
+
+    // --- Tokens -------------------------------------------------------------------
+
+    /** The current magic link token; created on first use. */
+    public function magicToken(int $participationId): string
+    {
+        $row = $this->db->one('SELECT magic_token_enc FROM participations WHERE id = ?', [$participationId]);
+        if ($row !== null && $row['magic_token_enc'] !== null) {
+            try {
+                return $this->crypto->decrypt((string) $row['magic_token_enc']);
+            } catch (\Throwable) {
+                // unreadable (e.g. key changed): issue a new one
+            }
+        }
+
+        return $this->regenerateMagicToken($participationId);
+    }
+
+    /** New magic link; the old one stops working at once (ML-03). */
+    public function regenerateMagicToken(int $participationId): string
+    {
+        $token = Tokens::random(32);
+        $this->db->update('participations', [
+            'magic_token_hash' => Tokens::hash($token),
+            'magic_token_enc' => $this->crypto->encrypt($token),
+            'magic_token_issued_at' => Database::now(),
+        ], ['id' => $participationId]);
+
+        return $token;
+    }
+
+    /** Invitation link token for sponsors (NF-08: 128 bit, not guessable); created on first use. */
+    public function inviteToken(int $participationId): string
+    {
+        $token = (string) $this->db->value('SELECT invite_token FROM participations WHERE id = ?', [$participationId]);
+        if ($token !== '') {
+            return $token;
+        }
+        $token = Tokens::random(16);
+        $this->db->update('participations', ['invite_token' => $token], ['id' => $participationId]);
+
+        return $token;
+    }
+
+    // --- Mails ----------------------------------------------------------------------
+
+    /**
+     * Queues the invitation with the magic link (EM-01, TN-03). Only while sponsors are
+     * searched (EV-03). Returns false if the mail was not queued.
+     *
+     * @param array<string, mixed> $event
+     */
+    public function queueInvite(array $event, int $participationId, ?int $batchId, ?int $adminId): bool
+    {
+        if ($event['status'] !== 'collecting' || $event['archived_at'] !== null || !$this->mail->isConfigured()) {
+            return false;
+        }
+        $p = $this->participation($participationId);
+        if ($p === null || (int) $p['event_id'] !== (int) $event['id']) {
+            return false;
+        }
+        $brand = $this->branding->forEvent($event);
+        $values = ['first_name' => $p['first_name'], 'last_name' => $p['last_name'], 'event' => $event['name'], 'club' => $brand['club_name']];
+        $subject = $brand['invite_subject'] !== ''
+            ? MailComposer::placeholders($brand['invite_subject'], $values)
+            : $this->translator->t('mail.invite.subject', ['event' => $event['name']]);
+        $intro = $brand['invite_intro'] !== ''
+            ? MailComposer::placeholders($brand['invite_intro'], $values)
+            : $this->translator->t('mail.invite.intro', ['event' => $event['name']]);
+
+        $mail = $this->composer->build('invite', (string) $p['email'], $p['first_name'] . ' ' . $p['last_name'], $subject, $brand, [
+            'first_name' => $p['first_name'],
+            'intro' => $intro,
+            'magic_url' => $this->mail->url('/t/' . $this->magicToken($participationId)),
+            'event' => $this->eventFacts($event),
+        ]);
+        $this->queue->enqueue($mail + ['event_id' => (int) $event['id'], 'participation_id' => $participationId, 'batch_id' => $batchId, 'created_by' => $adminId]);
+        $this->db->update('participations', ['invited_at' => Database::now()], ['id' => $participationId]);
+
+        return true;
+    }
+
+    /**
+     * Invites everyone of the event who was not invited yet, as one send wave.
+     *
+     * @return array{batch_id: int, count: int}|null
+     */
+    public function inviteAll(array $event, ?int $adminId): ?array
+    {
+        $ids = array_map('intval', array_column(
+            $this->db->all('SELECT id FROM participations WHERE event_id = ? AND invited_at IS NULL ORDER BY id', [(int) $event['id']]),
+            'id',
+        ));
+
+        return $this->inviteMany($event, $ids, $adminId);
+    }
+
+    /**
+     * @param list<int> $participationIds
+     * @return array{batch_id: int, count: int}|null
+     */
+    public function inviteMany(array $event, array $participationIds, ?int $adminId): ?array
+    {
+        if ($participationIds === [] || $event['status'] !== 'collecting' || !$this->mail->isConfigured()) {
+            return null;
+        }
+
+        return $this->db->transaction(function () use ($event, $participationIds, $adminId): array {
+            $batchId = $this->queue->createBatch((int) $event['id'], 'invite', $adminId);
+            $count = 0;
+            foreach ($participationIds as $id) {
+                if ($this->queueInvite($event, $id, $batchId, $adminId)) {
+                    $count++;
+                }
+            }
+            $this->queue->setBatchTotal($batchId, $count);
+
+            return ['batch_id' => $batchId, 'count' => $count];
+        });
+    }
+
+    /** New magic link plus mail to the participant (ML-03). */
+    public function regenerateAndSend(array $event, int $participationId, ?int $adminId): bool
+    {
+        $p = $this->participation($participationId);
+        if ($p === null || !$this->mail->isConfigured()) {
+            return false;
+        }
+
+        return $this->db->transaction(function () use ($event, $p, $participationId, $adminId): bool {
+            $token = $this->regenerateMagicToken($participationId);
+            $brand = $this->branding->forEvent($event);
+            $mail = $this->composer->build('new_link', (string) $p['email'], $p['first_name'] . ' ' . $p['last_name'],
+                $this->translator->t('mail.new_link.subject', ['event' => $event['name']]), $brand, [
+                    'first_name' => $p['first_name'],
+                    'magic_url' => $this->mail->url('/t/' . $token),
+                    'event' => $this->eventFacts($event),
+                ]);
+            $this->queue->enqueue($mail + ['event_id' => (int) $event['id'], 'participation_id' => $participationId, 'created_by' => $adminId]);
+
+            return true;
+        });
+    }
+
+    /**
+     * «Link verloren» (ML-02, ML-04): one mail with the links of all open participations
+     * of this address, siblings included. The same links as before are sent (A4).
+     * Returns the number of links; the caller must not reveal it.
+     */
+    public function queueLostLinks(string $email): int
+    {
+        $rows = $this->openParticipationsByEmail($email);
+        if ($rows === [] || !$this->mail->isConfigured()) {
+            return 0;
+        }
+        $links = [];
+        foreach ($rows as $p) {
+            $links[] = [
+                'first_name' => $p['first_name'],
+                'last_name' => $p['last_name'],
+                'event_name' => $p['event_name'],
+                'event_date' => $this->formatter->date($p['event_date']),
+                'magic_url' => $this->mail->url('/t/' . $this->magicToken((int) $p['id'])),
+            ];
+        }
+        $brand = $this->branding->club();
+        $names = implode(', ', array_unique(array_column($links, 'first_name')));
+        $mail = $this->composer->build('links', mb_strtolower(trim($email)), $names,
+            $this->translator->t('mail.links.subject', ['club' => $brand['club_name']]), $brand, [
+                'links' => $links,
+                'names' => $names,
+            ]);
+        $this->queue->enqueue($mail);
+
+        return count($links);
+    }
+
+    /** @return array<string, string> */
+    private function eventFacts(array $event): array
+    {
+        return [
+            'name' => (string) $event['name'],
+            'date' => $this->formatter->date($event['event_date']),
+            'location' => (string) ($event['location'] ?? ''),
+            'purpose' => (string) ($event['texts']['purpose'] ?? ''),
+        ];
+    }
+
+    private static function wellFormed(string $token, int $length): bool
+    {
+        return strlen($token) === $length && preg_match('/^[A-Za-z0-9_-]+$/', $token) === 1;
+    }
+
+    private const SELECT = 'SELECT pa.*, p.first_name, p.last_name, p.email,
+            e.name AS event_name, e.status AS event_status, e.archived_at AS event_archived_at, e.event_date
+        FROM participations pa
+        JOIN participants p ON p.id = pa.participant_id
+        JOIN events e ON e.id = pa.event_id';
+}

@@ -23,6 +23,7 @@
     {key: 'overview', path: '', label: t('events.tab.overview')},
     {key: 'participants', path: '/participants', label: t('events.tab.participants')},
     {key: 'teams', path: '/teams', label: t('events.tab.teams')},
+    {key: 'mails', path: '/mails', label: t('events.tab.mails')},
   ] %}
   {% if perm.edit %}{% set tabs = tabs|merge([{key: 'settings', path: '/settings', label: t('events.tab.settings')}]) %}{% endif %}
   {% for tab in tabs %}

@@ -64,6 +64,9 @@ final class Branding
             'welcome' => (string) ($texts['welcome'] ?? ''),
             'purpose' => (string) ($texts['purpose'] ?? ''),
             'mail_footer' => (string) ($texts['mail_footer'] ?? ''),
+            'invite_subject' => (string) ($texts['invite_subject'] ?? ''),
+            'invite_intro' => (string) ($texts['invite_intro'] ?? ''),
+            'event_id' => (string) ($event['id'] ?? ''),
             'privacy_url' => $club['privacy_url'],
             'imprint_url' => $club['imprint_url'],
         ];

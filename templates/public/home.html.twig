@@ -1,0 +1,33 @@
+{% extends 'layout/public.html.twig' %}
+
+{% block title %}{{ t('public.home.title') }}{% endblock %}
+
+{% block content %}
+  <h1 class="pub-title">{{ t('public.home.title') }}</h1>
+  <p class="lead">{{ t('public.home.intro') }}</p>
+
+  {% if has_access %}
+    <p><a href="{{ url('/me') }}" class="btn btn--primary btn--block">{{ t('public.home.to_my_page') }}</a></p>
+  {% endif %}
+
+  <section class="card stack" aria-labelledby="lost-title">
+    <h2 class="h2" id="lost-title">{{ t('public.home.lost_title') }}</h2>
+    <p>{{ t('public.home.lost_text') }}</p>
+    <form method="post" action="{{ url('/link') }}" class="stack" novalidate>
+      {{ csrf_field() }}
+      <div class="field{{ error ? ' field--error' }}">
+        <label for="f-email">{{ t('public.home.email') }}</label>
+        <input id="f-email" name="email" type="email" value="{{ email }}" autocomplete="email" inputmode="email" required maxlength="190"{% if error %} aria-invalid="true" aria-describedby="e-email"{% endif %}>
+        {% if error %}<p class="field__error" id="e-email">{{ t(error) }}</p>{% endif %}
+      </div>
+      <div class="hp" aria-hidden="true">
+        <label for="f-website">Website</label>
+        <input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off">
+      </div>
+      <button type="submit" class="btn btn--primary btn--block">{{ t('public.home.send_links') }}</button>
+    </form>
+    <p class="muted small">{{ t('public.home.siblings_hint') }}</p>
+  </section>
+{% endblock %}
+
+{% block footer_extra %}<p><a href="{{ url('/admin') }}" class="muted">{{ t('public.footer.admin') }}</a></p>{% endblock %}

@@ -16,6 +16,12 @@
       <div class="notice notice--info">{{ t('participants.list_closed') }}</div>
     {% endif %}
   {% endif %}
+  {% if event.status == 'collecting' and uninvited > 0 %}
+    <div class="notice notice--warning">
+      {{ t('mails.invite.pending', {count: uninvited}) }}
+      <a href="{{ url('/admin/events/' ~ event.id ~ '/mails') }}">{{ perm.mail ? t('mails.invite.go_send') : t('mails.invite.go_view') }}</a>
+    </div>
+  {% endif %}
 
   <form method="get" action="{{ url('/admin/events/' ~ event.id ~ '/participants') }}" class="filter-bar" role="search">
     <div class="field">
@@ -54,6 +60,7 @@
             <th scope="col">{{ t('participants.name') }}</th>
             <th scope="col">{{ t('participants.email') }}</th>
             <th scope="col">{{ t('participants.team') }}</th>
+            <th scope="col">{{ t('participants.access.invitation') }}</th>
             <th scope="col" class="num">{{ t('participants.pledges') }}</th>
           </tr>
         </thead>
@@ -63,6 +70,7 @@
               <td><a href="{{ url('/admin/events/' ~ event.id ~ '/participants/' ~ r.participation_id) }}"><strong>{{ r.first_name }} {{ r.last_name }}</strong></a></td>
               <td class="break">{{ r.email }}</td>
               <td>{{ r.team_name ?? '–' }}</td>
+              <td>{% include 'admin/events/participants/_invite_state.html.twig' with {inv: invites[r.participation_id] ?? null, invited_at: r.invited_at} %}</td>
               <td class="num">{{ r.pledge_count }}</td>
             </tr>
           {% endfor %}

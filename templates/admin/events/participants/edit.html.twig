@@ -34,6 +34,38 @@
     {% endif %}
   </section>
 
+  <section class="card stack form-narrow" aria-labelledby="access-title">
+    <h2 class="h2" id="access-title">{{ t('participants.access.title') }}</h2>
+    <p class="muted">{{ t('participants.access.help') }}</p>
+    <dl class="facts">
+      <div><dt>{{ t('participants.access.invitation') }}</dt><dd>{% include 'admin/events/participants/_invite_state.html.twig' with {inv: invite, invited_at: p.invited_at} %}</dd></div>
+      <div><dt>{{ t('participants.access.link_issued') }}</dt><dd>{{ p.magic_token_issued_at ? p.magic_token_issued_at|datetime : t('participants.access.no_link') }}</dd></div>
+    </dl>
+    {% if invite and invite.status == 'failed' and invite.last_error %}<p class="field__error small">{{ invite.last_error|split(':')|first|t }}</p>{% endif %}
+    {% if perm.mail %}
+      {% if not mail_configured %}
+        <p class="notice notice--warning">{{ t('mails.not_configured') }}</p>
+      {% endif %}
+      <div class="button-row">
+        {% if event.status == 'collecting' %}
+          <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/participants/' ~ p.id ~ '/invite') }}">
+            {{ csrf_field() }}
+            <button type="submit" class="btn btn--secondary"{{ mail_configured ? '' : ' disabled' }}>{{ p.invited_at ? t('participants.access.resend') : t('participants.access.send') }}</button>
+          </form>
+        {% endif %}
+        {% if event.status in ['collecting', 'run_done', 'billing'] and p.magic_token_issued_at %}
+          <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/participants/' ~ p.id ~ '/link') }}" data-confirm="{{ t('participants.access.renew_confirm', {name: p.first_name}) }}">
+            {{ csrf_field() }}
+            <button type="submit" class="btn btn--secondary"{{ mail_configured ? '' : ' disabled' }}>{{ t('participants.access.renew') }}</button>
+          </form>
+        {% endif %}
+      </div>
+      <p class="muted small">{{ t('participants.access.renew_help') }}</p>
+    {% else %}
+      <p class="muted small">{{ t('mails.only_event_admin') }}</p>
+    {% endif %}
+  </section>
+
   {% if perm.participants %}
     <section class="card stack form-narrow" aria-labelledby="remove-title">
       <h2 class="h2" id="remove-title">{{ t('participants.remove_title') }}</h2>

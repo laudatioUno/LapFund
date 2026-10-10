@@ -13,10 +13,17 @@ use LapFund\Http\Router;
 use LapFund\Http\Session;
 use LapFund\I18n\Formatter;
 use LapFund\I18n\Translator;
+use LapFund\Mail\MailComposer;
+use LapFund\Mail\MailQueue;
+use LapFund\Mail\MailSettings;
+use LapFund\Mail\MailTransport;
+use LapFund\Mail\MailWorker;
+use LapFund\Mail\SmtpTransport;
 use LapFund\Repository\AdminUserRepository;
 use LapFund\Repository\AuditLog;
 use LapFund\Repository\EventRepository;
 use LapFund\Repository\ParticipantRepository;
+use LapFund\Repository\PledgeRepository;
 use LapFund\Repository\TeamRepository;
 use LapFund\Repository\SettingsRepository;
 use LapFund\Security\Auth;
@@ -27,6 +34,7 @@ use LapFund\Security\Totp;
 use LapFund\Service\AdminInvites;
 use LapFund\Service\Branding;
 use LapFund\Service\ImageUpload;
+use LapFund\Service\ParticipantAccess;
 use LapFund\Service\ParticipantService;
 use LapFund\View\View;
 
@@ -35,7 +43,7 @@ use LapFund\View\View;
  */
 final class App
 {
-    public const VERSION = '0.2.0';
+    public const VERSION = '0.3.0';
 
     public Config $config;
     public readonly Translator $translator;
@@ -65,6 +73,33 @@ final class App
     public function run(): void
     {
         $this->handle(Request::fromGlobals())->send();
+        $this->sendMailsAfterResponse();
+    }
+
+    /**
+     * Fallback without cron (NF-03): after the response has been delivered, send due
+     * mails, at most once a minute. Needs PHP-FPM (fastcgi_finish_request), as on
+     * most shared hosting; with cron set up this only finds an empty queue.
+     */
+    private function sendMailsAfterResponse(): void
+    {
+        if (!function_exists('fastcgi_finish_request') || !$this->config->isInstalled()) {
+            return;
+        }
+        try {
+            $settings = $this->settings();
+            $last = (int) $settings->get('mail_last_web_run', '0');
+            if (time() - $last < 60 || !$this->mailQueue()->hasDue() || $this->migrator()->pending() !== []) {
+                return;
+            }
+            $settings->set('mail_last_web_run', (string) time());
+            fastcgi_finish_request();
+            ignore_user_abort(true);
+            @set_time_limit(60);
+            $this->mailWorker()->run(50, 40);
+        } catch (\Throwable $e) {
+            $this->logError($e);
+        }
     }
 
     public function handle(Request $request): Response
@@ -174,9 +209,77 @@ final class App
         return $this->service(ParticipantRepository::class, fn () => new ParticipantRepository($this->db()));
     }
 
+    public function pledges(): PledgeRepository
+    {
+        return $this->service(PledgeRepository::class, fn () => new PledgeRepository($this->db()));
+    }
+
+    public function participantSession(): \LapFund\Security\ParticipantSession
+    {
+        return $this->service(\LapFund\Security\ParticipantSession::class, fn () => new \LapFund\Security\ParticipantSession($this->session, $this->access()));
+    }
+
     public function participantService(): ParticipantService
     {
         return $this->service(ParticipantService::class, fn () => new ParticipantService($this->db(), $this->participants(), $this->teams()));
+    }
+
+    public function mailSettings(): MailSettings
+    {
+        return $this->service(MailSettings::class, fn () => new MailSettings($this->settings(), (string) $this->config->get('app.cron_secret', '')));
+    }
+
+    public function mailQueue(): MailQueue
+    {
+        return $this->service(MailQueue::class, fn () => new MailQueue($this->db()));
+    }
+
+    public function mailComposer(): MailComposer
+    {
+        return $this->service(MailComposer::class, fn () => new MailComposer($this->view(), $this->translator, $this->mailSettings()));
+    }
+
+    public function mailTransport(): MailTransport
+    {
+        return $this->service(MailTransport::class, fn () => new SmtpTransport($this->mailSettings()));
+    }
+
+    /** For tests: replaces SMTP with another transport. */
+    public function useMailTransport(MailTransport $transport): void
+    {
+        $this->services[MailTransport::class] = $transport;
+        unset($this->services[MailWorker::class]);
+    }
+
+    public function mailWorker(): MailWorker
+    {
+        return $this->service(MailWorker::class, fn () => new MailWorker(
+            $this->db(),
+            $this->mailQueue(),
+            $this->mailSettings(),
+            $this->mailTransport(),
+            $this->root . '/storage/uploads',
+        ));
+    }
+
+    public function access(): ParticipantAccess
+    {
+        return $this->service(ParticipantAccess::class, fn () => new ParticipantAccess(
+            $this->db(),
+            $this->crypto(),
+            $this->events(),
+            $this->mailQueue(),
+            $this->mailComposer(),
+            $this->mailSettings(),
+            $this->branding(),
+            $this->translator,
+            $this->formatter,
+        ));
+    }
+
+    public function rateLimiter(): RateLimiter
+    {
+        return $this->service(RateLimiter::class, fn () => new RateLimiter($this->db()));
     }
 
     public function invites(): AdminInvites

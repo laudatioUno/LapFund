@@ -1,0 +1,53 @@
+{# Fields of a pledge. Needs: input, errors, methods, quick, event; for_participant (bool) #}
+<fieldset class="fieldset">
+  <legend>{{ t('pledge.field.type') }}</legend>
+  <div class="segmented" role="radiogroup">
+    {% for type in ['flat', 'per_lap'] %}
+      <label class="segmented__option">
+        <input type="radio" name="type" value="{{ type }}"{{ input.type == type ? ' checked' }} data-pledge-type>
+        <span><strong>{{ t('pledge.type.' ~ type) }}</strong><br><span class="small">{{ t('pledge.type_help.' ~ type) }}</span></span>
+      </label>
+    {% endfor %}
+  </div>
+  {% if errors.type is defined %}<p class="field__error">{{ t(errors.type) }}</p>{% endif %}
+</fieldset>
+
+<div class="field{{ errors.amount is defined ? ' field--error' }}">
+  <label for="f-amount">{{ t('pledge.field.amount') }} <span class="muted" data-amount-hint="flat"{{ input.type == 'per_lap' ? ' hidden' }}>{{ t('pledge.amount_hint.flat') }}</span><span class="muted" data-amount-hint="per_lap"{{ input.type != 'per_lap' ? ' hidden' }}>{{ t('pledge.amount_hint.per_lap', {m: event.lap_length_m ?: '–'}) }}</span></label>
+  <div class="amount-row">
+    <span class="amount-row__currency" aria-hidden="true">CHF</span>
+    <input id="f-amount" name="amount" type="text" inputmode="decimal" autocomplete="off" value="{{ input.amount }}" required maxlength="12"
+      {%- if errors.amount is defined %} aria-invalid="true" aria-describedby="e-amount"{% endif %}>
+  </div>
+  <div class="quick" data-quick hidden>
+    {% for type, values in quick %}
+      {% for v in values %}<button type="button" class="chip-btn" data-quick-type="{{ type }}" data-quick-value="{{ v }}">{{ v }}.–</button>{% endfor %}
+    {% endfor %}
+  </div>
+  {% if errors.amount is defined %}<p class="field__error" id="e-amount">{{ t(errors.amount) }}</p>{% endif %}
+</div>
+
+<fieldset class="fieldset">
+  <legend>{{ t('pledge.field.method') }}</legend>
+  <div class="segmented">
+    {% for m in methods %}
+      <label class="segmented__option">
+        <input type="radio" name="method" value="{{ m }}"{{ input.method == m or methods|length == 1 ? ' checked' }}>
+        <span><strong>{{ t('pledge.method.' ~ m) }}</strong><br><span class="small">{{ for_participant ? t('pledge.method_help_participant.' ~ m) : t('pledge.method_help.' ~ m, {name: p.first_name}) }}</span></span>
+      </label>
+    {% endfor %}
+  </div>
+  {% if errors.method is defined %}<p class="field__error">{{ t(errors.method) }}</p>{% endif %}
+</fieldset>
+
+<div class="field{{ errors.name is defined ? ' field--error' }}">
+  <label for="f-name">{{ for_participant ? t('pledge.field.sponsor_name') : t('pledge.field.name') }}</label>
+  <input id="f-name" name="name" type="text" value="{{ input.name }}" required maxlength="120" autocomplete="{{ for_participant ? 'off' : 'name' }}"{% if errors.name is defined %} aria-invalid="true" aria-describedby="e-name"{% endif %}>
+  {% if errors.name is defined %}<p class="field__error" id="e-name">{{ t(errors.name) }}</p>{% endif %}
+</div>
+<div class="field{{ errors.email is defined ? ' field--error' }}">
+  <label for="f-email">{{ for_participant ? t('pledge.field.sponsor_email') : t('pledge.field.email') }}</label>
+  <input id="f-email" name="email" type="email" value="{{ input.email }}" required maxlength="190" inputmode="email" autocomplete="{{ for_participant ? 'off' : 'email' }}" aria-describedby="{{ errors.email is defined ? 'e-email' : 'h-email' }}"{% if errors.email is defined %} aria-invalid="true"{% endif %}>
+  {% if errors.email is defined %}<p class="field__error" id="e-email">{{ t(errors.email) }}</p>
+  {% else %}<p class="field__help" id="h-email">{{ for_participant ? t('pledge.field.sponsor_email_help') : t('pledge.field.email_help') }}</p>{% endif %}
+</div>

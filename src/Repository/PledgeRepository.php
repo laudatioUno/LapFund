@@ -20,7 +20,7 @@ final class PledgeRepository
     public function forParticipation(int $participationId): array
     {
         return $this->db->all(
-            "SELECT id, type, amount_cents, payment_method, sponsor_name, status, created_at
+            "SELECT id, type, amount_cents, payment_method, sponsor_name, sponsor_message, source, status, created_at, cash_received_at, paid_at
              FROM pledges WHERE participation_id = ? AND status <> 'cancelled' ORDER BY created_at DESC, id DESC",
             [$participationId],
         );

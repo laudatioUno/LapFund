@@ -2,7 +2,7 @@
 
 **LapFund** is a self-hosted web tool for sponsored runs ("Sponsorenlauf"): participants share a personal link, sponsors pledge online – a fixed amount or an amount per lap – and the club records laps and keeps track of payments. Made for clubs that want to replace paper lists without paying platform fees.
 
-> Status: **stage 3 of 6**. Installer, admin login with two-factor authentication, admin accounts, club branding, events, teams, participants, mail sending, invitations with personal links and the participant page work. Sponsor pledges, laps and payments follow in the next stages.
+> Status: **stage 4 of 6**. Installer, admin login with two-factor authentication, admin accounts, club branding, events, teams, participants, mail sending, invitations with personal links, the participant page and sponsor pledges work. Laps, billing and reports follow in the next stages.
 
 ## Features
 
@@ -32,9 +32,17 @@ Stage 3 – mail and participant access
 - «Link lost» on the start page: one mail with the links of all participations of an address (siblings included), with the same answer for known and unknown addresses
 - The event admin can issue a new link for a participant; the old one stops working at once
 
+Stage 4 – sponsors
+- Sponsor page behind the personal sponsor link: pledge a fixed amount or an amount per lap, pay by Twint or cash, with consent and spam protection
+- Payment page: Twint QR code of the event, amount and the message to enter (participant / sponsor), or the cash note; payment details by mail on request
+- Confirmation mail to the sponsor with the payment details
+- Participants enter pledges themselves (e.g. from the paper list) and tick cash payments as received
+- Sponsor list as PDF for printing, with a QR code to the sponsor link
+- Entry deadline per event; after the run no new pledges
+
 ## Requirements
 
-- PHP **8.3 or newer** with `pdo_mysql`, `sodium`, `gd`, `mbstring`, `openssl`
+- PHP **8.3 or newer** with `pdo_mysql`, `sodium`, `gd`, `mbstring`, `openssl`, `dom`, `iconv`
 - An SMTP account for sending mails (a no-reply address of the club, the hosting provider's mail server or a mail service)
 - MySQL 8.0+ or MariaDB 10.6+ (an empty database)
 - HTTPS

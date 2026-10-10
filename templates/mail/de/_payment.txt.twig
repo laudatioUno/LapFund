@@ -1,0 +1,15 @@
+{{ t('mail.pledge.for') }}: {{ participant }}
+{{ t('mail.pledge.kind') }}: {{ t('pledge.type.' ~ pledge.type) }}
+{{ t('mail.pledge.amount') }}: {{ amount }}{% if pledge.type == 'per_lap' %} {{ t('pledge.per_lap_short') }}{% endif %}
+
+{{ t('mail.pledge.method') }}: {{ t('pledge.method.' ~ pledge.payment_method) }}
+
+{% if pledge.type == 'per_lap' %}{{ t('mail.pledge.per_lap_text') }}
+{% elseif twint %}{{ t('mail.pledge.twint_title') }}
+{{ t('mail.pledge.twint_text', {amount: amount}) }}
+{{ twint_message }}
+{% else %}{{ t('mail.pledge.cash_text', {name: pledge.first_name, amount: amount}) }}
+{% endif %}
+
+{{ t('mail.pledge.button') }}:
+{{ payment_url }}

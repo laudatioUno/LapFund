@@ -78,4 +78,8 @@ return [
     'invite.soon_text' => 'Das Formular für Zusagen wird gerade fertiggestellt. Schau in ein paar Tagen wieder über diesen Link vorbei.',
     'invite.closed_title' => 'Keine Zusagen mehr möglich',
     'invite.closed_text' => 'Für diesen Sponsorenlauf können keine neuen Zusagen mehr erfasst werden. Danke für dein Interesse!',
+    'me.add_pledge' => '+ Erfassen',
+    'me.cash_received' => 'Bargeld erhalten',
+    'me.entered_by_you' => 'von dir erfasst',
+    'me.pdf' => 'Sponsorenliste zum Ausdrucken (PDF)',
 ];

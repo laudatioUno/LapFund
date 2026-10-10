@@ -1,0 +1,27 @@
+{% extends 'layout/public.html.twig' %}
+{% import 'partials/macros.html.twig' as m %}
+
+{% block title %}{{ t('pledge.participant.title') }}{% endblock %}
+
+{% block content %}
+  <p><a href="{{ url('/me') }}">← {{ t('pledge.participant.back') }}</a></p>
+  <h1 class="pub-title">{{ t('pledge.participant.title') }}</h1>
+  <p class="lead">{{ t('pledge.participant.intro') }}</p>
+  <form method="post" action="{{ url('/me/pledges/new') }}" class="card stack" novalidate>
+    {{ csrf_field() }}
+    {% if errors is not empty %}<div class="notice notice--error" role="alert">{{ t('events.form_has_errors') }}</div>{% endif %}
+    {% include 'public/_pledge_fields.html.twig' with {for_participant: true} %}
+    <div class="field{{ errors.consent is defined ? ' field--error' }}">
+      <label class="inline-check inline-check--top">
+        <input type="checkbox" name="consent" value="1"{{ input.consent ?? false ? ' checked' }}>
+        <span>{{ t('pledge.participant.consent') }}</span>
+      </label>
+      {% if errors.consent is defined %}<p class="field__error">{{ t(errors.consent) }}</p>{% endif %}
+    </div>
+    <div class="button-row">
+      <button type="submit" class="btn btn--primary">{{ t('pledge.participant.save') }}</button>
+      <button type="submit" name="again" value="1" class="btn btn--secondary">{{ t('pledge.participant.save_next') }}</button>
+    </div>
+    <p class="muted small">{{ t('pledge.participant.mail_hint') }}</p>
+  </form>
+{% endblock %}

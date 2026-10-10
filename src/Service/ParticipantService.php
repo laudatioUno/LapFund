@@ -75,20 +75,21 @@ final class ParticipantService
      * Applies a classified import: creates missing persons and teams and adds everyone to the event.
      *
      * @param list<array<string, mixed>> $rows
-     * @return int number of participants added
+     * @return list<int> ids of the new participations
      */
-    public function applyImport(int $eventId, array $rows): int
+    public function applyImport(int $eventId, array $rows): array
     {
-        return $this->db->transaction(function () use ($eventId, $rows): int {
-            $added = 0;
+        return $this->db->transaction(function () use ($eventId, $rows): array {
+            $added = [];
             foreach ($rows as $row) {
                 if (!in_array($row['status'] ?? '', ['new', 'existing'], true)) {
                     continue;
                 }
                 $person = $this->participants->findOrCreate($row['first_name'], $row['last_name'], $row['email']);
                 $teamId = $row['team'] !== '' ? $this->teams->findOrCreate($eventId, $row['team']) : null;
-                if ($this->participants->addToEvent($eventId, $person['id'], $teamId)) {
-                    $added++;
+                $id = $this->participants->addToEvent($eventId, $person['id'], $teamId);
+                if ($id !== null) {
+                    $added[] = $id;
                 }
             }
 
@@ -101,14 +102,14 @@ final class ParticipantService
      * same name are used or created in the target event.
      *
      * @param list<int> $participantIds
-     * @return int number of participants added
+     * @return list<int> ids of the new participations
      */
-    public function copyFromEvent(int $sourceEventId, int $targetEventId, array $participantIds, bool $keepTeams): int
+    public function copyFromEvent(int $sourceEventId, int $targetEventId, array $participantIds, bool $keepTeams): array
     {
         $wanted = array_flip($participantIds);
 
-        return $this->db->transaction(function () use ($sourceEventId, $targetEventId, $wanted, $keepTeams): int {
-            $added = 0;
+        return $this->db->transaction(function () use ($sourceEventId, $targetEventId, $wanted, $keepTeams): array {
+            $added = [];
             foreach ($this->participants->fromEvent($sourceEventId, $targetEventId) as $row) {
                 $id = (int) $row['participant_id'];
                 if (!isset($wanted[$id]) || (int) $row['already_in_target'] === 1) {
@@ -117,8 +118,9 @@ final class ParticipantService
                 $teamId = ($keepTeams && $row['team_name'] !== null)
                     ? $this->teams->findOrCreate($targetEventId, (string) $row['team_name'])
                     : null;
-                if ($this->participants->addToEvent($targetEventId, $id, $teamId)) {
-                    $added++;
+                $pid = $this->participants->addToEvent($targetEventId, $id, $teamId);
+                if ($pid !== null) {
+                    $added[] = $pid;
                 }
             }
 

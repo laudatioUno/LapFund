@@ -1,0 +1,12 @@
+{# Invitation state of one participation. Needs: inv (last invite mail or null), invited_at #}
+{% if inv is null %}
+  <span class="muted small">{{ invited_at ? t('participants.access.state.invited', {date: invited_at|datetime}) : t('participants.access.state.none') }}</span>
+{% elseif inv.status == 'sent' %}
+  <span class="badge badge--mail-sent">{{ t('participants.access.state.sent') }}</span> <span class="muted small">{{ inv.sent_at|date_ch }}</span>
+{% elseif inv.status == 'failed' %}
+  <span class="badge badge--mail-failed">{{ t('mail.status.failed') }}</span>
+{% elseif inv.status == 'cancelled' %}
+  <span class="badge badge--mail-cancelled">{{ t('mail.status.cancelled') }}</span>
+{% else %}
+  <span class="badge badge--mail-queued">{{ t('mail.status.queued') }}</span>
+{% endif %}

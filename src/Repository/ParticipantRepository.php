@@ -149,20 +149,19 @@ final class ParticipantRepository
         );
     }
 
-    /** Adds a person to an event. Returns false if already in it. */
-    public function addToEvent(int $eventId, int $participantId, ?int $teamId): bool
+    /** Adds a person to an event. Returns the new participation id, or null if already in it. */
+    public function addToEvent(int $eventId, int $participantId, ?int $teamId): ?int
     {
         if ($this->isInEvent($eventId, $participantId)) {
-            return false;
+            return null;
         }
-        $this->db->insert('participations', [
+
+        return $this->db->insert('participations', [
             'event_id' => $eventId,
             'participant_id' => $participantId,
             'team_id' => $teamId,
             'created_at' => Database::now(),
         ]);
-
-        return true;
     }
 
     public function setTeam(int $participationId, ?int $teamId): void

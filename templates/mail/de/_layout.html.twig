@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ subject }}</title>
+</head>
+<body style="margin:0;padding:0;background:#F3F6F9;font-family:Arial,Helvetica,sans-serif;color:#14212E;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3F6F9;">
+<tr><td align="center" style="padding:24px 12px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#FFFFFF;border-radius:12px;">
+<tr><td style="padding:20px 24px;border-bottom:4px solid {{ brand.primary_color }};">
+  <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+    {% if has_logo %}<td style="padding-right:12px;"><img src="cid:logo" width="48" height="48" alt="" style="display:block;width:48px;height:48px;object-fit:contain;"></td>{% endif %}
+    <td style="font-size:18px;font-weight:bold;line-height:1.2;">{{ brand.club_name }}{% if brand.event_name ?? '' %}<br><span style="font-size:14px;font-weight:normal;color:#586776;">{{ brand.event_name }}</span>{% endif %}</td>
+  </tr></table>
+</td></tr>
+<tr><td style="padding:24px;font-size:16px;line-height:1.5;">
+{% block content %}{% endblock %}
+</td></tr>
+<tr><td style="padding:16px 24px 24px;font-size:13px;line-height:1.5;color:#586776;border-top:1px solid #DCE3EA;">
+  {% if brand.mail_footer ?? '' %}<p style="margin:0 0 10px;">{{ brand.mail_footer|nl2br }}</p>{% endif %}
+  <p style="margin:0;">{{ t('mail.footer.no_reply') }}{% if brand.contact_email %} {{ t('mail.footer.contact') }} <a href="mailto:{{ brand.contact_email }}" style="color:#586776;">{{ brand.contact_email }}</a>{% endif %}</p>
+  {% if brand.privacy_url %}<p style="margin:10px 0 0;"><a href="{{ brand.privacy_url }}" style="color:#586776;">{{ t('mail.footer.privacy') }}</a></p>{% endif %}
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{% extends 'layout/public.html.twig' %}
+
+{% block title %}{{ event_name }}{% endblock %}
+
+{% block content %}
+  <section class="card stack">
+    <h1 class="h2">{{ t('public.not_open.title') }}</h1>
+    <p>{{ t('public.not_open.text', {event: event_name}) }}</p>
+  </section>
+{% endblock %}

@@ -1,0 +1,5 @@
+{% extends 'mail/de/_layout.html.twig' %}
+{% block content %}
+<p style="margin:0 0 16px;font-size:20px;font-weight:bold;">{{ t('mail.test.title') }}</p>
+<p style="margin:0 0 16px;">{{ t('mail.test.text', {name: admin_name}) }}</p>
+{% endblock %}

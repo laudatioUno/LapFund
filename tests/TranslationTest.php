@@ -21,10 +21,15 @@ final class TranslationTest extends TestCase
         'events.status_help.' => ['preparation', 'collecting', 'run_done', 'billing', 'closed'],
         'events.confirm_next.' => ['collecting', 'run_done', 'billing', 'closed'],
         'participants.import.status.' => ['new', 'existing', 'in_event', 'duplicate', 'invalid'],
+        'mail.settings.enc.' => ['ssl', 'starttls', 'none'],
+        'mail.status.' => ['queued', 'sending', 'sent', 'failed', 'cancelled'],
+        'mail.type.' => ['invite', 'new_link', 'links', 'test'],
+        'mail.error.' => ['not_configured_hint', 'connect_hint', 'auth_hint', 'tls_hint', 'recipient_hint', 'sender_hint', 'other_hint'],
+        'public.me.method.' => ['twint', 'cash'],
     ];
 
     /** Keys of config/config.php and permission names that look like translation keys. */
-    private const CONFIG_KEYS = ['app.timezone', 'app.locale', 'app.debug', 'app.key', 'events.list'];
+    private const CONFIG_KEYS = ['app.timezone', 'app.locale', 'app.debug', 'app.key', 'app.cron_secret', 'events.list', 'mail.manage'];
 
     public function testAllUsedKeysExist(): void
     {
@@ -77,7 +82,7 @@ final class TranslationTest extends TestCase
         $keys = [];
         $patterns = [
             "/\\bt\\(\\s*'([a-z0-9_]+\\.[a-z0-9_.]+)'/",
-            "/'((?:app|auth|admin|install|errors|validation|upload|events|participants)\\.[a-z0-9_.]+)'/",
+            "/'((?:app|auth|admin|install|errors|validation|upload|events|participants|mail|mails|public)\\.[a-z0-9_.]+)'/",
         ];
         $files = [...$this->phpFiles($root . '/src'), ...$this->phpFiles($root . '/templates', 'twig')];
         foreach (array_unique($files) as $file) {

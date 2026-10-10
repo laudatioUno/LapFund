@@ -131,4 +131,11 @@ return [
     'teams.renamed' => 'Team umbenannt in «{name}».',
     'teams.deleted' => 'Team «{name}» gelöscht.',
     'teams.name_taken' => 'Ein Team mit diesem Namen gibt es schon.',
+    'tab.mails' => 'Mails',
+    'section.invite_mail' => 'Einladungsmail',
+    'section.invite_mail_help' => 'Platzhalter: {vorname}, {event}, {verein}. Leer lassen für den Standardtext.',
+    'field.invite_subject' => 'Betreff',
+    'field.invite_subject_help' => 'Standard: {default}',
+    'field.invite_intro' => 'Einleitung',
+    'field.invite_intro_help' => 'Steht nach «Hallo Vorname». Standard: {default}',
 ];

@@ -124,4 +124,10 @@ return [
     'audit.action.participant_removed' => 'Teilnehmende entfernt',
     'audit.action.participants_imported' => 'CSV importiert',
     'audit.action.participants_copied' => 'Teilnehmende übernommen',
+    'audit.action.mail_settings_updated' => 'Mail-Einstellungen geändert',
+    'audit.action.test_mail_sent' => 'Testmail verschickt',
+    'audit.action.mails_retried' => 'Mails erneut versucht',
+    'audit.action.invitations_sent' => 'Einladungen verschickt',
+    'audit.action.invitation_sent' => 'Einladung verschickt',
+    'audit.action.magic_link_renewed' => 'Neuer Teilnehmer-Link erstellt',
 ];

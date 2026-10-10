@@ -1,0 +1,28 @@
+{% extends 'layout/admin.html.twig' %}
+
+{% block title %}{{ t('mail.log.title') }}{% endblock %}
+
+{% block content %}
+  <header class="page-head">
+    <div>
+      <a href="{{ url('/admin/mail') }}" class="back">← {{ t('app.nav.mail') }}</a>
+      <h1 class="h1">{{ t('mail.log.title') }}</h1>
+    </div>
+    {% if counts.failed > 0 %}
+      <form method="post" action="{{ url('/admin/mail/retry') }}">
+        {{ csrf_field() }}
+        <button type="submit" class="btn btn--secondary">{{ t('mail.log.retry', {count: counts.failed}) }}</button>
+      </form>
+    {% endif %}
+  </header>
+  <p class="muted">{{ t('mail.log.intro') }}</p>
+
+  <ul class="summary-chips" aria-label="{{ t('mail.log.status') }}">
+    <li><a href="{{ url('/admin/mail/log') }}" class="chip{{ status_filter == '' ? ' chip--active' }}">{{ t('mail.log.all') }}</a></li>
+    {% for st in ['queued', 'sent', 'failed', 'cancelled'] %}
+      <li><a href="{{ url('/admin/mail/log?status=' ~ st) }}" class="chip{{ status_filter == st ? ' chip--active' }}">{{ t('mail.status.' ~ st) }}: {{ st == 'queued' ? counts.queued + counts.sending : counts[st] }}</a></li>
+    {% endfor %}
+  </ul>
+
+  {% include 'admin/mail/_log_table.html.twig' with {rows: rows, show_event: true} %}
+{% endblock %}

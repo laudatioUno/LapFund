@@ -1,0 +1,5 @@
+{% extends 'mail/de/_layout.txt.twig' %}
+{% block content %}{{ t('mail.test.title') }}
+
+{{ t('mail.test.text', {name: admin_name}) }}
+{% endblock %}

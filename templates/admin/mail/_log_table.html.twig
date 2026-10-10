@@ -1,0 +1,30 @@
+{# Mail log table. Needs: rows, show_event (bool) #}
+<div class="table-wrap">
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">{{ t('mail.log.when') }}</th>
+        <th scope="col">{{ t('mail.log.type') }}</th>
+        <th scope="col">{{ t('mail.log.to') }}</th>
+        {% if show_event %}<th scope="col">{{ t('mail.log.event') }}</th>{% endif %}
+        <th scope="col">{{ t('mail.log.status') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+        <tr>
+          <td class="nowrap">{{ (r.sent_at ?? r.created_at)|datetime }}</td>
+          <td>{{ t('mail.type.' ~ r.type) }}</td>
+          <td class="break">{{ r.to_name ? r.to_name ~ ' · ' }}<span class="muted">{{ r.to_email }}</span></td>
+          {% if show_event %}<td>{{ r.event_name ?? '–' }}</td>{% endif %}
+          <td>
+            <span class="badge badge--mail-{{ r.status }}">{{ t('mail.status.' ~ r.status) }}</span>
+            {% if r.last_error and r.status != 'sent' %}<br><span class="small {{ r.status == 'failed' ? 'field__error' : 'muted' }}">{{ r.last_error|split(':')|first|t }}</span>{% endif %}
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="{{ show_event ? 5 : 4 }}" class="muted">{{ t('mail.log.empty') }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

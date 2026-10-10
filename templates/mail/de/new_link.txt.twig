@@ -1,0 +1,10 @@
+{% extends 'mail/de/_layout.txt.twig' %}
+{% block content %}{{ t('mail.hello', {name: first_name}) }}
+
+{{ t('mail.new_link.text', {event: event.name}) }}
+
+{{ t('mail.invite.button') }}:
+{{ magic_url }}
+
+{{ t('mail.invite.keep_link') }}
+{% endblock %}

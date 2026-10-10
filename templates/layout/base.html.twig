@@ -4,9 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
   <title>{% block title %}{{ brand.club_name }}{% endblock %} · LapFund</title>
   <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-  <link rel="stylesheet" href="{{ url('/theme.css') }}?c={{ brand.primary_color|trim('#') }}">
+  <link rel="stylesheet" href="{{ url('/theme.css') }}?c={{ brand.primary_color|trim('#') }}{% if theme_event is defined %}&amp;e={{ theme_event }}{% endif %}">
   <link rel="icon" href="{{ asset('img/favicon.svg') }}" type="image/svg+xml">
   <script src="{{ asset('js/app.js') }}" defer></script>
 </head>

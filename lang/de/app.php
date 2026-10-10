@@ -18,4 +18,5 @@ return [
     'cancel' => 'Abbrechen',
     'nav.events' => 'Events',
     'nav.pool' => 'Personen',
+    'nav.mail' => 'Mailversand',
 ];

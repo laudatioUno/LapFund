@@ -1,0 +1,28 @@
+{% extends 'layout/base.html.twig' %}
+{% import 'partials/macros.html.twig' as m %}
+
+{% block body_class %}page-public{% endblock %}
+
+{% block body %}
+<header class="pub-head">
+  <div class="pub-head__inner">
+    {% if brand.logo %}<img src="{{ url('/media/' ~ brand.logo) }}" alt="" class="pub-head__logo">{% endif %}
+    <div>
+      <div class="pub-head__club">{{ brand.club_name }}</div>
+      {% if brand.event_name is defined and brand.event_name %}<div class="pub-head__event">{{ brand.event_name }}</div>{% endif %}
+    </div>
+  </div>
+</header>
+<main class="pub-main" id="main">
+  {{ m.flashes(flashes) }}
+  {% block content %}{% endblock %}
+</main>
+<footer class="pub-foot">
+  {% block footer_extra %}{% endblock %}
+  {% if brand.contact_email %}<p>{{ t('public.footer.questions') }} <a href="mailto:{{ brand.contact_email }}">{{ brand.contact_email }}</a></p>{% endif %}
+  <p class="pub-foot__links">
+    {% if brand.privacy_url %}<a href="{{ brand.privacy_url }}" rel="noopener">{{ t('public.footer.privacy') }}</a>{% endif %}
+    {% if brand.imprint_url %}<a href="{{ brand.imprint_url }}" rel="noopener">{{ t('public.footer.imprint') }}</a>{% endif %}
+  </p>
+</footer>
+{% endblock %}

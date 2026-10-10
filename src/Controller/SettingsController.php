@@ -11,7 +11,7 @@ use LapFund\Validation;
 
 /**
  * Club data and look (PE-01, PE-04, PE-05, PE-07). Club admins only.
- * Mail settings follow in stage 3.
+ * Mail settings: MailController.
  */
 final class SettingsController extends Controller
 {

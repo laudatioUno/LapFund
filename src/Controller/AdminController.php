@@ -10,12 +10,6 @@ use LapFund\Http\Response;
 
 final class AdminController extends Controller
 {
-    /** Public start page; the participant "link lost" form follows in stage 3. */
-    public function home(Request $request, array $params): Response
-    {
-        return $this->redirect('/admin');
-    }
-
     public function dashboard(Request $request, array $params): Response
     {
         $user = $this->admin('dashboard.view');

@@ -1,0 +1,15 @@
+{% extends 'mail/de/_layout.txt.twig' %}
+{% block content %}{{ t('mail.hello', {name: first_name}) }}
+
+{{ intro }}
+{% if event.date or event.location %}
+{{ t('mail.invite.when_where', {date: event.date ?: '–', location: event.location ?: '–'}) }}
+{% endif %}
+
+{{ t('mail.invite.button') }}:
+{{ magic_url }}
+
+{{ t('mail.invite.what_you_find') }}
+
+{{ t('mail.invite.keep_link') }}
+{% endblock %}

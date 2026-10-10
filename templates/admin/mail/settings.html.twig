@@ -1,0 +1,108 @@
+{% extends 'layout/admin.html.twig' %}
+{% import 'partials/macros.html.twig' as m %}
+
+{% block title %}{{ t('app.nav.mail') }}{% endblock %}
+
+{% block content %}
+  <header class="page-head">
+    <h1 class="h1">{{ t('app.nav.mail') }}</h1>
+    <a href="{{ url('/admin/mail/log') }}" class="btn btn--secondary">{{ t('mail.log.title') }}</a>
+  </header>
+
+  {% if not configured %}
+    <div class="notice notice--warning">{{ t('mail.settings.not_configured') }}</div>
+  {% elseif counts.failed > 0 %}
+    <div class="notice notice--error">{{ t('mail.settings.has_failed', {count: counts.failed}) }} <a href="{{ url('/admin/mail/log?status=failed') }}">{{ t('mail.log.show_failed') }}</a></div>
+  {% endif %}
+
+  <form method="post" action="{{ url('/admin/mail') }}" class="stack" novalidate autocomplete="off">
+    {{ csrf_field() }}
+    {% if errors is not empty %}<div class="notice notice--error" role="alert">{{ t('events.form_has_errors') }}</div>{% endif %}
+
+    <section class="card stack" aria-labelledby="sender-title">
+      <h2 class="h2" id="sender-title">{{ t('mail.settings.sender') }}</h2>
+      <p class="muted">{{ t('mail.settings.sender_help') }}</p>
+      <div class="grid-2">
+        {{ m.field('from_email', t('mail.settings.from_email'), input.from_email, errors, 'email', {required: true, help: t('mail.settings.from_email_help')}) }}
+        {{ m.field('from_name', t('mail.settings.from_name'), input.from_name, errors, 'text', {required: true, maxlength: 120, help: t('mail.settings.from_name_help')}) }}
+      </div>
+      {{ m.field('app_url', t('mail.settings.app_url'), input.app_url, errors, 'url', {required: true, help: t('mail.settings.app_url_help')}) }}
+    </section>
+
+    <section class="card stack" aria-labelledby="smtp-title">
+      <h2 class="h2" id="smtp-title">{{ t('mail.settings.smtp') }}</h2>
+      <p class="muted">{{ t('mail.settings.smtp_help') }}</p>
+      <div class="grid-2">
+        {{ m.field('host', t('mail.settings.host'), input.host, errors, 'text', {required: true, maxlength: 190}) }}
+        <div class="grid-2 grid-2--tight">
+          {{ m.field('port', t('mail.settings.port'), input.port ~ '', errors, 'text', {required: true, inputmode: 'numeric'}) }}
+          <div class="field{{ errors.encryption is defined ? ' field--error' }}">
+            <label for="f-encryption">{{ t('mail.settings.encryption') }}</label>
+            <select id="f-encryption" name="encryption">
+              {% for enc in encryptions %}<option value="{{ enc }}"{{ input.encryption == enc ? ' selected' }}>{{ t('mail.settings.enc.' ~ enc) }}</option>{% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+      <p class="field__help">{{ t('mail.settings.port_help') }}</p>
+      <div class="grid-2">
+        {{ m.field('username', t('mail.settings.username'), input.username, errors, 'text', {optional: true, maxlength: 190, autocomplete: 'off'}) }}
+        <div class="field{{ errors.password is defined ? ' field--error' }}">
+          <label for="f-password">{{ t('mail.settings.password') }}</label>
+          <input id="f-password" name="password" type="password" autocomplete="new-password" aria-describedby="h-password" placeholder="{{ input.has_password ? t('mail.settings.password_stored') : '' }}">
+          <p class="field__help" id="h-password">{{ input.has_password ? t('mail.settings.password_keep') : t('mail.settings.password_help') }}</p>
+          {% if input.has_password %}<label class="inline-check small"><input type="checkbox" name="remove_password" value="1"> {{ t('mail.settings.password_remove') }}</label>{% endif %}
+        </div>
+      </div>
+    </section>
+
+    <section class="card stack" aria-labelledby="limit-title">
+      <h2 class="h2" id="limit-title">{{ t('mail.settings.limit') }}</h2>
+      <p class="muted">{{ t('mail.settings.limit_help') }}</p>
+      <div class="grid-2">
+        {{ m.field('per_minute', t('mail.settings.per_minute'), input.per_minute ~ '', errors, 'text', {required: true, inputmode: 'numeric'}) }}
+        {{ m.field('per_hour', t('mail.settings.per_hour'), input.per_hour ~ '', errors, 'text', {required: true, inputmode: 'numeric'}) }}
+      </div>
+    </section>
+
+    <div><button type="submit" class="btn btn--primary">{{ t('app.save') }}</button></div>
+  </form>
+
+  <section class="card stack" id="test" aria-labelledby="test-title">
+    <h2 class="h2" id="test-title">{{ t('mail.test.title_admin') }}</h2>
+    <p class="muted">{{ t('mail.test.help') }}</p>
+    {% if test_error %}
+      <div class="notice notice--error" role="alert">
+        <strong>{{ t(test_error.key) }}</strong>
+        <p class="small">{{ t(test_error.key ~ '_hint') }}</p>
+        {% if test_error.detail %}<details class="small"><summary>{{ t('mail.test.details') }}</summary><code class="debug">{{ test_error.detail }}</code></details>{% endif %}
+      </div>
+    {% endif %}
+    <form method="post" action="{{ url('/admin/mail/test') }}" class="copy-row copy-row--labelled" novalidate>
+      {{ csrf_field() }}
+      <div class="field filter-bar__grow">
+        <label for="f-test_to">{{ t('mail.test.to') }}</label>
+        <input id="f-test_to" name="test_to" type="email" value="{{ test_to }}" required>
+      </div>
+      <button type="submit" class="btn btn--secondary"{{ configured ? '' : ' disabled' }}>{{ t('mail.test.send') }}</button>
+    </form>
+  </section>
+
+  <section class="card stack" aria-labelledby="cron-title">
+    <h2 class="h2" id="cron-title">{{ t('mail.cron.title') }}</h2>
+    <p>{{ t('mail.cron.text') }}</p>
+    <ol class="steps">
+      <li>{{ t('mail.cron.option_cli') }}<br><code class="secret">* * * * * php {{ worker_path }}</code></li>
+      <li>{{ t('mail.cron.option_url') }}
+        {% if configured %}
+          <div class="copy-row">
+            <input id="cron-url" type="text" value="{{ cron_url }}" readonly class="input--mono">
+            <button type="button" class="btn btn--secondary" data-copy-target="cron-url" data-copied="{{ t('app.copied') }}">{{ t('app.copy') }}</button>
+          </div>
+          <p class="field__help">{{ t('mail.cron.url_secret') }}</p>
+        {% else %}<br><span class="muted">{{ t('mail.cron.url_after_setup') }}</span>{% endif %}
+      </li>
+    </ol>
+    <p class="muted small">{{ t('mail.cron.fallback') }}</p>
+  </section>
+{% endblock %}

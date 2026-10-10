@@ -14,6 +14,14 @@ final class AssetController extends Controller
     public function theme(Request $request, array $params): Response
     {
         $b = $this->app->branding()->club();
+        // Pages of an event use its own color (PE-02); ?e=<event id>
+        $eventId = $request->input('e');
+        if ($eventId !== '' && ctype_digit($eventId) && $this->app->config->isInstalled()) {
+            $event = $this->app->events()->find((int) $eventId);
+            if ($event !== null) {
+                $b = $this->app->branding()->forEvent($event);
+            }
+        }
         $css = ":root{--accent:{$b['primary_color']};--accent-dark:{$b['primary_dark']};--on-accent:{$b['on_primary']};}\n";
 
         return (new Response($css, 200, [

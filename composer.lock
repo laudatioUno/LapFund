@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "703b85104ef347bad588280ae8be101d",
+    "content-hash": "e6908c34701430c68fc2e23679d10337",
     "packages": [
         {
             "name": "chillerlan/php-qrcode",
@@ -57,6 +57,7 @@
                     "chillerlan\\QRCodeTest\\": "tests"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "scripts": {
                 "phan": [
                     "@php vendor/bin/phan"
@@ -130,8 +131,7 @@
                     "url": "https://ko-fi.com/codemasher"
                 }
             ],
-            "time": "2026-03-18T21:21:07+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2026-03-18T21:21:07+00:00"
         },
         {
             "name": "chillerlan/php-settings-container",
@@ -171,6 +171,7 @@
                     "chillerlan\\SettingsTest\\": "tests"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "scripts": {
                 "phan": [
                     "@php vendor/bin/phan"
@@ -214,8 +215,7 @@
                 "issues": "https://github.com/chillerlan/php-settings-container/issues",
                 "source": "https://github.com/chillerlan/php-settings-container"
             },
-            "time": "2026-03-20T21:10:52+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2026-03-20T21:10:52+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",
@@ -251,6 +251,7 @@
                     "ParagonIE\\ConstantTime\\Tests\\": "tests/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "scripts": {
                 "mutation-test": [
                     "infection"
@@ -293,8 +294,107 @@
                 "email": "info@paragonie.com",
                 "source": "https://github.com/paragonie/constant_time_encoding"
             },
-            "time": "2025-09-24T15:06:41+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2025-09-24T15:06:41+00:00"
+        },
+        {
+            "name": "phpmailer/phpmailer",
+            "version": "v7.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PHPMailer/PHPMailer.git",
+                "reference": "1bc1716a507a65e039d4ac9d9adebbbd0d346e15"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PHPMailer/PHPMailer/zipball/1bc1716a507a65e039d4ac9d9adebbbd0d346e15",
+                "reference": "1bc1716a507a65e039d4ac9d9adebbbd0d346e15",
+                "shasum": ""
+            },
+            "require": {
+                "ext-ctype": "*",
+                "ext-filter": "*",
+                "ext-hash": "*",
+                "php": ">=5.5.0"
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+                "doctrine/annotations": "^1.2.6 || ^1.13.3",
+                "php-parallel-lint/php-console-highlighter": "^1.0.0",
+                "php-parallel-lint/php-parallel-lint": "^1.3.2",
+                "phpcompatibility/php-compatibility": "^10.0.0@dev",
+                "squizlabs/php_codesniffer": "^3.13.5",
+                "yoast/phpunit-polyfills": "^1.0.4"
+            },
+            "suggest": {
+                "decomplexity/SendOauth2": "Adapter for using XOAUTH2 authentication",
+                "directorytree/imapengine": "For uploading sent messages via IMAP, see gmail example",
+                "ext-imap": "Needed to support advanced email address parsing according to RFC822",
+                "ext-mbstring": "Needed to send email in multibyte encoding charset or decode encoded addresses",
+                "ext-openssl": "Needed for secure SMTP sending and DKIM signing",
+                "greew/oauth2-azure-provider": "Needed for Microsoft Azure XOAUTH2 authentication",
+                "hayageek/oauth2-yahoo": "Needed for Yahoo XOAUTH2 authentication",
+                "league/oauth2-google": "Needed for Google XOAUTH2 authentication",
+                "psr/log": "For optional PSR-3 debug logging",
+                "symfony/polyfill-mbstring": "To support UTF-8 if the Mbstring PHP extension is not enabled (^1.2)",
+                "thenetworg/oauth2-azure": "Needed for Microsoft XOAUTH2 authentication"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "PHPMailer\\PHPMailer\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "PHPMailer\\Test\\": "test/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "scripts": {
+                "check": [
+                    "./vendor/bin/phpcs"
+                ],
+                "style": [
+                    "./vendor/bin/phpcbf"
+                ],
+                "test": [
+                    "./vendor/bin/phpunit --no-coverage"
+                ],
+                "coverage": [
+                    "./vendor/bin/phpunit"
+                ],
+                "lint": [
+                    "@php ./vendor/php-parallel-lint/php-parallel-lint/parallel-lint . --show-deprecated -e php,phps --exclude vendor --exclude .git --exclude build"
+                ]
+            },
+            "license": [
+                "LGPL-2.1-only"
+            ],
+            "authors": [
+                {
+                    "name": "Marcus Bointon",
+                    "email": "phpmailer@synchromedia.co.uk"
+                },
+                {
+                    "name": "Jim Jagielski",
+                    "email": "jimjag@gmail.com"
+                },
+                {
+                    "name": "Andy Prevost",
+                    "email": "codeworxtech@users.sourceforge.net"
+                },
+                {
+                    "name": "Brent R. Matzelle"
+                }
+            ],
+            "description": "PHPMailer is a full-featured email creation and transfer class for PHP",
+            "funding": [
+                {
+                    "url": "https://github.com/Synchro",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-05-18T08:06:14+00:00"
         },
         {
             "name": "psr/clock",
@@ -319,6 +419,7 @@
                     "Psr\\Clock\\": "src/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -337,8 +438,7 @@
                 "psr-20",
                 "time"
             ],
-            "time": "2022-11-25T14:36:26+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2022-11-25T14:36:26+00:00"
         },
         {
             "name": "spomky-labs/otphp",
@@ -374,6 +474,7 @@
                     "OTPHP\\Test\\": "tests/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -398,8 +499,7 @@
                 "otp",
                 "totp"
             ],
-            "time": "2026-06-06T23:41:24+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2026-06-06T23:41:24+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",
@@ -433,6 +533,7 @@
                     "function.php"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -448,8 +549,7 @@
             ],
             "description": "A generic function and convention to trigger deprecation notices",
             "homepage": "https://symfony.com",
-            "time": "2026-06-05T06:23:12+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2026-06-05T06:23:12+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",
@@ -489,6 +589,7 @@
                     "bootstrap.php"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -510,8 +611,7 @@
                 "polyfill",
                 "portable"
             ],
-            "time": "2026-04-10T15:47:36+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2026-04-10T15:47:36+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
@@ -552,6 +652,7 @@
                     "bootstrap.php"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -574,8 +675,7 @@
                 "portable",
                 "shim"
             ],
-            "time": "2026-09-24T15:19:04+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2026-09-24T15:19:04+00:00"
         },
         {
             "name": "twig/twig",
@@ -620,6 +720,7 @@
                     "Twig\\Tests\\": "tests/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -645,8 +746,7 @@
             "keywords": [
                 "templating"
             ],
-            "time": "2026-09-25T13:20:01+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2026-09-25T13:20:01+00:00"
         }
     ],
     "packages-dev": [
@@ -692,6 +792,7 @@
                     "DeepCopy\\": "fixtures/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -703,8 +804,7 @@
                 "object",
                 "object graph"
             ],
-            "time": "2026-08-11T10:17:44+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2026-08-11T10:17:44+00:00"
         },
         {
             "name": "nikic/php-parser",
@@ -748,6 +848,7 @@
                     "PhpParser\\": "test/PhpParser/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -761,8 +862,7 @@
                 "parser",
                 "php"
             ],
-            "time": "2026-09-13T18:51:52+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2026-09-13T18:51:52+00:00"
         },
         {
             "name": "phar-io/manifest",
@@ -797,6 +897,7 @@
                     "src/"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -821,8 +922,7 @@
             "support": {
                 "issues": "https://github.com/phar-io/manifest/issues"
             },
-            "time": "2024-03-03T12:33:53+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2024-03-03T12:33:53+00:00"
         },
         {
             "name": "phar-io/version",
@@ -847,6 +947,7 @@
                     "src/"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -871,8 +972,7 @@
             "support": {
                 "issues": "https://github.com/phar-io/version/issues"
             },
-            "time": "2022-02-21T01:04:05+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2022-02-21T01:04:05+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -926,6 +1026,7 @@
                     "tests/"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -947,8 +1048,7 @@
                 "issues": "https://github.com/sebastianbergmann/php-code-coverage/issues",
                 "security": "https://github.com/sebastianbergmann/php-code-coverage/security/policy"
             },
-            "time": "2025-12-24T07:01:01+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2025-12-24T07:01:01+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -981,6 +1081,7 @@
                     "src/"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -1001,8 +1102,7 @@
                 "issues": "https://github.com/sebastianbergmann/php-file-iterator/issues",
                 "security": "https://github.com/sebastianbergmann/php-file-iterator/security/policy"
             },
-            "time": "2026-02-02T13:52:54+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2026-02-02T13:52:54+00:00"
         },
         {
             "name": "phpunit/php-invoker",
@@ -1044,6 +1144,7 @@
                     "tests/_fixture/"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -1063,8 +1164,7 @@
                 "issues": "https://github.com/sebastianbergmann/php-invoker/issues",
                 "security": "https://github.com/sebastianbergmann/php-invoker/security/policy"
             },
-            "time": "2024-07-03T05:07:44+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2024-07-03T05:07:44+00:00"
         },
         {
             "name": "phpunit/php-text-template",
@@ -1097,6 +1197,7 @@
                     "src/"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -1116,8 +1217,7 @@
                 "issues": "https://github.com/sebastianbergmann/php-text-template/issues",
                 "security": "https://github.com/sebastianbergmann/php-text-template/security/policy"
             },
-            "time": "2024-07-03T05:08:43+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2024-07-03T05:08:43+00:00"
         },
         {
             "name": "phpunit/php-timer",
@@ -1150,6 +1250,7 @@
                     "src/"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -1169,8 +1270,7 @@
                 "issues": "https://github.com/sebastianbergmann/php-timer/issues",
                 "security": "https://github.com/sebastianbergmann/php-timer/security/policy"
             },
-            "time": "2024-07-03T05:09:35+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2024-07-03T05:09:35+00:00"
         },
         {
             "name": "phpunit/phpunit",
@@ -1279,6 +1379,7 @@
                     "tests/end-to-end/_files/listing-tests-and-groups/ExampleAbstractTestCase.php"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -1306,8 +1407,7 @@
                     "url": "https://phpunit.de/sponsoring.html"
                 }
             ],
-            "time": "2026-10-05T05:47:54+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2026-10-05T05:47:54+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -1340,6 +1440,7 @@
                     "src/"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -1356,8 +1457,7 @@
                 "issues": "https://github.com/sebastianbergmann/cli-parser/issues",
                 "security": "https://github.com/sebastianbergmann/cli-parser/security/policy"
             },
-            "time": "2024-07-03T04:41:05+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2024-07-03T04:41:05+00:00"
         },
         {
             "name": "sebastian/code-unit",
@@ -1400,6 +1500,7 @@
                     "tests/_fixture/issue_9.php"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -1416,8 +1517,7 @@
                 "issues": "https://github.com/sebastianbergmann/code-unit/issues",
                 "security": "https://github.com/sebastianbergmann/code-unit/security/policy"
             },
-            "time": "2025-03-19T07:56:08+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2025-03-19T07:56:08+00:00"
         },
         {
             "name": "sebastian/code-unit-reverse-lookup",
@@ -1450,6 +1550,7 @@
                     "src/"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -1465,8 +1566,7 @@
                 "issues": "https://github.com/sebastianbergmann/code-unit-reverse-lookup/issues",
                 "security": "https://github.com/sebastianbergmann/code-unit-reverse-lookup/security/policy"
             },
-            "time": "2024-07-03T04:45:54+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2024-07-03T04:45:54+00:00"
         },
         {
             "name": "sebastian/comparator",
@@ -1511,6 +1611,7 @@
                     "tests/_fixture"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -1543,8 +1644,7 @@
                 "issues": "https://github.com/sebastianbergmann/comparator/issues",
                 "security": "https://github.com/sebastianbergmann/comparator/security/policy"
             },
-            "time": "2026-01-24T09:26:40+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2026-01-24T09:26:40+00:00"
         },
         {
             "name": "sebastian/complexity",
@@ -1578,6 +1678,7 @@
                     "src/"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -1594,8 +1695,7 @@
                 "issues": "https://github.com/sebastianbergmann/complexity/issues",
                 "security": "https://github.com/sebastianbergmann/complexity/security/policy"
             },
-            "time": "2024-07-03T04:49:50+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2024-07-03T04:49:50+00:00"
         },
         {
             "name": "sebastian/diff",
@@ -1634,6 +1734,7 @@
                     "tests/"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -1659,8 +1760,7 @@
                 "issues": "https://github.com/sebastianbergmann/diff/issues",
                 "security": "https://github.com/sebastianbergmann/diff/security/policy"
             },
-            "time": "2024-07-03T04:53:05+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2024-07-03T04:53:05+00:00"
         },
         {
             "name": "sebastian/environment",
@@ -1696,6 +1796,7 @@
                     "src/"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -1716,8 +1817,7 @@
                 "issues": "https://github.com/sebastianbergmann/environment/issues",
                 "security": "https://github.com/sebastianbergmann/environment/security/policy"
             },
-            "time": "2025-05-21T11:55:47+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2025-05-21T11:55:47+00:00"
         },
         {
             "name": "sebastian/exporter",
@@ -1757,6 +1857,7 @@
                     "tests/_fixture"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -1792,8 +1893,7 @@
                 "issues": "https://github.com/sebastianbergmann/exporter/issues",
                 "security": "https://github.com/sebastianbergmann/exporter/security/policy"
             },
-            "time": "2025-09-24T06:12:51+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2025-09-24T06:12:51+00:00"
         },
         {
             "name": "sebastian/global-state",
@@ -1837,6 +1937,7 @@
                     "tests/_fixture/SnapshotFunctions.php"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -1855,8 +1956,7 @@
                 "issues": "https://github.com/sebastianbergmann/global-state/issues",
                 "security": "https://github.com/sebastianbergmann/global-state/security/policy"
             },
-            "time": "2024-07-03T04:57:36+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2024-07-03T04:57:36+00:00"
         },
         {
             "name": "sebastian/lines-of-code",
@@ -1890,6 +1990,7 @@
                     "src/"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -1906,8 +2007,7 @@
                 "issues": "https://github.com/sebastianbergmann/lines-of-code/issues",
                 "security": "https://github.com/sebastianbergmann/lines-of-code/security/policy"
             },
-            "time": "2024-07-03T04:58:38+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2024-07-03T04:58:38+00:00"
         },
         {
             "name": "sebastian/object-enumerator",
@@ -1947,6 +2047,7 @@
                     "tests/_fixture/"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -1962,8 +2063,7 @@
                 "issues": "https://github.com/sebastianbergmann/object-enumerator/issues",
                 "security": "https://github.com/sebastianbergmann/object-enumerator/security/policy"
             },
-            "time": "2024-07-03T05:00:13+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2024-07-03T05:00:13+00:00"
         },
         {
             "name": "sebastian/object-reflector",
@@ -2001,6 +2101,7 @@
                     "tests/_fixture/"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -2016,8 +2117,7 @@
                 "issues": "https://github.com/sebastianbergmann/object-reflector/issues",
                 "security": "https://github.com/sebastianbergmann/object-reflector/security/policy"
             },
-            "time": "2024-07-03T05:01:32+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2024-07-03T05:01:32+00:00"
         },
         {
             "name": "sebastian/recursion-context",
@@ -2050,6 +2150,7 @@
                     "src/"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -2073,8 +2174,7 @@
                 "issues": "https://github.com/sebastianbergmann/recursion-context/issues",
                 "security": "https://github.com/sebastianbergmann/recursion-context/security/policy"
             },
-            "time": "2025-08-13T04:42:22+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2025-08-13T04:42:22+00:00"
         },
         {
             "name": "sebastian/type",
@@ -2116,6 +2216,7 @@
                     "tests/_fixture/functions_that_declare_return_types.php"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -2132,8 +2233,7 @@
                 "issues": "https://github.com/sebastianbergmann/type/issues",
                 "security": "https://github.com/sebastianbergmann/type/security/policy"
             },
-            "time": "2025-08-09T06:55:48+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2025-08-09T06:55:48+00:00"
         },
         {
             "name": "sebastian/version",
@@ -2163,6 +2263,7 @@
                     "src/"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -2179,8 +2280,7 @@
                 "issues": "https://github.com/sebastianbergmann/version/issues",
                 "security": "https://github.com/sebastianbergmann/version/security/policy"
             },
-            "time": "2024-10-09T05:16:32+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2024-10-09T05:16:32+00:00"
         },
         {
             "name": "staabm/side-effects-detector",
@@ -2219,6 +2319,7 @@
                     "tests/"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "scripts": {
                 "qa": [
                     "@test",
@@ -2238,8 +2339,7 @@
             "keywords": [
                 "static analysis"
             ],
-            "time": "2024-10-20T05:08:20+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2024-10-20T05:08:20+00:00"
         },
         {
             "name": "theseer/tokenizer",
@@ -2267,6 +2367,7 @@
                     "src/"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -2281,8 +2382,7 @@
             "support": {
                 "issues": "https://github.com/theseer/tokenizer/issues"
             },
-            "time": "2025-11-17T20:03:12+00:00",
-            "notification-url": "https://packagist.org/downloads/"
+            "time": "2025-11-17T20:03:12+00:00"
         }
     ],
     "aliases": [],
@@ -2294,6 +2394,7 @@
         "php": ">=8.3",
         "ext-gd": "*",
         "ext-mbstring": "*",
+        "ext-openssl": "*",
         "ext-pdo_mysql": "*",
         "ext-sodium": "*"
     },

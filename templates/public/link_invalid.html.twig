@@ -1,0 +1,15 @@
+{% extends 'layout/public.html.twig' %}
+
+{% block title %}{{ t('public.link_invalid.title') }}{% endblock %}
+
+{% block content %}
+  <section class="card stack">
+    <h1 class="h2">{{ t('public.link_invalid.title') }}</h1>
+    {% if for_sponsor ?? false %}
+      <p>{{ t('public.link_invalid.sponsor_text') }}</p>
+    {% else %}
+      <p>{{ t('public.link_invalid.text') }}</p>
+      <p><a href="{{ url('/') }}" class="btn btn--primary">{{ t('public.link_invalid.request_new') }}</a></p>
+    {% endif %}
+  </section>
+{% endblock %}

@@ -77,6 +77,25 @@ final class View
         return $this->twig->render($template, $data + $globals);
     }
 
+    /**
+     * Renders a mail template. No session or request data: mails are rendered
+     * for a recipient, not for the person who caused them.
+     *
+     * @param array<string, mixed> $data
+     */
+    public function renderMail(string $template, array $data): string
+    {
+        return $this->twig->render($template, $data + [
+            'version' => App::VERSION,
+            'lang' => $this->app->translator->locale,
+        ]);
+    }
+
+    public function exists(string $template): bool
+    {
+        return $this->twig->getLoader()->exists($template);
+    }
+
     private function asset(string $path): string
     {
         $file = $this->app->root . '/public/assets/' . ltrim($path, '/');

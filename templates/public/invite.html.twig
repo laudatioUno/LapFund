@@ -1,0 +1,29 @@
+{% extends 'layout/public.html.twig' %}
+
+{% block title %}{{ t('public.invite.title', {name: p.first_name ~ ' ' ~ p.last_name}) }}{% endblock %}
+
+{% block content %}
+  <h1 class="pub-title">{{ t('public.invite.title', {name: p.first_name ~ ' ' ~ p.last_name}) }}</h1>
+  {% if brand.purpose %}<p class="lead">{{ t('public.invite.purpose', {purpose: brand.purpose}) }}</p>{% endif %}
+  {% if event.event_date or event.location %}
+    <p class="muted">{{ event.event_date ? event.event_date|date('d.m.Y') }}{{ event.event_date and event.location ? ' · ' }}{{ event.location }}{% if event.lap_length_m %} · {{ t('public.invite.lap_length', {m: event.lap_length_m}) }}{% endif %}</p>
+  {% endif %}
+
+  {% if brand.welcome %}<section class="card"><p>{{ brand.welcome|nl2br }}</p></section>{% endif %}
+  {% if p.message %}
+    <section class="card stack">
+      <h2 class="h2">{{ t('public.invite.message_from', {name: p.first_name}) }}</h2>
+      <p class="quote">«{{ p.message }}»</p>
+    </section>
+  {% endif %}
+
+  <section class="card stack">
+    {% if open %}
+      <h2 class="h2">{{ t('public.invite.soon_title') }}</h2>
+      <p>{{ t('public.invite.soon_text') }}</p>
+    {% else %}
+      <h2 class="h2">{{ t('public.invite.closed_title') }}</h2>
+      <p>{{ t('public.invite.closed_text') }}</p>
+    {% endif %}
+  </section>
+{% endblock %}

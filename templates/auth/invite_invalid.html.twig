@@ -1,0 +1,11 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}{{ t('auth.invite_invalid_title') }}{% endblock %}
+
+{% block content %}
+  <h1 class="h1">{{ t('auth.invite_invalid_title') }}</h1>
+  <p>{{ t('auth.invite_invalid_text') }}</p>
+  {% if brand.contact_email %}
+    <p><a href="mailto:{{ brand.contact_email }}">{{ brand.contact_email }}</a></p>
+  {% endif %}
+{% endblock %}

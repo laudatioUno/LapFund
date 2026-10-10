@@ -1,0 +1,68 @@
+{% extends 'layout/auth.html.twig' %}
+{% import 'partials/macros.html.twig' as m %}
+
+{% block title %}{{ t('install.title') }}{% endblock %}
+{% block body_class %}page-auth page-auth--wide{% endblock %}
+
+{% block content %}
+  <h1 class="h1">{{ t('install.title') }}</h1>
+  <p class="lead">{{ t('install.intro') }}</p>
+
+  <section aria-labelledby="req-title" class="stack">
+    <h2 class="h2" id="req-title">{{ t('install.requirements') }}</h2>
+    <ul class="checks">
+      {% for c in checks %}
+        <li class="checks__item {{ c.ok ? 'is-ok' : 'is-fail' }}">
+          <span class="checks__icon" aria-hidden="true">{{ c.ok ? '✓' : '✕' }}</span>
+          <span>{{ c.label }}{% if c.detail %} <span class="muted">({{ c.detail }})</span>{% endif %}</span>
+          <span class="visually-hidden">{{ c.ok ? t('install.ok') : t('install.missing') }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+    {% if not requirements_ok %}
+      <div class="notice notice--error" role="alert">{{ t('install.requirements_failed') }}</div>
+    {% endif %}
+  </section>
+
+  <form method="post" action="{{ url('/install') }}" class="stack" novalidate>
+    {{ csrf_field() }}
+    {{ m.form_error(errors) }}
+    {% if detail %}<p class="notice notice--error">{{ detail }}</p>{% endif %}
+
+    <fieldset class="fieldset">
+      <legend class="h2">{{ t('install.database') }}</legend>
+      <p class="muted">{{ t('install.database_help') }}</p>
+      <div class="grid-2">
+        {{ m.field('db_host', t('install.db_host'), input.db_host, errors, 'text', {required: true}) }}
+        {{ m.field('db_port', t('install.db_port'), input.db_port, errors, 'text', {required: true, inputmode: 'numeric'}) }}
+      </div>
+      {{ m.field('db_name', t('install.db_name'), input.db_name, errors, 'text', {required: true}) }}
+      <div class="grid-2">
+        {{ m.field('db_user', t('install.db_user'), input.db_user, errors, 'text', {required: true, autocomplete: 'off'}) }}
+        {{ m.field('db_pass', t('install.db_pass'), '', errors, 'password', {autocomplete: 'off'}) }}
+      </div>
+    </fieldset>
+
+    <fieldset class="fieldset">
+      <legend class="h2">{{ t('install.club') }}</legend>
+      {{ m.field('club_name', t('install.club_name'), input.club_name, errors, 'text', {required: true, maxlength: 100}) }}
+    </fieldset>
+
+    <fieldset class="fieldset">
+      <legend class="h2">{{ t('install.admin') }}</legend>
+      <p class="muted">{{ t('install.admin_help') }}</p>
+      {{ m.field('admin_name', t('admin.users.display_name'), input.admin_name, errors, 'text', {required: true, autocomplete: 'name'}) }}
+      <div class="grid-2">
+        {{ m.field('admin_username', t('admin.users.username'), input.admin_username, errors, 'text', {required: true, autocomplete: 'username', help: t('admin.users.username_help')}) }}
+        {{ m.field('admin_email', t('admin.users.email'), input.admin_email, errors, 'email', {required: true, autocomplete: 'email'}) }}
+      </div>
+      <div class="grid-2">
+        {{ m.field('password', t('auth.password'), '', errors, 'password', {required: true, autocomplete: 'new-password', help: t('auth.password_help')}) }}
+        {{ m.field('password_confirm', t('auth.password_confirm'), '', errors, 'password', {required: true, autocomplete: 'new-password'}) }}
+      </div>
+    </fieldset>
+
+    <button type="submit" class="btn btn--primary btn--block"{% if not requirements_ok %} disabled{% endif %}>{{ t('install.submit') }}</button>
+    <p class="muted small">{{ t('install.next_step') }}</p>
+  </form>
+{% endblock %}

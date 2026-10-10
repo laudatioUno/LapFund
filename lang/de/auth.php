@@ -1,0 +1,52 @@
+<?php
+
+return [
+    'password' => 'Passwort',
+    'new_password' => 'Neues Passwort',
+    'password_confirm' => 'Passwort wiederholen',
+    'password_help' => 'Mindestens 12 Zeichen. Ein Satz aus mehreren Wörtern ist sicher und gut zu merken.',
+    'password_too_short' => 'Das Passwort braucht mindestens 12 Zeichen.',
+    'password_mismatch' => 'Die beiden Passwörter stimmen nicht überein.',
+
+    'login_title' => 'Admin-Anmeldung',
+    'continue' => 'Weiter',
+    'login' => 'Anmelden',
+    'login_hint' => 'Passwort vergessen oder Authenticator verloren? Ein Vereins-Admin kann deinen Zugang zurücksetzen.',
+    'invalid_credentials' => 'Benutzername oder Passwort stimmen nicht.',
+    'locked' => 'Zu viele Fehlversuche. Das Konto ist für {minutes} Minuten gesperrt.',
+    'rate_limited' => 'Zu viele Anmeldeversuche von diesem Gerät. Bitte warte einige Minuten.',
+    'pending_expired' => 'Die Anmeldung hat zu lange gedauert. Bitte nochmals beginnen.',
+    'logged_out' => 'Du bist abgemeldet.',
+
+    'totp_title' => 'Bestätigungscode',
+    'totp_text' => 'Hallo {name}. Gib den 6-stelligen Code aus deiner Authenticator-App ein.',
+    'code' => 'Code',
+    'code_help' => 'Kein Zugriff auf die App? Gib stattdessen einen deiner Wiederherstellungscodes ein.',
+    'invalid_code' => 'Der Code stimmt nicht oder ist abgelaufen.',
+    'back_to_login' => 'Zurück zur Anmeldung',
+    'recovery_codes_low' => 'Dir bleiben nur noch {count} Wiederherstellungscodes. Lass deine Zwei-Faktor-Anmeldung bald von einem Vereins-Admin zurücksetzen, um neue zu erhalten.',
+
+    'setup_title' => 'Zwei-Faktor-Anmeldung einrichten',
+    'setup_intro' => 'Hallo {name}. Zum Schutz der Spenderdaten braucht jede Anmeldung zusätzlich einen Code aus einer Authenticator-App.',
+    'setup_step1' => 'Installiere eine Authenticator-App auf deinem Handy, zum Beispiel Google Authenticator, Microsoft Authenticator oder 2FAS.',
+    'setup_step2' => 'Scanne in der App den QR-Code.',
+    'setup_step3' => 'Gib den 6-stelligen Code ein, den die App anzeigt.',
+    'setup_qr_alt' => 'QR-Code für die Authenticator-App',
+    'setup_manual' => 'QR-Code lässt sich nicht scannen? Diesen Schlüssel von Hand eingeben:',
+    'setup_code' => 'Code aus der App',
+    'setup_submit' => 'Bestätigen',
+    'setup_done' => 'Die Zwei-Faktor-Anmeldung ist eingerichtet.',
+
+    'codes_title' => 'Deine Wiederherstellungscodes',
+    'codes_text' => 'Falls du dein Handy verlierst, meldest du dich mit einem dieser Codes an. Jeder Code funktioniert genau einmal.',
+    'codes_copy' => 'Codes kopieren',
+    'codes_print' => 'Drucken',
+    'codes_warning' => 'Diese Codes werden nur jetzt angezeigt. Bewahre sie an einem sicheren Ort auf, zum Beispiel in einem Passwort-Manager.',
+    'codes_done' => 'Ich habe die Codes gespeichert',
+
+    'invite_title' => 'Willkommen bei LapFund',
+    'invite_text' => 'Hallo {name}. Du wurdest als Admin für {club} eingeladen. Lege ein Passwort fest; danach richtest du die Zwei-Faktor-Anmeldung ein.',
+    'invite_submit' => 'Passwort festlegen',
+    'invite_invalid_title' => 'Link nicht gültig',
+    'invite_invalid_text' => 'Dieser Einladungslink ist abgelaufen oder wurde schon verwendet. Bitte einen Vereins-Admin um einen neuen Link.',
+];

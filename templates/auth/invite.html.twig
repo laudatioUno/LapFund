@@ -1,0 +1,27 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}{{ t('auth.invite_title') }}{% endblock %}
+
+{% block content %}
+  <h1 class="h1">{{ t('auth.invite_title') }}</h1>
+  <p>{{ t('auth.invite_text', {name: invite.display_name, club: brand.club_name}) }}</p>
+  <dl class="facts">
+    <div><dt>{{ t('admin.users.username') }}</dt><dd><strong>{{ invite.username }}</strong></dd></div>
+    <div><dt>{{ t('admin.users.role') }}</dt><dd>{{ t('admin.roles.' ~ invite.role) }}</dd></div>
+  </dl>
+  {% if error is defined %}<div class="notice notice--error" role="alert">{{ error }}</div>{% endif %}
+  <form method="post" action="{{ url('/admin/invite/' ~ token) }}" class="stack">
+    {{ csrf_field() }}
+    <input type="text" name="username" value="{{ invite.username }}" autocomplete="username" class="visually-hidden" tabindex="-1" aria-hidden="true" readonly>
+    <div class="field">
+      <label for="f-password">{{ t('auth.new_password') }}</label>
+      <input id="f-password" name="password" type="password" autocomplete="new-password" minlength="12" required aria-describedby="h-password">
+      <p class="field__help" id="h-password">{{ t('auth.password_help') }}</p>
+    </div>
+    <div class="field">
+      <label for="f-password_confirm">{{ t('auth.password_confirm') }}</label>
+      <input id="f-password_confirm" name="password_confirm" type="password" autocomplete="new-password" minlength="12" required>
+    </div>
+    <button type="submit" class="btn btn--primary btn--block">{{ t('auth.invite_submit') }}</button>
+  </form>
+{% endblock %}

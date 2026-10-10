@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: PHP version
+        run: php -v && composer --version
+      - name: Install dependencies (from composer.lock)
+        run: composer install --no-interaction --no-progress
+      - name: Lint
+        run: find src bin lang public -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
+      - name: Unit tests
+        run: vendor/bin/phpunit
+      - name: Security advisories
+        run: composer audit --no-dev

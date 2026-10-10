@@ -1,0 +1,19 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}{{ t('auth.totp_title') }}{% endblock %}
+
+{% block content %}
+  <h1 class="h1">{{ t('auth.totp_title') }}</h1>
+  <p>{{ t('auth.totp_text', {name: user.display_name}) }}</p>
+  {% if error is defined %}<div class="notice notice--error" role="alert">{{ error }}</div>{% endif %}
+  <form method="post" action="{{ url('/admin/login/totp') }}" class="stack">
+    {{ csrf_field() }}
+    <div class="field">
+      <label for="f-code">{{ t('auth.code') }}</label>
+      <input id="f-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="11" class="input--code" required autofocus aria-describedby="h-code">
+      <p class="field__help" id="h-code">{{ t('auth.code_help') }}</p>
+    </div>
+    <button type="submit" class="btn btn--primary btn--block">{{ t('auth.login') }}</button>
+  </form>
+  <p class="small"><a href="{{ url('/admin/login') }}">{{ t('auth.back_to_login') }}</a></p>
+{% endblock %}

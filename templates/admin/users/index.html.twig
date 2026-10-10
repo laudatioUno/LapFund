@@ -1,0 +1,38 @@
+{% extends 'layout/admin.html.twig' %}
+{% import 'partials/macros.html.twig' as m %}
+
+{% block title %}{{ t('app.nav.users') }}{% endblock %}
+
+{% block content %}
+  <header class="page-head">
+    <h1 class="h1">{{ t('app.nav.users') }}</h1>
+    <a href="{{ url('/admin/users/new') }}" class="btn btn--primary">{{ t('admin.users.add') }}</a>
+  </header>
+  <p class="muted">{{ t('admin.users.intro') }}</p>
+
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">{{ t('admin.users.display_name') }}</th>
+          <th scope="col">{{ t('admin.users.username') }}</th>
+          <th scope="col">{{ t('admin.users.role') }}</th>
+          <th scope="col">{{ t('admin.users.status') }}</th>
+          <th scope="col">{{ t('admin.users.last_login') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+          <tr>
+            <td><a href="{{ url('/admin/users/' ~ u.id) }}" class="strong">{{ u.display_name }}</a>
+              {% if u.id == current_user.id %}<span class="muted"> ({{ t('admin.users.you') }})</span>{% endif %}</td>
+            <td>{{ u.username }}</td>
+            <td>{{ t('admin.roles.' ~ u.role) }}</td>
+            <td>{{ m.status_badge(u.status) }}</td>
+            <td class="nowrap">{{ u.last_login_at ? u.last_login_at|datetime : '–' }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

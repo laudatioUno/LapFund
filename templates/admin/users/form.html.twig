@@ -1,0 +1,82 @@
+{% extends 'layout/admin.html.twig' %}
+{% import 'partials/macros.html.twig' as m %}
+
+{% block title %}{{ mode == 'create' ? t('admin.users.add') : user.display_name }}{% endblock %}
+
+{% block content %}
+  {% set is_create = mode == 'create' %}
+  <header class="page-head">
+    <div>
+      <a href="{{ url('/admin/users') }}" class="back">← {{ t('app.nav.users') }}</a>
+      <h1 class="h1">{{ is_create ? t('admin.users.add') : user.display_name }}</h1>
+    </div>
+    {% if not is_create %}{{ m.status_badge(user.status) }}{% endif %}
+  </header>
+
+  <div class="cols">
+    <form method="post" action="{{ url(is_create ? '/admin/users/new' : '/admin/users/' ~ user.id) }}" class="card stack cols__main" novalidate>
+      {{ csrf_field() }}
+      {% if is_create %}
+        {{ m.field('username', t('admin.users.username'), input.username, errors, 'text', {required: true, autocomplete: 'off', help: t('admin.users.username_help')}) }}
+      {% else %}
+        <dl class="facts"><div><dt>{{ t('admin.users.username') }}</dt><dd>{{ user.username }}</dd></div></dl>
+      {% endif %}
+      {{ m.field('display_name', t('admin.users.display_name'), input.display_name, errors, 'text', {required: true}) }}
+      {{ m.field('email', t('admin.users.email'), input.email, errors, 'email', {required: true}) }}
+
+      <fieldset class="fieldset{{ errors.role is defined ? ' field--error' }}">
+        <legend>{{ t('admin.users.role') }}</legend>
+        {% for role in ['event_admin', 'club_admin'] %}
+          <label class="choice">
+            <input type="radio" name="role" value="{{ role }}"{{ input.role == role ? ' checked' }}{{ (not is_create and is_self) ? ' disabled' }}>
+            <span><strong>{{ t('admin.roles.' ~ role) }}</strong><br><span class="muted small">{{ t('admin.roles.' ~ role ~ '_help') }}</span></span>
+          </label>
+        {% endfor %}
+        {% if not is_create and is_self %}<input type="hidden" name="role" value="{{ user.role }}">{% endif %}
+        {% if errors.role is defined %}<p class="field__error">{{ t(errors.role) }}</p>{% endif %}
+      </fieldset>
+
+      <div>
+        <button type="submit" class="btn btn--primary">{{ is_create ? t('admin.users.create_and_invite') : t('app.save') }}</button>
+      </div>
+    </form>
+
+    {% if not is_create %}
+      <aside class="card stack cols__side" aria-labelledby="access-title">
+        <h2 class="h2" id="access-title">{{ t('admin.users.access') }}</h2>
+        <dl class="facts">
+          <div><dt>{{ t('admin.users.last_login') }}</dt><dd>{{ user.last_login_at ? user.last_login_at|datetime : '–' }}</dd></div>
+          {% if open_invite %}<div><dt>{{ t('admin.users.invite_open_until') }}</dt><dd>{{ open_invite.expires_at|datetime }}</dd></div>{% endif %}
+        </dl>
+
+        {% if is_self %}
+          <p class="muted small">{{ t('admin.users.self_hint') }}</p>
+        {% else %}
+          {% if user.status == 'locked' %}
+            <form method="post" action="{{ url('/admin/users/' ~ user.id ~ '/unlock') }}">
+              {{ csrf_field() }}
+              <button type="submit" class="btn btn--secondary btn--block">{{ t('admin.users.unlock') }}</button>
+            </form>
+          {% endif %}
+
+          <form method="post" action="{{ url('/admin/users/' ~ user.id ~ '/invite') }}" data-confirm="{{ user.status == 'invited' ? '' : t('admin.users.reset_access_confirm') }}">
+            {{ csrf_field() }}
+            <button type="submit" class="btn btn--secondary btn--block">{{ user.status == 'invited' ? t('admin.users.new_invite') : t('admin.users.reset_access') }}</button>
+          </form>
+
+          {% if user.totp_secret_enc %}
+            <form method="post" action="{{ url('/admin/users/' ~ user.id ~ '/reset-totp') }}" data-confirm="{{ t('admin.users.reset_totp_confirm') }}">
+              {{ csrf_field() }}
+              <button type="submit" class="btn btn--secondary btn--block">{{ t('admin.users.reset_totp') }}</button>
+            </form>
+          {% endif %}
+
+          <form method="post" action="{{ url('/admin/users/' ~ user.id ~ '/active') }}" data-confirm="{{ user.active ? t('admin.users.deactivate_confirm') : '' }}">
+            {{ csrf_field() }}
+            <button type="submit" class="btn btn--block {{ user.active ? 'btn--danger' : 'btn--secondary' }}">{{ user.active ? t('admin.users.deactivate') : t('admin.users.activate') }}</button>
+          </form>
+        {% endif %}
+      </aside>
+    {% endif %}
+  </div>
+{% endblock %}

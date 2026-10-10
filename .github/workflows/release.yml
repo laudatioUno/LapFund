@@ -1,0 +1,23 @@
+name: Release
+
+# Push a tag like v0.1.0 to build the ZIP with all libraries and attach it to a GitHub release.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tests
+        run: composer install --no-interaction --no-progress && vendor/bin/phpunit && composer audit --no-dev
+      - name: Build ZIP
+        run: bin/build-release.sh "${GITHUB_REF_NAME#v}"
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" "build/lapfund-${GITHUB_REF_NAME#v}.zip" --title "LapFund $GITHUB_REF_NAME" --generate-notes

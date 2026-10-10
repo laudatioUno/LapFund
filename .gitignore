@@ -1,0 +1,9 @@
+/vendor/
+/config/config.php
+/storage/uploads/*
+/storage/logs/*
+/storage/cache/*
+!/storage/**/.gitkeep
+/build/
+/.phpunit.cache/
+.DS_Store

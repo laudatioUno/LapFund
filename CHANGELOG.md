@@ -3,6 +3,14 @@
 All notable changes to LapFund. Versions follow [semantic versioning](https://semver.org/).
 The section of a version is used as the release notes on GitHub.
 
+## [1.0.1] – 2026-10
+
+### Fixed
+- WhatsApp button on the participant page: on phones it now opens WhatsApp's «send to» picker with the prepared text instead of only the app's start screen (iPhone, [#13](https://github.com/laudatioUno/LapFund/issues/13)). Computers keep using WhatsApp Web.
+
+### Added
+- «Teilen …» button on the participant page: opens the phone's share menu (WhatsApp, Signal, Threema, SMS …); shown only where the browser supports it
+
 ## [1.0.0] – 2026-10
 
 First complete version: a sponsored run can be handled from preparation to the final report.

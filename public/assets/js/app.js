@@ -23,6 +23,26 @@
     });
   });
 
+  // Sharing on phones (issue #13)
+  var ua = navigator.userAgent || '';
+  var isPhone = /iPhone|iPad|iPod|Android/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  // WhatsApp: on phones open the app's «send to» picker directly instead of going through wa.me
+  if (isPhone) {
+    document.querySelectorAll('a[data-app-href]').forEach(function (link) {
+      link.setAttribute('href', link.getAttribute('data-app-href'));
+      link.removeAttribute('target');
+    });
+  }
+  // «Share …» opens the phone's share sheet (WhatsApp, Signal, Threema, SMS …) where supported
+  document.querySelectorAll('[data-share-text]').forEach(function (button) {
+    if (typeof navigator.share !== 'function') { return; }
+    button.hidden = false;
+    button.addEventListener('click', function () {
+      navigator.share({ title: button.getAttribute('data-share-title') || undefined, text: button.getAttribute('data-share-text') })
+        .catch(function () { /* cancelled by the user */ });
+    });
+  });
+
   // Confirm dialogs: <form data-confirm="Question?">
   document.querySelectorAll('form[data-confirm]').forEach(function (form) {
     form.addEventListener('submit', function (event) {

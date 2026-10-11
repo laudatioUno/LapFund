@@ -50,8 +50,12 @@
     <section class="card stack" aria-labelledby="share-title">
       <h2 class="h2" id="share-title">{{ t('public.me.find_sponsors') }}</h2>
       <p>{{ t('public.me.find_sponsors_text') }}</p>
+      <button type="button" class="btn btn--primary share-main" data-share-text="{{ share.text }}" data-share-title="{{ t('public.me.share_subject', {event: event.name}) }}" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true" class="share-btn__icon"><path d="M12 15V4M8 8l4-4 4 4M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        {{ t('public.me.share') }}
+      </button>
       <div class="share-grid">
-        <a href="{{ share.whatsapp }}" class="share-btn" rel="noopener" target="_blank">
+        <a href="{{ share.whatsapp }}" data-app-href="{{ share.whatsapp_app }}" class="share-btn" rel="noopener" target="_blank">
           <svg viewBox="0 0 24 24" aria-hidden="true" class="share-btn__icon"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 18.7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
           {{ t('public.me.whatsapp') }}
         </a>

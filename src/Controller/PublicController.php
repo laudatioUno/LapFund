@@ -105,7 +105,11 @@ final class PublicController extends Controller
             $share = [
                 'url' => $url,
                 'qr' => QrCode::dataUri($url, 7),
+                'text' => $text,
+                // wa.me for computers (WhatsApp Web); phones get the app link from app.js,
+                // because iOS opens only the app's start screen via wa.me (issue #13).
                 'whatsapp' => 'https://wa.me/?text=' . rawurlencode($text),
+                'whatsapp_app' => 'whatsapp://send?text=' . rawurlencode($text),
                 'mail' => 'mailto:?subject=' . rawurlencode($this->t('public.me.share_subject', ['event' => $event['name']]))
                     . '&body=' . rawurlencode($text),
             ];

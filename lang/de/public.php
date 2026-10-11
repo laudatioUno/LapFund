@@ -43,6 +43,7 @@ return [
     'me.find_sponsors' => 'Sponsoren suchen',
     'me.find_sponsors_text' => 'Schick deinen Sponsorenlink an Familie, Nachbarn und Freunde. Sie tragen sich selbst ein.',
     'me.whatsapp' => 'WhatsApp',
+    'me.share' => 'Teilen …',
     'me.email' => 'E-Mail',
     'me.copy_link' => 'Link kopieren',
     'me.your_link' => 'Dein Sponsorenlink',

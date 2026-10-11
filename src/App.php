@@ -47,7 +47,7 @@ use LapFund\View\View;
  */
 final class App
 {
-    public const VERSION = '1.0.0';
+    public const VERSION = '1.0.1';
 
     public Config $config;
     public readonly Translator $translator;

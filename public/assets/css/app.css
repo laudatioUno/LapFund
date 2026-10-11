@@ -307,6 +307,8 @@ a.chip:hover { background: var(--line); }
 .share-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 72px; padding: 8px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; text-align: center; }
 .share-btn:hover { border-color: var(--ink); color: var(--ink); }
 .share-btn__icon { width: 22px; height: 22px; }
+.share-main { width: 100%; gap: 8px; min-height: 52px; }
+.share-main[hidden] { display: none; }
 .qr-box summary { cursor: pointer; font-weight: 600; color: var(--accent-dark); min-height: 44px; display: flex; align-items: center; }
 .qr-box img { display: block; margin: 8px auto; border: 1px solid var(--line); border-radius: 10px; image-rendering: pixelated; }
 .qr-box p { text-align: center; }

@@ -100,7 +100,7 @@ return [
     'copy.none_selected' => 'Bitte mindestens eine Person auswählen.',
     'copy.done' => '{count} Personen übernommen.',
 
-    'pool.intro' => 'Alle Personen aus allen Events. Hier lässt sich nachschauen, wer schon einmal dabei war.',
+    'pool.intro' => 'Alle Personen aus allen Events. Hier lässt sich nachschauen, wer schon einmal dabei war. Wer länger nicht mehr mitgemacht hat, kann der Vereins-Admin unter «Inaktiv» löschen.',
     'pool.count' => 'Personen im Pool: {count}',
     'pool.empty' => 'Der Pool ist noch leer.',
     'pool.last_event' => 'Letzter Event',
@@ -126,4 +126,21 @@ return [
     'pledges_title' => 'Zusagen',
     'no_pledges' => 'Noch keine Zusagen.',
     'pledges_later' => 'Zusagen korrigieren, stornieren und als bezahlt abhaken folgt mit der Abrechnung.',
+
+    // Stage 6: deleting inactive participants (NF-11)
+    'deleted_name' => 'Gelöscht',
+    'pool.views' => 'Ansicht',
+    'pool.all' => 'Alle',
+    'pool.inactive' => 'Inaktiv seit {years} Jahren',
+    'pool.inactive_help' => 'Diese Personen haben seit mindestens {years} Jahren an keinem Event teilgenommen und sind in keinem laufenden Event dabei. Beim Löschen werden Name, E-Mail, Links und Nachrichten entfernt. In den Auswertungen früherer Events bleiben ihre Runden und Beträge anonym erhalten.',
+    'pool.inactive_count' => 'Inaktive Personen: {count}',
+    'pool.no_inactive' => 'Keine inaktiven Personen.',
+    'pool.delete' => 'Löschen',
+    'pool.delete_confirm' => '{name} endgültig löschen? Das lässt sich nicht rückgängig machen.',
+    'pool.delete_all' => 'Alle {count} endgültig löschen',
+    'pool.delete_all_confirm' => '{count} Personen endgültig löschen? Das lässt sich nicht rückgängig machen.',
+    'pool.deleted' => '{name} ist gelöscht.',
+    'pool.deleted_many' => '{count} Personen sind gelöscht.',
+    'pool.delete_active' => 'Diese Person ist in einem laufenden Event dabei und kann noch nicht gelöscht werden.',
+    'pool.only_club' => 'Löschen kann nur ein Vereins-Admin.',
 ];

@@ -209,6 +209,7 @@ final class MailController extends Controller
         if ($this->app->migrator()->pending() !== []) {
             return Response::text("pending database updates\n", 503);
         }
+        $this->app->retention()->runDaily();
         $r = $this->app->mailWorker()->run(200, 50);
 
         return Response::text($r['locked'] ? "busy\n" : sprintf("sent %d, failed %d, cancelled %d\n", $r['sent'], $r['failed'], $r['cancelled']));

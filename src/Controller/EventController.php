@@ -95,13 +95,15 @@ final class EventController extends EventScopedController
             'statuses' => EventStatus::ORDER,
             'status_index' => EventStatus::index($status),
             'next_status' => EventStatus::next($status),
-            'previous_status' => EventStatus::previous($status),
+            'previous_status' => $this->event['anonymized_at'] !== null ? null : EventStatus::previous($status),
             'can_archive' => EventStatus::allowsArchive($status),
             'teams' => $teams,
             'participant_count' => $count,
             'admins' => $this->app->events()->admins($id),
             'checklist' => $checklist,
             'uninvited' => $this->app->access()->uninvitedCount($id),
+            'anonymize_at' => $this->app->retention()->anonymizeAt($this->event),
+            'retention_months' => $this->app->retention()->months(),
         ]);
     }
 
@@ -115,7 +117,15 @@ final class EventController extends EventScopedController
 
             return $this->redirect($this->eventPath());
         }
-        $this->app->events()->update((int) $this->event['id'], ['status' => $to]);
+        if ($from === 'closed' && $this->event['anonymized_at'] !== null) {
+            $this->flash('error', 'events.reopen_anonymized');
+
+            return $this->redirect($this->eventPath());
+        }
+        $this->app->events()->update((int) $this->event['id'], [
+            'status' => $to,
+            'closed_at' => $to === 'closed' ? gmdate('Y-m-d H:i:s') : null,
+        ]);
         $this->audit('event_status_changed', 'event', (int) $this->event['id'], ['status' => $from], ['status' => $to]);
         $this->flash('success', 'events.status_changed', ['status' => $this->t('events.status.' . $to)]);
         if ($to === 'collecting' && $this->app->access()->uninvitedCount((int) $this->event['id']) > 0) {
@@ -139,6 +149,22 @@ final class EventController extends EventScopedController
         $this->flash('success', $archive ? 'events.archived' : 'events.unarchived');
 
         return $this->redirect($archive ? '/admin/events' : $this->eventPath());
+    }
+
+    /** Deletes the sponsor data of a closed event now instead of after the retention period (NF-11). */
+    public function anonymize(Request $request, array $params): Response
+    {
+        $this->loadEvent($params, 'event.anonymize');
+        if ($this->event['status'] !== 'closed' || $this->event['anonymized_at'] !== null) {
+            $this->flash('error', 'events.anonymize_not_allowed');
+
+            return $this->redirect($this->eventPath());
+        }
+        $n = $this->app->retention()->anonymizeEvent($this->event);
+        $this->audit('event_anonymized', 'event', (int) $this->event['id'], null, ['pledges' => $n, 'automatic' => false]);
+        $this->flash('success', 'events.anonymized', ['count' => $n]);
+
+        return $this->redirect($this->eventPath());
     }
 
     public function settings(Request $request, array $params): Response

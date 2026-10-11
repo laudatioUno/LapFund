@@ -108,7 +108,7 @@
       <ul class="card pledge-list">
         {% for pl in pledges %}
           <li class="pledge-list__item">
-            <span class="strong">{{ pl.sponsor_name }}</span>
+            <span class="strong">{{ pl.sponsor_name ?? t('pledges.anonymized') }}</span>
             <span class="pledge-list__amount">{% if after_run and not pl.unknown and pl.type == 'per_lap' %}{{ pl.owed_cents|money }}{% else %}{{ pl.amount_cents|money }}{% if pl.type == 'per_lap' %} {{ t('public.me.per_lap_short') }}{% endif %}{% endif %}</span>
             <span class="muted small">{{ t('public.me.method.' ~ pl.payment_method) }}{% if pl.source == 'participant' %} · {{ t('public.me.entered_by_you') }}{% endif %}{% if after_run and pl.type == 'per_lap' and not pl.unknown %} · {{ pl.amount_cents|money }} {{ t('public.me.per_lap_short') }}{% endif %}</span>
             <span class="small pledge-list__status"><span class="badge badge--pledge-{{ pl.status }}">{{ t('pledge.status.' ~ pl.status) }}</span></span>

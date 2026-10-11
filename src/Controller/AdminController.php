@@ -7,6 +7,7 @@ namespace LapFund\Controller;
 use LapFund\App;
 use LapFund\Http\Request;
 use LapFund\Http\Response;
+use LapFund\Repository\AuditLog;
 
 final class AdminController extends Controller
 {
@@ -58,8 +59,44 @@ final class AdminController extends Controller
 
     public function audit(Request $request, array $params): Response
     {
-        $this->admin('audit.view');
+        $user = $this->admin('audit.view');
+        $area = $request->input('area');
+        $area = isset(AuditLog::AREAS[$area]) ? $area : '';
+        $event = $request->input('event');
+        $eventId = ctype_digit($event) ? (int) $event : null;
 
-        return $this->render('admin/audit.html.twig', ['entries' => $this->app->audit()->latest(200)]);
+        return $this->render('admin/audit.html.twig', [
+            'log' => $this->app->audit()->search(['event_id' => $eventId, 'area' => $area], max(1, (int) $request->input('page'))),
+            'area' => $area,
+            'areas' => array_keys(AuditLog::AREAS),
+            'event_id' => $eventId,
+            'events' => $this->app->events()->listFor($user, true),
+        ]);
+    }
+
+    /**
+     * Database export for backups (NF-17). Contains all personal data, so the
+     * club admin confirms with the code of the authenticator app.
+     */
+    public function backup(Request $request, array $params): Response
+    {
+        $user = $this->admin('system.manage');
+        if (!$this->app->auth()->attemptSecondFactor($user, trim($request->input('code')))) {
+            $this->flash('error', 'admin.system.backup_code_wrong');
+
+            return $this->redirect('/admin/system');
+        }
+        $out = fopen('php://temp', 'w+b');
+        $this->app->databaseExport()->write($out, App::VERSION);
+        rewind($out);
+        $body = (string) stream_get_contents($out);
+        fclose($out);
+        $this->app->audit()->log((int) $user['id'], 'database_exported', 'system', null, null, ['bytes' => strlen($body)]);
+
+        return new Response($body, 200, [
+            'Content-Type' => 'application/sql; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="' . $this->app->databaseExport()->filename() . '"',
+            'Cache-Control' => 'no-store',
+        ]);
     }
 }

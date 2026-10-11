@@ -18,6 +18,7 @@ final class Permissions
         'audit.view',
         'events.create',
         'mail.manage',      // mail settings, test mail, mail log of the installation
+        'participants.delete', // delete participants from the pool for good (NF-11)
     ];
 
     /** Actions every admin may perform. */
@@ -43,6 +44,7 @@ final class Permissions
         'event.payments' => ['assigned'],              // pledges, payments, payment mails (AD-02, ZA-*)
         'event.assign_admins' => ['club'],
         'event.archive' => ['club'],
+        'event.anonymize' => ['club'],                 // delete sponsor data now (NF-11)
     ];
 
     /** @param array<string, mixed> $user */

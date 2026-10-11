@@ -64,8 +64,9 @@
             {% for pl in pledges %}
               <tr{{ pl.status == 'cancelled' ? ' class="is-muted"' }}>
                 <td>
-                  <strong>{{ pl.sponsor_name }}</strong><br>
-                  <span class="muted small break">{{ pl.sponsor_email }}</span><br>
+                  {% if pl.anonymized_at %}<strong class="muted">{{ t('pledges.anonymized') }}</strong><br>
+                  {% else %}<strong>{{ pl.sponsor_name }}</strong><br>
+                  <span class="muted small break">{{ pl.sponsor_email }}</span><br>{% endif %}
                   <span class="muted small">{{ pl.created_at|datetime }} · {{ t('pledge.source.' ~ pl.source) }} · {{ t('pledge.method.' ~ pl.payment_method) }}</span>
                   {% if pl.sponsor_message %}<br><span class="small">«{{ pl.sponsor_message }}»</span>{% endif %}
                 </td>
@@ -174,5 +175,19 @@
         <p class="muted">{{ t('participants.list_closed') }}</p>
       {% endif %}
     </section>
+  {% endif %}
+
+  {% if history is not empty %}
+    <details class="card history">
+      <summary class="h3">{{ t('admin.audit.history', {count: history|length}) }}</summary>
+      <ul class="history__list">
+        {% for e in history %}
+          <li>
+            <span class="nowrap small muted">{{ e.created_at|datetime }} · {{ e.display_name ?? t('admin.audit.system') }}</span><br>
+            <strong>{{ t('admin.audit.action.' ~ e.action) }}</strong>{% set lines = audit_details(e) %}{% if lines is not empty %} <span class="small">– {{ lines|join(', ') }}</span>{% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </details>
   {% endif %}
 {% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'layout/admin.html.twig' %}
+
+{% block title %}{{ t('events.tab.audit') }} · {{ event.name }}{% endblock %}
+
+{% block content %}
+  {% include 'partials/event_header.html.twig' %}
+  <p class="muted">{{ t('admin.audit.event_intro') }}</p>
+
+  <form method="get" action="{{ url('/admin/events/' ~ event.id ~ '/log') }}" class="filter-bar">
+    <div class="field">
+      <label for="f-area">{{ t('admin.audit.area') }}</label>
+      <select id="f-area" name="area">
+        <option value="">{{ t('admin.audit.all_areas') }}</option>
+        {% for a in areas %}<option value="{{ a }}"{{ area == a ? ' selected' }}>{{ t('admin.audit.areas.' ~ a) }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="filter-bar__actions">
+      <button type="submit" class="btn btn--secondary">{{ t('participants.filter_apply') }}</button>
+      {% if area != '' %}<a href="{{ url('/admin/events/' ~ event.id ~ '/log') }}" class="small">{{ t('participants.filter_reset') }}</a>{% endif %}
+    </div>
+  </form>
+
+  {% include 'partials/audit_table.html.twig' with {show_event: false, page_url: '/admin/events/' ~ event.id ~ '/log?area=' ~ area|url_encode ~ '&'} %}
+{% endblock %}

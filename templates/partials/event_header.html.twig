@@ -25,7 +25,9 @@
     {key: 'teams', path: '/teams', label: t('events.tab.teams')},
     {key: 'laps', path: '/laps', label: t('events.tab.laps')},
     {key: 'payments', path: '/payments', label: t('events.tab.payments')},
+    {key: 'reports', path: '/reports', label: t('events.tab.reports')},
     {key: 'mails', path: '/mails', label: t('events.tab.mails')},
+    {key: 'audit', path: '/log', label: t('events.tab.audit')},
   ] %}
   {% if perm.edit %}{% set tabs = tabs|merge([{key: 'settings', path: '/settings', label: t('events.tab.settings')}]) %}{% endif %}
   {% for tab in tabs %}

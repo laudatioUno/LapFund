@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 // Sends due mails from the queue (architecture 9.1). Run it every minute by cron:
 //   * * * * * php /path/to/lapfund/bin/worker.php
-// It respects the sending limit from the mail settings (EM-12).
+// It respects the sending limit from the mail settings (EM-12). Once a day it also
+// runs the data retention (anonymizes sponsor data of old events, NF-11).
 
 if (PHP_SAPI !== 'cli') {
     exit(1);
@@ -22,6 +23,10 @@ if ($app->migrator()->pending() !== []) {
     exit(1);
 }
 
+$housekeeping = $app->retention()->runDaily();
+if ($housekeeping['events'] > 0) {
+    printf("data retention: %d events, %d pledges anonymized\n", $housekeeping['events'], $housekeeping['pledges']);
+}
 $result = $app->mailWorker()->run(500, 50);
 if ($result['locked']) {
     echo "Another worker is running.\n";

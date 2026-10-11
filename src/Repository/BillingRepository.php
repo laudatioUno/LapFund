@@ -25,7 +25,7 @@ final class BillingRepository
     public function participants(int $eventId, ?int $teamId = null, bool $noTeam = false): array
     {
         $sql = 'SELECT pa.id AS participation_id, pa.laps, pa.did_not_start, pa.team_id, pa.laps_updated_at,
-                    p.first_name, p.last_name, t.name AS team_name, t.sort_order,
+                    p.first_name, p.last_name, p.email, t.name AS team_name, t.sort_order,
                     COUNT(pl.id) - SUM(pl.status = \'cancelled\') AS sponsor_count,
                     COALESCE(SUM(CASE WHEN pl.status <> \'cancelled\' AND pl.type = \'flat\' THEN pl.amount_cents END), 0) AS flat_cents,
                     COALESCE(SUM(CASE WHEN pl.status <> \'cancelled\' AND pl.type = \'per_lap\' THEN pl.amount_cents END), 0) AS per_lap_cents,

@@ -8,23 +8,44 @@
   </header>
   <p class="muted">{{ t('participants.pool.intro') }}</p>
 
-  <form method="get" action="{{ url('/admin/participants') }}" class="filter-bar" role="search">
-    <div class="field filter-bar__grow">
-      <label for="f-q">{{ t('participants.search') }}</label>
-      <input id="f-q" name="q" type="search" value="{{ query }}" maxlength="100" placeholder="{{ t('participants.search_placeholder') }}">
-    </div>
-    <div class="filter-bar__actions">
-      <button type="submit" class="btn btn--secondary">{{ t('participants.search_button') }}</button>
-      {% if query != '' %}<a href="{{ url('/admin/participants') }}" class="small">{{ t('participants.filter_reset') }}</a>{% endif %}
-    </div>
-  </form>
+  <nav class="tabs" aria-label="{{ t('participants.pool.views') }}">
+    <a href="{{ url('/admin/participants') }}" class="tabs__link{{ not inactive ? ' is-active' }}"{% if not inactive %} aria-current="page"{% endif %}>{{ t('participants.pool.all') }}</a>
+    <a href="{{ url('/admin/participants?inactive=1') }}" class="tabs__link{{ inactive ? ' is-active' }}"{% if inactive %} aria-current="page"{% endif %}>{{ t('participants.pool.inactive', {years: inactive_years}) }}</a>
+  </nav>
+
+  {% if inactive %}
+    <section class="card stack">
+      <p>{{ t('participants.pool.inactive_help', {years: inactive_years}) }}</p>
+      {% if can_delete and rows is not empty %}
+        <form method="post" action="{{ url('/admin/participants/delete-inactive') }}" data-confirm="{{ t('participants.pool.delete_all_confirm', {count: rows|length}) }}">
+          {{ csrf_field() }}
+          <button type="submit" class="btn btn--danger">{{ t('participants.pool.delete_all', {count: rows|length}) }}</button>
+        </form>
+      {% elseif not can_delete %}
+        <p class="muted small">{{ t('participants.pool.only_club') }}</p>
+      {% endif %}
+    </section>
+  {% else %}
+    <form method="get" action="{{ url('/admin/participants') }}" class="filter-bar" role="search">
+      <div class="field filter-bar__grow">
+        <label for="f-q">{{ t('participants.search') }}</label>
+        <input id="f-q" name="q" type="search" value="{{ query }}" maxlength="100" placeholder="{{ t('participants.search_placeholder') }}">
+      </div>
+      <div class="filter-bar__actions">
+        <button type="submit" class="btn btn--secondary">{{ t('participants.search_button') }}</button>
+        {% if query != '' %}<a href="{{ url('/admin/participants') }}" class="small">{{ t('participants.filter_reset') }}</a>{% endif %}
+      </div>
+    </form>
+  {% endif %}
 
   <p class="muted small" role="status">
-    {% if query != '' %}{{ t('participants.count_filtered', {count: rows|length, total: total}) }}{% else %}{{ t('participants.pool.count', {count: total}) }}{% endif %}
+    {% if inactive %}{{ t('participants.pool.inactive_count', {count: rows|length}) }}
+    {% elseif query != '' %}{{ t('participants.count_filtered', {count: rows|length, total: total}) }}
+    {% else %}{{ t('participants.pool.count', {count: total}) }}{% endif %}
   </p>
 
   {% if rows is empty %}
-    <section class="card empty"><p class="muted">{{ total == 0 ? t('participants.pool.empty') : t('participants.empty_filtered') }}</p></section>
+    <section class="card empty"><p class="muted">{{ inactive ? t('participants.pool.no_inactive') : (total == 0 ? t('participants.pool.empty') : t('participants.empty_filtered')) }}</p></section>
   {% else %}
     <div class="table-wrap">
       <table class="table">
@@ -34,6 +55,7 @@
             <th scope="col">{{ t('participants.email') }}</th>
             <th scope="col" class="num">{{ t('app.nav.events') }}</th>
             <th scope="col">{{ t('participants.pool.last_event') }}</th>
+            {% if inactive and can_delete %}<th scope="col"><span class="visually-hidden">{{ t('events.teams.actions') }}</span></th>{% endif %}
           </tr>
         </thead>
         <tbody>
@@ -43,11 +65,19 @@
               <td class="break">{{ r.email }}</td>
               <td class="num">{{ r.event_count }}</td>
               <td>{{ r.last_event ?? '–' }}</td>
+              {% if inactive and can_delete %}
+                <td class="actions">
+                  <form method="post" action="{{ url('/admin/participants/' ~ r.id ~ '/delete') }}" data-confirm="{{ t('participants.pool.delete_confirm', {name: r.first_name ~ ' ' ~ r.last_name}) }}">
+                    {{ csrf_field() }}<input type="hidden" name="back" value="inactive">
+                    <button type="submit" class="btn btn--link btn--danger-link">{{ t('participants.pool.delete') }}</button>
+                  </form>
+                </td>
+              {% endif %}
             </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
-    {% if rows|length >= 300 %}<p class="muted small">{{ t('participants.pool.limited') }}</p>{% endif %}
+    {% if not inactive and rows|length >= 300 %}<p class="muted small">{{ t('participants.pool.limited') }}</p>{% endif %}
   {% endif %}
 {% endblock %}

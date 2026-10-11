@@ -1,0 +1,6 @@
+{% extends 'mail/de/_layout.html.twig' %}
+{% block content %}
+<p style="margin:0 0 16px;font-size:20px;font-weight:bold;">{{ t('mail.hello', {name: pledge.sponsor_name}) }}</p>
+<p style="margin:0 0 16px;">{{ t('mail.payment_info.text', {name: participant, event: event.name}) }}</p>
+{% include 'mail/de/_payment.html.twig' %}
+{% endblock %}

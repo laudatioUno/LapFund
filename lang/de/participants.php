@@ -123,4 +123,7 @@ return [
     'access.link_not_now' => 'Ein neuer Link ist nur zwischen Sponsorensuche und Abrechnung möglich.',
     'access.invited_auto' => '{count} Einladungen sind in der Warteschlange.',
     'access.not_invited_no_mail' => 'Keine Einladung verschickt: Der Mailversand ist noch nicht eingerichtet.',
+    'pledges_title' => 'Zusagen',
+    'no_pledges' => 'Noch keine Zusagen.',
+    'pledges_later' => 'Zusagen korrigieren, stornieren und als bezahlt abhaken folgt mit der Abrechnung.',
 ];

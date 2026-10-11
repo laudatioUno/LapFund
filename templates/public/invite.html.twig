@@ -1,4 +1,5 @@
 {% extends 'layout/public.html.twig' %}
+{% import 'partials/macros.html.twig' as m %}
 
 {% block title %}{{ t('public.invite.title', {name: p.first_name ~ ' ' ~ p.last_name}) }}{% endblock %}
 
@@ -17,13 +18,37 @@
     </section>
   {% endif %}
 
-  <section class="card stack">
-    {% if open %}
-      <h2 class="h2">{{ t('public.invite.soon_title') }}</h2>
-      <p>{{ t('public.invite.soon_text') }}</p>
-    {% else %}
+  {% if open %}
+    <form method="post" action="{{ url('/i/' ~ token) }}" class="card stack" novalidate>
+      {{ csrf_field() }}
+      <h2 class="h2">{{ t('pledge.form_title', {name: p.first_name}) }}</h2>
+      {{ m.form_error(errors) }}
+      {% if errors is not empty and errors._form is not defined %}<div class="notice notice--error" role="alert">{{ t('events.form_has_errors') }}</div>{% endif %}
+      {% include 'public/_pledge_fields.html.twig' with {for_participant: false} %}
+      <div class="field{{ errors.message is defined ? ' field--error' }}">
+        <label for="f-message">{{ t('pledge.field.message', {name: p.first_name}) }} <span class="muted">{{ t('app.optional') }}</span></label>
+        <textarea id="f-message" name="message" rows="2" maxlength="500">{{ input.message }}</textarea>
+        {% if errors.message is defined %}<p class="field__error">{{ t(errors.message) }}</p>{% endif %}
+      </div>
+      <div class="hp" aria-hidden="true">
+        <label for="f-website">Website</label>
+        <input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off">
+      </div>
+      <div class="field{{ errors.consent is defined ? ' field--error' }}">
+        <label class="inline-check inline-check--top">
+          <input type="checkbox" name="consent" value="1"{{ input.consent ?? false ? ' checked' }}>
+          <span>{{ t('pledge.consent', {club: brand.club_name}) }}{% if brand.privacy_url %} <a href="{{ brand.privacy_url }}" rel="noopener" target="_blank">{{ t('pledge.privacy_link') }}</a>{% endif %}</span>
+        </label>
+        {% if errors.consent is defined %}<p class="field__error">{{ t(errors.consent) }}</p>{% endif %}
+      </div>
+      <button type="submit" class="btn btn--primary btn--block">{{ t('pledge.submit', {name: p.first_name}) }}</button>
+      <p class="muted small">{{ t('pledge.no_changes_after') }}</p>
+      {% if event.entry_deadline %}<p class="muted small">{{ t('pledge.deadline', {date: event.entry_deadline|datetime}) }}</p>{% endif %}
+    </form>
+  {% else %}
+    <section class="card stack">
       <h2 class="h2">{{ t('public.invite.closed_title') }}</h2>
-      <p>{{ t('public.invite.closed_text') }}</p>
-    {% endif %}
-  </section>
+      <p>{{ closed == 'pledge.closed.deadline' ? t('pledge.closed.deadline_text') : t('public.invite.closed_text') }}</p>
+    </section>
+  {% endif %}
 {% endblock %}

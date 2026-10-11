@@ -15,6 +15,7 @@ use LapFund\Controller\ParticipantController;
 use LapFund\Controller\PoolController;
 use LapFund\Controller\PublicController;
 use LapFund\Controller\SettingsController;
+use LapFund\Controller\SponsorController;
 use LapFund\Controller\TeamController;
 use LapFund\Controller\UserController;
 use LapFund\Http\Router;
@@ -38,7 +39,16 @@ final class Routes
         $r->post('/me/message', $c(PublicController::class, 'saveMessage'));
         $r->post('/me/switch', $c(PublicController::class, 'switchParticipation'));
         $r->post('/me/logout', $c(PublicController::class, 'logout'));
-        $r->get('/i/{token:[A-Za-z0-9_-]+}', $c(PublicController::class, 'invitation'));
+        $r->post('/me/pledges/{pledge:[1-9][0-9]*}/cash', $c(PublicController::class, 'cash'));
+        $r->get('/me/pledges/new', $c(PublicController::class, 'newPledge'));
+        $r->post('/me/pledges/new', $c(PublicController::class, 'storePledge'));
+        $r->get('/me/list.pdf', $c(PublicController::class, 'listPdf'));
+
+        // Sponsors (stage 4)
+        $r->get('/i/{token:[A-Za-z0-9_-]+}', $c(SponsorController::class, 'invitation'));
+        $r->post('/i/{token:[A-Za-z0-9_-]+}', $c(SponsorController::class, 'pledge'));
+        $r->get('/p/{token:[A-Za-z0-9_-]+}', $c(SponsorController::class, 'payment'));
+        $r->post('/p/{token:[A-Za-z0-9_-]+}/mail', $c(SponsorController::class, 'paymentMail'));
         $r->get('/cron/{key:[A-Za-z0-9]+}', $c(MailController::class, 'cron'));
         $r->get('/theme.css', $c(AssetController::class, 'theme'));
         $r->get('/media/{file:[a-f0-9]+\.png}', $c(AssetController::class, 'media'));

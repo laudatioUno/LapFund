@@ -20,6 +20,8 @@ final class PublicController extends Controller
     /** Laps for the projection on the participant page (TS-02). */
     private const PROJECTION_LAPS = [10, 20, 30];
     private const MESSAGE_MAX = 500;
+    /** States in which the participant may tick «cash received» (TS-07). */
+    private const CASH_STATES = ['collecting', 'run_done', 'billing'];
 
     public function home(Request $request, array $params): Response
     {
@@ -126,6 +128,8 @@ final class PublicController extends Controller
             'can_edit_message' => $collecting,
             'message_max' => self::MESSAGE_MAX,
             'siblings' => count($siblings) > 1 ? $siblings : [],
+            'can_add_pledge' => $collecting,
+            'can_mark_cash' => in_array($event['status'], self::CASH_STATES, true),
             'message_error' => null,
         ]);
     }
@@ -156,6 +160,114 @@ final class PublicController extends Controller
         return $this->redirect('/me#message');
     }
 
+    /** Pledge entered by the participant, e.g. from the paper list (TS-05). */
+    public function newPledge(Request $request, array $params): Response
+    {
+        $this->guardPending();
+        [$p, $event] = $this->participantAndEvent();
+        if ($event['status'] !== 'collecting') {
+            $this->flash('error', 'pledge.closed.status');
+
+            return $this->redirect('/me');
+        }
+
+        return $this->pledgeForm($p, $event, ['type' => 'flat', 'amount' => '', 'method' => \LapFund\Service\PledgeService::methods($event)[0], 'name' => '', 'email' => '', 'message' => '', 'consent' => false], []);
+    }
+
+    public function storePledge(Request $request, array $params): Response
+    {
+        $this->guardPending();
+        [$p, $event] = $this->participantAndEvent();
+        if ($event['status'] !== 'collecting') {
+            $this->flash('error', 'pledge.closed.status');
+
+            return $this->redirect('/me');
+        }
+        if (!$this->app->rateLimiter()->hit('pledge_participant', (string) $p['id'], 60, 3600)) {
+            throw new HttpException(429);
+        }
+        $input = [
+            'type' => $request->input('type'),
+            'amount' => $request->input('amount'),
+            'method' => $request->input('method'),
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+            'message' => '',
+        ];
+        $checked = $this->app->pledgeService()->validate($input, $event, true, $request->input('consent') === '1');
+        if ($checked['errors'] !== []) {
+            return $this->pledgeForm($p, $event, $input + ['consent' => $request->input('consent') === '1'], $checked['errors'], 422);
+        }
+        $this->app->pledgeService()->create($event, $p, $checked['data'], 'participant');
+        $this->flash('success', 'pledge.participant.saved', ['name' => $checked['data']['sponsor_name']]);
+
+        return $this->redirect($request->input('again') === '1' ? '/me/pledges/new' : '/me#sponsors');
+    }
+
+    /** «Bar erhalten» for cash pledges only (TS-07). */
+    public function cash(Request $request, array $params): Response
+    {
+        $this->guardPending();
+        [$p, $event] = $this->participantAndEvent();
+        if (!in_array($event['status'], self::CASH_STATES, true)
+            || !$this->app->pledgeService()->setCashReceived((int) $p['id'], (int) $params['pledge'], $request->input('received') === '1')) {
+            $this->flash('error', 'pledge.cash.not_possible');
+        }
+
+        return $this->redirect('/me#sponsors');
+    }
+
+    /** Sponsor list for printing (TS-08): QR code to the invitation link, no link as text (NF-08). */
+    public function listPdf(Request $request, array $params): Response
+    {
+        $this->guardPending();
+        [$p, $event] = $this->participantAndEvent();
+        $brand = $this->app->branding()->forEvent($event);
+        $logo = $brand['logo'] !== '' ? $this->app->images()->path($brand['logo']) : null;
+        $html = $this->app->view()->renderMail('pdf/sponsor_list.html.twig', [
+            'p' => $p,
+            'event' => $event,
+            'brand' => $brand,
+            'logo_path' => $logo,
+            'qr' => $event['status'] === 'collecting' ? QrCode::dataUri($this->absolute('/i/' . $this->app->access()->inviteToken((int) $p['id'])), 6) : null,
+            'pledges' => array_reverse($this->app->pledges()->forParticipation((int) $p['id'])),
+            'empty_rows' => max(8, 18 - count($this->app->pledges()->forParticipation((int) $p['id']))),
+            'formatter' => $this->app->formatter,
+        ]);
+        $name = 'Sponsorenliste-' . preg_replace('/[^A-Za-z0-9]+/', '-', $p['first_name'] . '-' . $p['last_name']) . '.pdf';
+
+        return new Response($this->app->pdf()->render($html, $this->t('pdf.title', ['name' => $p['first_name'] . ' ' . $p['last_name']])), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $name . '"',
+        ]);
+    }
+
+    /** @return array{0: array<string, mixed>, 1: array<string, mixed>} */
+    private function participantAndEvent(): array
+    {
+        $p = $this->app->participantSession()->current();
+        $event = $p !== null ? $this->app->events()->find((int) $p['event_id']) : null;
+        if ($p === null || $event === null) {
+            throw new \LapFund\Controller\RedirectException($this->app->request->url('/'));
+        }
+
+        return [$p, $event];
+    }
+
+    private function pledgeForm(array $p, array $event, array $input, array $errors, int $status = 200): Response
+    {
+        return $this->render('public/pledge_new.html.twig', [
+            'p' => $p,
+            'event' => $event,
+            'brand' => $this->app->branding()->forEvent($event),
+            'theme_event' => (int) $event['id'],
+            'methods' => \LapFund\Service\PledgeService::methods($event),
+            'quick' => SponsorController::QUICK,
+            'input' => $input,
+            'errors' => $errors,
+        ], $status);
+    }
+
     public function switchParticipation(Request $request, array $params): Response
     {
         $this->app->participantSession()->switchTo((int) $request->input('participation'));
@@ -172,36 +284,8 @@ final class PublicController extends Controller
         return $this->redirect('/');
     }
 
-    /**
-     * Invitation link for sponsors (/i/{token}). Entering a pledge follows in stage 4;
-     * until then the page shows who is asking and that the form follows.
-     */
-    public function invitation(Request $request, array $params): Response
-    {
-        $this->guardPending();
-        if (!$this->app->rateLimiter()->hit('invite_ip', $request->ip(), 120, 600)) {
-            throw new HttpException(429);
-        }
-        $p = $this->app->access()->findByInviteToken((string) $params['token']);
-        if ($p === null) {
-            return $this->render('public/link_invalid.html.twig', ['for_sponsor' => true], 404);
-        }
-        $event = $this->app->events()->find((int) $p['event_id']);
-        if ($event === null) {
-            throw new HttpException(404);
-        }
-
-        return $this->render('public/invite.html.twig', [
-            'p' => $p,
-            'event' => $event,
-            'brand' => $this->app->branding()->forEvent($event),
-            'theme_event' => (int) $event['id'],
-            'open' => ParticipantSession::usable($p) && $event['status'] === 'collecting',
-        ]);
-    }
-
     /** Public pages wait until pending database updates have run. */
-    private function guardPending(): void
+    protected function guardPending(): void
     {
         if ($this->app->migrator()->pending() !== []) {
             throw new HttpException(503);

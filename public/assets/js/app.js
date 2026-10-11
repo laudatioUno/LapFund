@@ -86,4 +86,28 @@
     };
     setTimeout(step, 1500);
   }
+
+  // Pledge form: quick amounts for the chosen type, hint per type
+  var quick = document.querySelector('[data-quick]');
+  var amount = document.getElementById('f-amount');
+  if (quick && amount) {
+    var types = document.querySelectorAll('[data-pledge-type]');
+    var current = function () {
+      var t = 'flat';
+      types.forEach(function (r) { if (r.checked) { t = r.value; } });
+      return t;
+    };
+    var sync = function () {
+      var t = current();
+      quick.querySelectorAll('[data-quick-type]').forEach(function (b) { b.hidden = b.getAttribute('data-quick-type') !== t; });
+      document.querySelectorAll('[data-amount-hint]').forEach(function (h) { h.hidden = h.getAttribute('data-amount-hint') !== t; });
+    };
+    quick.hidden = false;
+    types.forEach(function (r) { r.addEventListener('change', sync); });
+    quick.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-quick-value]');
+      if (b) { amount.value = b.getAttribute('data-quick-value'); amount.focus(); }
+    });
+    sync();
+  }
 })();

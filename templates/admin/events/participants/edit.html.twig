@@ -34,6 +34,35 @@
     {% endif %}
   </section>
 
+  <section class="card stack form-narrow" aria-labelledby="pledges-title">
+    <h2 class="h2" id="pledges-title">{{ t('participants.pledges_title') }}</h2>
+    {% if pledges is empty %}
+      <p class="muted">{{ t('participants.no_pledges') }}</p>
+    {% else %}
+      <div class="table-wrap table-wrap--flat">
+        <table class="table table--compact">
+          <thead><tr>
+            <th scope="col">{{ t('pledge.field.sponsor_name') }}</th>
+            <th scope="col" class="num">{{ t('pledge.field.amount') }}</th>
+            <th scope="col">{{ t('pledge.field.method') }}</th>
+            <th scope="col">{{ t('pledge.payment.status') }}</th>
+          </tr></thead>
+          <tbody>
+            {% for pl in pledges %}
+              <tr>
+                <td>{{ pl.sponsor_name }}<br><span class="muted small">{{ pl.created_at|datetime }} · {{ t('pledge.source.' ~ pl.source) }}</span></td>
+                <td class="num nowrap">{{ pl.amount_cents|money }}{% if pl.type == 'per_lap' %}<br><span class="muted small">{{ t('pledge.per_lap_short') }}</span>{% endif %}</td>
+                <td>{{ t('pledge.method.' ~ pl.payment_method) }}</td>
+                <td><span class="badge badge--pledge-{{ pl.status }}">{{ t('pledge.status.' ~ pl.status) }}</span></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="muted small">{{ t('participants.pledges_later') }}</p>
+    {% endif %}
+  </section>
+
   <section class="card stack form-narrow" aria-labelledby="access-title">
     <h2 class="h2" id="access-title">{{ t('participants.access.title') }}</h2>
     <p class="muted">{{ t('participants.access.help') }}</p>

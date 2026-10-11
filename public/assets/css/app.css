@@ -320,6 +320,36 @@ a.chip:hover { background: var(--line); }
 .chip-btn { font: inherit; font-weight: 600; font-size: 15px; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); cursor: pointer; }
 .chip-btn.is-current { background: var(--ink); border-color: var(--ink); color: #FFFFFF; }
 
+/* Stage 4: pledges */
+.segmented { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.segmented__option { display: flex; gap: 10px; align-items: flex-start; padding: 12px; border: 1px solid var(--line-strong); border-radius: 10px; cursor: pointer; background: var(--surface); }
+.segmented__option input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--accent); flex-shrink: 0; }
+.segmented__option:has(input:checked) { border: 2px solid var(--accent); padding: 11px; background: #F4F8FC; }
+.amount-row { display: flex; align-items: center; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--surface); }
+.amount-row:focus-within { outline: 3px solid var(--accent); border-color: var(--accent); }
+.amount-row__currency { padding: 0 4px 0 14px; font-weight: 600; color: var(--muted); }
+.amount-row input { border: 0 !important; outline: none !important; font-size: 22px; font-weight: 700; min-height: 52px; }
+.field--error .amount-row { border-color: var(--err-ink); }
+.quick { display: flex; flex-wrap: wrap; gap: 8px; }
+.inline-check--top { align-items: flex-start; }
+.inline-check--top input { margin-top: 3px; flex-shrink: 0; }
+.section-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.pledge-list__status { text-align: right; }
+.pledge-list__msg { grid-column: 1 / -1; color: var(--ink-2); font-style: italic; }
+.pledge-list__cash { grid-column: 1 / -1; }
+.cash-toggle { display: inline-flex; align-items: center; gap: 10px; min-height: 40px; padding: 0; border: 0; background: none; font: inherit; color: var(--ink); cursor: pointer; }
+.cash-toggle__box { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border: 2px solid var(--line-strong); border-radius: 6px; font-weight: 700; color: var(--on-accent); }
+.cash-toggle.is-checked .cash-toggle__box { background: var(--accent); border-color: var(--accent); }
+.pdf-link { font-weight: 600; }
+.twint-qr { text-align: center; }
+.twint-qr img { max-width: 260px; width: 100%; border: 1px solid var(--line); border-radius: 10px; }
+.badge--pledge-open { background: var(--info-bg); color: var(--info-ink); }
+.badge--pledge-cash_received { background: var(--warn-bg); color: var(--warn-ink); }
+.badge--pledge-paid { background: var(--ok-bg); color: var(--ok-ink); }
+.badge--pledge-cancelled { background: #E8ECF0; color: var(--muted); }
+.table-wrap--flat { box-shadow: none; border: 1px solid var(--line); }
+.table--compact { min-width: 0; }
+
 @media (max-width: 820px) {
   .nav { gap: 12px; }
   .nav__group { flex-direction: row; flex-wrap: wrap; }

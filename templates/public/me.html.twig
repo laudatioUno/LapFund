@@ -83,8 +83,11 @@
     {% endif %}
   </section>
 
-  <section class="stack" aria-labelledby="sp-title">
-    <h2 class="h2" id="sp-title">{{ t('public.me.sponsors_title') }}</h2>
+  <section class="stack" id="sponsors" aria-labelledby="sp-title">
+    <div class="section-head">
+      <h2 class="h2" id="sp-title">{{ t('public.me.sponsors_title') }}</h2>
+      {% if can_add_pledge %}<a href="{{ url('/me/pledges/new') }}" class="btn btn--secondary btn--small">{{ t('public.me.add_pledge') }}</a>{% endif %}
+    </div>
     {% if pledges is empty %}
       <div class="card"><p class="muted">{{ t('public.me.no_sponsors') }}</p></div>
     {% else %}
@@ -93,11 +96,23 @@
           <li class="pledge-list__item">
             <span class="strong">{{ pl.sponsor_name }}</span>
             <span class="pledge-list__amount">{{ pl.amount_cents|money }}{% if pl.type == 'per_lap' %} {{ t('public.me.per_lap_short') }}{% endif %}</span>
-            <span class="muted small">{{ t('public.me.method.' ~ pl.payment_method) }}</span>
+            <span class="muted small">{{ t('public.me.method.' ~ pl.payment_method) }}{% if pl.source == 'participant' %} · {{ t('public.me.entered_by_you') }}{% endif %}</span>
+            <span class="small pledge-list__status"><span class="badge badge--pledge-{{ pl.status }}">{{ t('pledge.status.' ~ pl.status) }}</span></span>
+            {% if pl.sponsor_message %}<span class="pledge-list__msg small">«{{ pl.sponsor_message }}»</span>{% endif %}
+            {% if pl.payment_method == 'cash' and pl.status in ['open', 'cash_received'] and can_mark_cash %}
+              <form method="post" action="{{ url('/me/pledges/' ~ pl.id ~ '/cash') }}" class="pledge-list__cash">
+                {{ csrf_field() }}
+                <input type="hidden" name="received" value="{{ pl.status == 'open' ? '1' : '0' }}">
+                <button type="submit" class="cash-toggle{{ pl.status == 'cash_received' ? ' is-checked' }}" aria-pressed="{{ pl.status == 'cash_received' ? 'true' : 'false' }}">
+                  <span class="cash-toggle__box" aria-hidden="true">{{ pl.status == 'cash_received' ? '✓' : '' }}</span>{{ t('public.me.cash_received') }}
+                </button>
+              </form>
+            {% endif %}
           </li>
         {% endfor %}
       </ul>
     {% endif %}
+    <p><a href="{{ url('/me/list.pdf') }}" class="pdf-link" target="_blank" rel="noopener">{{ t('public.me.pdf') }}</a></p>
   </section>
 {% endblock %}
 

@@ -347,6 +347,7 @@ final class ParticipantController extends EventScopedController
             'can_remove' => (int) $p['pledge_count'] === 0 && $this->canChangeList(),
             'invite' => $this->app->mailQueue()->lastInvitePerParticipation((int) $this->event['id'])[(int) $p['id']] ?? null,
             'mail_configured' => $this->app->mailSettings()->isConfigured(),
+            'pledges' => $this->app->pledges()->forParticipation((int) $p['id']),
         ], $status);
     }
 

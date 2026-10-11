@@ -35,6 +35,8 @@ use LapFund\Service\AdminInvites;
 use LapFund\Service\Branding;
 use LapFund\Service\ImageUpload;
 use LapFund\Service\ParticipantAccess;
+use LapFund\Service\Pdf;
+use LapFund\Service\PledgeService;
 use LapFund\Service\ParticipantService;
 use LapFund\View\View;
 
@@ -43,7 +45,7 @@ use LapFund\View\View;
  */
 final class App
 {
-    public const VERSION = '0.3.0';
+    public const VERSION = '0.4.0';
 
     public Config $config;
     public readonly Translator $translator;
@@ -275,6 +277,24 @@ final class App
             $this->translator,
             $this->formatter,
         ));
+    }
+
+    public function pledgeService(): PledgeService
+    {
+        return $this->service(PledgeService::class, fn () => new PledgeService(
+            $this->db(),
+            $this->mailQueue(),
+            $this->mailComposer(),
+            $this->mailSettings(),
+            $this->branding(),
+            $this->translator,
+            $this->formatter,
+        ));
+    }
+
+    public function pdf(): Pdf
+    {
+        return $this->service(Pdf::class, fn () => new Pdf($this->root));
     }
 
     public function rateLimiter(): RateLimiter

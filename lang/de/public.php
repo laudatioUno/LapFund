@@ -82,4 +82,10 @@ return [
     'me.cash_received' => 'Bargeld erhalten',
     'me.entered_by_you' => 'von dir erfasst',
     'me.pdf' => 'Sponsorenliste zum Ausdrucken (PDF)',
+    'me.your_run' => 'Dein Lauf',
+    'me.laps' => 'Runden',
+    'me.did_not_start' => 'nicht gestartet',
+    'me.total_collected' => 'gesammelt',
+    'me.paid_so_far' => 'Bezahlt: {amount}',
+    'me.open_amount' => 'Offen: {amount}',
 ];

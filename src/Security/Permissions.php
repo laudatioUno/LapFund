@@ -39,6 +39,8 @@ final class Permissions
         'event.participants' => ['club', 'assigned'],  // add, import, take over, teams
         'event.status' => ['assigned'],                // move the status
         'event.mail' => ['assigned'],                  // invitations, new magic links (A7)
+        'event.laps' => ['assigned'],                  // record laps (RU-01)
+        'event.payments' => ['assigned'],              // pledges, payments, payment mails (AD-02, ZA-*)
         'event.assign_admins' => ['club'],
         'event.archive' => ['club'],
     ];

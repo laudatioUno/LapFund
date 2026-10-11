@@ -10,8 +10,11 @@ use LapFund\Controller\AuthController;
 use LapFund\Controller\EventController;
 use LapFund\Controller\EventMailController;
 use LapFund\Controller\InstallController;
+use LapFund\Controller\LapsController;
 use LapFund\Controller\MailController;
 use LapFund\Controller\ParticipantController;
+use LapFund\Controller\PaymentsController;
+use LapFund\Controller\PledgeAdminController;
 use LapFund\Controller\PoolController;
 use LapFund\Controller\PublicController;
 use LapFund\Controller\SettingsController;
@@ -124,6 +127,25 @@ final class Routes
         $r->post('/admin/events/{id}/mails/retry', $c(EventMailController::class, 'retry'));
         $r->post('/admin/events/{id}/participants/{pid:[1-9][0-9]*}/invite', $c(ParticipantController::class, 'resendInvite'));
         $r->post('/admin/events/{id}/participants/{pid:[1-9][0-9]*}/link', $c(ParticipantController::class, 'newLink'));
+
+        // Laps and billing (stage 5)
+        $r->get('/admin/events/{id}/laps', $c(LapsController::class, 'index'));
+        $r->post('/admin/events/{id}/laps', $c(LapsController::class, 'save'));
+        $r->get('/admin/events/{id}/laps.pdf', $c(LapsController::class, 'pdf'));
+        $r->get('/admin/events/{id}/payments', $c(PaymentsController::class, 'index'));
+        $r->post('/admin/events/{id}/payments/send', $c(PaymentsController::class, 'send'));
+        $r->post('/admin/events/{id}/payments/test', $c(PaymentsController::class, 'test'));
+        $r->post('/admin/events/{id}/payments/remind', $c(PaymentsController::class, 'remind'));
+        $pp = '/admin/events/{id}/participants/{pid:[1-9][0-9]*}';
+        $r->get($pp . '/pledges/new', $c(PledgeAdminController::class, 'create'));
+        $r->post($pp . '/pledges/new', $c(PledgeAdminController::class, 'store'));
+        $r->get($pp . '/pledges/{plid:[1-9][0-9]*}', $c(PledgeAdminController::class, 'edit'));
+        $r->post($pp . '/pledges/{plid:[1-9][0-9]*}', $c(PledgeAdminController::class, 'update'));
+        $r->post($pp . '/pledges/{plid:[1-9][0-9]*}/cancel', $c(PledgeAdminController::class, 'cancel'));
+        $r->post($pp . '/pledges/{plid:[1-9][0-9]*}/paid', $c(PledgeAdminController::class, 'paid'));
+        $r->post($pp . '/pledges/{plid:[1-9][0-9]*}/unpaid', $c(PledgeAdminController::class, 'unpaid'));
+        $r->post($pp . '/paid', $c(PledgeAdminController::class, 'allPaid'));
+        $r->post($pp . '/paid/undo', $c(PledgeAdminController::class, 'undoAll'));
 
         $r->get('/admin/participants', $c(PoolController::class, 'index'));
 

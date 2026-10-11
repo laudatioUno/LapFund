@@ -1,0 +1,30 @@
+<?php
+
+// Lap list and lap entry. Keys are used as 'laps.<key>'.
+return [
+    'pdf_heading' => 'Zählliste',
+    'pdf_help' => 'Zum Ausdrucken für den Lauftag: pro Team eine Seite mit Feld für die Strichliste. Die Nummern entsprechen der Erfassung unten.',
+    'pdf_all' => 'Ganzer Event (PDF)',
+    'pdf_title' => 'Zählliste {event}',
+    'pdf_note' => 'Strichliste: ein Strich pro Runde. Nach dem Lauf Total eintragen und visieren.',
+    'no' => 'Nr.',
+    'tally' => 'Strichliste',
+    'total' => 'Total',
+    'visum' => 'Visum',
+    'no_team' => 'Ohne Team',
+    'laps' => 'Runden',
+    'dns' => 'Nicht gestartet',
+    'dns_short' => 'nicht gestartet',
+    'per_lap' => 'pro Runde zugesagt',
+    'save' => 'Runden speichern',
+    'saved' => 'Gespeichert, {count} Änderungen.',
+    'help' => 'Tipp: Mit Tab oder Enter geht es zur nächsten Person. Leer lassen, wenn die Runden noch nicht bekannt sind.',
+    'has_errors' => 'Bitte prüfe die markierten Zeilen.',
+    'error.number' => 'Bitte eine Zahl von 0 bis 999.',
+    'not_now' => 'Runden werden nach dem Lauf erfasst (Status «Lauf durchgeführt» oder «Abrechnung»).',
+    'edit_after_run' => 'Runden können erfasst werden, sobald der Status auf «Lauf durchgeführt» steht.',
+    'only_event_admin' => 'Runden erfassen nur die zugewiesenen Event-Admins.',
+    'send_corrections' => 'Sponsoren, deren Zahlungsaufforderung schon verschickt ist, eine Korrekturmail mit dem neuen Betrag senden',
+    'corrections_sent' => '{count} Korrekturmails sind in der Warteschlange.',
+    'corrections_hint' => '{count} Sponsoren haben bereits eine Zahlungsaufforderung mit einem anderen Betrag. Speichere nochmals mit Häkchen, um eine Korrekturmail zu senden, oder korrigiere einzeln.',
+];

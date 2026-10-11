@@ -25,6 +25,23 @@ final class ParticipantController extends EventScopedController
         $teamId = ctype_digit($teamFilter) ? (int) $teamFilter : null;
         $query = mb_substr($request->input('q'), 0, 100);
         $rows = $this->app->participants()->forEvent((int) $this->event['id'], $teamId, $query, $teamFilter === 'none');
+        $sums = [];
+        foreach ($this->app->billing()->participants((int) $this->event['id']) as $b) {
+            $sums[(int) $b['participation_id']] = $b;
+        }
+        foreach ($rows as &$row) {
+            $row['b'] = $sums[(int) $row['participation_id']] ?? null;
+        }
+        unset($row);
+        $onlyOpen = $request->input('state') === 'open';
+        if ($onlyOpen) {
+            $rows = array_values(array_filter($rows, static fn (array $r) => $r['b'] !== null && in_array($r['b']['state'], ['open', 'partial'], true)));
+        }
+        $sort = $request->input('sort') === 'open' ? 'open' : '';
+        if ($sort === 'open') {
+            usort($rows, static fn (array $a, array $b) => ($b['b']['open_cents'] ?? 0) <=> ($a['b']['open_cents'] ?? 0));
+        }
+        $billingView = in_array($this->event['status'], ['run_done', 'billing', 'closed'], true) || $request->input('view') === 'money';
 
         return $this->renderEvent('admin/events/participants/index.html.twig', 'participants', [
             'rows' => $rows,
@@ -36,6 +53,9 @@ final class ParticipantController extends EventScopedController
             'invites' => $this->app->mailQueue()->lastInvitePerParticipation((int) $this->event['id']),
             'uninvited' => $this->app->access()->uninvitedCount((int) $this->event['id']),
             'mail_configured' => $this->app->mailSettings()->isConfigured(),
+            'only_open' => $onlyOpen,
+            'sort' => $sort,
+            'money_view' => $billingView,
         ]);
     }
 
@@ -347,7 +367,11 @@ final class ParticipantController extends EventScopedController
             'can_remove' => (int) $p['pledge_count'] === 0 && $this->canChangeList(),
             'invite' => $this->app->mailQueue()->lastInvitePerParticipation((int) $this->event['id'])[(int) $p['id']] ?? null,
             'mail_configured' => $this->app->mailSettings()->isConfigured(),
-            'pledges' => $this->app->pledges()->forParticipation((int) $p['id']),
+            'pledges' => $this->app->billing()->pledgesOf((int) $p['id']),
+            'sums' => array_values(array_filter($this->app->billing()->participants((int) $this->event['id']), static fn (array $b) => (int) $b['participation_id'] === (int) $p['id']))[0] ?? null,
+            'can_pay' => $this->perm['payments'] && in_array($this->event['status'], PledgeAdminController::CHANGE_STATES, true),
+            'undo_group' => $this->app->billingService()->lastGroup((int) $p['id']),
+            'today' => gmdate('Y-m-d'),
         ], $status);
     }
 

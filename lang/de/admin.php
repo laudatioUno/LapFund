@@ -130,4 +130,12 @@ return [
     'audit.action.invitations_sent' => 'Einladungen verschickt',
     'audit.action.invitation_sent' => 'Einladung verschickt',
     'audit.action.magic_link_renewed' => 'Neuer Teilnehmer-Link erstellt',
+    'audit.action.laps_updated' => 'Runden erfasst',
+    'audit.action.payment_requests_sent' => 'Zahlungsaufforderungen verschickt',
+    'audit.action.payment_reminders_sent' => 'Erinnerungen verschickt',
+    'audit.action.pledge_created' => 'Zusage erfasst',
+    'audit.action.pledge_updated' => 'Zusage korrigiert',
+    'audit.action.pledge_cancelled' => 'Zusage storniert',
+    'audit.action.pledge_paid' => 'Zahlung abgehakt',
+    'audit.action.pledge_unpaid' => 'Zahlung zurückgenommen',
 ];

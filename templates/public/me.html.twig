@@ -18,6 +18,19 @@
   <h1 class="pub-title">{{ t('public.me.hello', {name: p.first_name}) }}</h1>
   <p><span class="badge badge--status-{{ event.status }}">{{ t('events.status.' ~ event.status) }}{% if event.event_date %} · {{ t('public.me.run_on', {date: event.event_date|date('d.m.Y')}) }}{% endif %}</span></p>
 
+  {% if after_run and sums and (p.laps is not null or p.did_not_start) %}
+    <section class="summary" aria-labelledby="run-title">
+      <h2 class="summary__label" id="run-title">{{ t('public.me.your_run') }}</h2>
+      <div class="summary__grid">
+        <div><span class="summary__value">{{ p.did_not_start ? '–' : p.laps }}</span><span class="summary__hint">{{ p.did_not_start ? t('public.me.did_not_start') : t('public.me.laps') }}</span></div>
+        <div><span class="summary__value">{{ sums.owed_cents|money }}</span><span class="summary__hint">{{ t('public.me.total_collected') }}</span></div>
+      </div>
+      <div class="summary__foot">
+        <span>{{ t('public.me.paid_so_far', {amount: sums.paid_cents|money}) }}</span>
+        <span>{{ t('public.me.open_amount', {amount: sums.open_cents|money}) }}</span>
+      </div>
+    </section>
+  {% else %}
   <section class="summary" aria-labelledby="sum-title">
     <h2 class="summary__label" id="sum-title">{{ t('public.me.collected') }}</h2>
     <div class="summary__grid">
@@ -31,6 +44,7 @@
       {% endif %}
     </div>
   </section>
+  {% endif %}
 
   {% if share %}
     <section class="card stack" aria-labelledby="share-title">
@@ -95,8 +109,8 @@
         {% for pl in pledges %}
           <li class="pledge-list__item">
             <span class="strong">{{ pl.sponsor_name }}</span>
-            <span class="pledge-list__amount">{{ pl.amount_cents|money }}{% if pl.type == 'per_lap' %} {{ t('public.me.per_lap_short') }}{% endif %}</span>
-            <span class="muted small">{{ t('public.me.method.' ~ pl.payment_method) }}{% if pl.source == 'participant' %} · {{ t('public.me.entered_by_you') }}{% endif %}</span>
+            <span class="pledge-list__amount">{% if after_run and not pl.unknown and pl.type == 'per_lap' %}{{ pl.owed_cents|money }}{% else %}{{ pl.amount_cents|money }}{% if pl.type == 'per_lap' %} {{ t('public.me.per_lap_short') }}{% endif %}{% endif %}</span>
+            <span class="muted small">{{ t('public.me.method.' ~ pl.payment_method) }}{% if pl.source == 'participant' %} · {{ t('public.me.entered_by_you') }}{% endif %}{% if after_run and pl.type == 'per_lap' and not pl.unknown %} · {{ pl.amount_cents|money }} {{ t('public.me.per_lap_short') }}{% endif %}</span>
             <span class="small pledge-list__status"><span class="badge badge--pledge-{{ pl.status }}">{{ t('pledge.status.' ~ pl.status) }}</span></span>
             {% if pl.sponsor_message %}<span class="pledge-list__msg small">«{{ pl.sponsor_message }}»</span>{% endif %}
             {% if pl.payment_method == 'cash' and pl.status in ['open', 'cash_received'] and can_mark_cash %}

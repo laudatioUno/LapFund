@@ -21,6 +21,7 @@ use LapFund\Mail\MailWorker;
 use LapFund\Mail\SmtpTransport;
 use LapFund\Repository\AdminUserRepository;
 use LapFund\Repository\AuditLog;
+use LapFund\Repository\BillingRepository;
 use LapFund\Repository\EventRepository;
 use LapFund\Repository\ParticipantRepository;
 use LapFund\Repository\PledgeRepository;
@@ -32,6 +33,7 @@ use LapFund\Security\Csrf;
 use LapFund\Security\RateLimiter;
 use LapFund\Security\Totp;
 use LapFund\Service\AdminInvites;
+use LapFund\Service\BillingService;
 use LapFund\Service\Branding;
 use LapFund\Service\ImageUpload;
 use LapFund\Service\ParticipantAccess;
@@ -45,7 +47,7 @@ use LapFund\View\View;
  */
 final class App
 {
-    public const VERSION = '0.4.0';
+    public const VERSION = '0.5.0';
 
     public Config $config;
     public readonly Translator $translator;
@@ -289,6 +291,28 @@ final class App
             $this->branding(),
             $this->translator,
             $this->formatter,
+            $this->crypto(),
+        ));
+    }
+
+    public function billing(): BillingRepository
+    {
+        return $this->service(BillingRepository::class, fn () => new BillingRepository($this->db()));
+    }
+
+    public function billingService(): BillingService
+    {
+        return $this->service(BillingService::class, fn () => new BillingService(
+            $this->db(),
+            $this->billing(),
+            $this->pledgeService(),
+            $this->mailQueue(),
+            $this->mailComposer(),
+            $this->mailSettings(),
+            $this->branding(),
+            $this->translator,
+            $this->formatter,
+            $this->audit(),
         ));
     }
 

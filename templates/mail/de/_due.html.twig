@@ -1,0 +1,18 @@
+{# Amount owed and how to pay. Needs: pledge, participant, owed, rate, laps, did_not_start, twint, twint_qr, twint_message, payment_url #}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;border:1px solid #DCE3EA;border-radius:10px;">
+<tr><td style="padding:14px 16px;font-size:15px;line-height:1.6;">
+  {{ t('mail.pledge.for') }}: <strong>{{ participant }}</strong><br>
+  {% if pledge.type == 'per_lap' %}{{ t('mail.due.per_lap_line', {laps: laps, rate: rate}) }}<br>{% else %}{{ t('mail.pledge.kind') }}: {{ t('pledge.type.flat') }}<br>{% endif %}
+  <span style="font-size:18px;">{{ t('mail.due.amount') }}: <strong>{{ owed }}</strong></span>
+</td></tr>
+</table>
+{% if twint %}
+  <p style="margin:0 0 8px;font-weight:bold;">{{ t('mail.pledge.twint_title') }}</p>
+  <p style="margin:0 0 8px;">{{ t('mail.pledge.twint_text', {amount: owed}) }}</p>
+  <p style="margin:0 0 12px;padding:10px 12px;background:#F3F6F9;border-radius:8px;font-family:monospace;font-size:15px;">{{ twint_message }}</p>
+  {% if twint_qr %}<p style="margin:0 0 16px;"><img src="cid:twint" width="200" alt="{{ t('pledge.payment.twint_qr_alt') }}" style="display:block;width:200px;height:auto;border:1px solid #DCE3EA;border-radius:8px;"></p>{% endif %}
+{% else %}
+  <p style="margin:0 0 16px;">{{ t('mail.pledge.cash_text', {name: pledge.first_name, amount: owed}) }}</p>
+{% endif %}
+{% include 'mail/de/_button.html.twig' with {href: payment_url, label: t('mail.pledge.button')} %}
+<p style="margin:0;font-size:13px;color:#586776;word-break:break-all;">{{ t('mail.link_fallback') }}<br><a href="{{ payment_url }}" style="color:#3B4A58;">{{ payment_url }}</a></p>

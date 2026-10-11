@@ -85,4 +85,7 @@ return [
     'participant.mail_hint' => 'Der Sponsor erhält eine Bestätigung mit den Zahlungsangaben. Ändern kann die Zusage danach nur der Event-Admin.',
 
     'cash.not_possible' => 'Das ist bei dieser Zusage nicht möglich.',
+    'payment.did_not_start' => '{name} konnte nicht starten. Für deine Zusage pro Runde ist deshalb nichts zu bezahlen. Danke trotzdem!',
+    'payment.laps_run' => '{name} ist {laps} Runden gelaufen',
+    'payment.laps_calc' => '{laps} Runden × {rate}',
 ];

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<title>{{ t('laps.pdf_title', {event: event.name}) }}</title>
+<style>
+  @page { margin: 14mm 14mm 18mm; }
+  body { font-family: "DejaVu Sans", sans-serif; font-size: 10pt; color: #14212E; }
+  .page { page-break-after: always; }
+  .page:last-child { page-break-after: auto; }
+  .head { width: 100%; border-bottom: 2pt solid {{ brand.primary_color }}; padding-bottom: 5pt; margin-bottom: 8pt; }
+  .head td { vertical-align: middle; }
+  .logo { width: 40pt; height: 40pt; }
+  .club { font-size: 11pt; font-weight: bold; }
+  .event { font-size: 9pt; color: #3B4A58; }
+  .team { font-size: 18pt; font-weight: bold; text-align: right; }
+  table.list { width: 100%; border-collapse: collapse; }
+  table.list th { text-align: left; font-size: 8pt; color: #3B4A58; border-bottom: 1pt solid #14212E; padding: 3pt 4pt; }
+  table.list td { border-bottom: 0.6pt solid #8A99A8; padding: 0 4pt; height: 30pt; vertical-align: middle; }
+  td.tally { border-left: 0.6pt solid #B9C5D1; border-right: 0.6pt solid #B9C5D1; }
+  .muted { color: #586776; font-size: 8pt; }
+</style>
+</head>
+<body>
+{% for key, g in groups %}
+<div class="page">
+  <table class="head"><tr>
+    {% if logo_path %}<td style="width:46pt"><img src="{{ logo_path }}" class="logo"></td>{% endif %}
+    <td><div class="club">{{ brand.club_name }}</div><div class="event">{{ t('laps.pdf_heading') }} · {{ event.name }}{% if event.event_date %} · {{ event.event_date|date('d.m.Y') }}{% endif %}{% if event.lap_length_m %} · {{ t('public.invite.lap_length', {m: event.lap_length_m}) }}{% endif %}</div></td>
+    <td class="team">{{ g.name ?? t('laps.no_team') }}</td>
+  </tr></table>
+  <table class="list">
+    <thead><tr>
+      <th style="width:6%">{{ t('laps.no') }}</th>
+      <th style="width:26%">{{ t('participants.name') }}</th>
+      <th style="width:46%">{{ t('laps.tally') }}</th>
+      <th style="width:11%">{{ t('laps.total') }}</th>
+      <th style="width:11%">{{ t('laps.visum') }}</th>
+    </tr></thead>
+    <tbody>
+    {% for r in g.rows %}
+      <tr><td>{{ r.no }}</td><td>{{ r.last_name }} {{ r.first_name }}</td><td class="tally"></td><td></td><td></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="muted">{{ t('laps.pdf_note') }}</p>
+</div>
+{% endfor %}
+</body>
+</html>

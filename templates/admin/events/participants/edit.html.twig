@@ -34,8 +34,20 @@
     {% endif %}
   </section>
 
-  <section class="card stack form-narrow" aria-labelledby="pledges-title">
-    <h2 class="h2" id="pledges-title">{{ t('participants.pledges_title') }}</h2>
+  <section class="card stack" aria-labelledby="pledges-title">
+    <div class="section-head">
+      <h2 class="h2" id="pledges-title">{{ t('participants.pledges_title') }}</h2>
+      {% if can_pay %}<a href="{{ url('/admin/events/' ~ event.id ~ '/participants/' ~ p.id ~ '/pledges/new') }}" class="btn btn--secondary btn--small">{{ t('pledges.admin.add') }}</a>{% endif %}
+    </div>
+    {% if sums %}
+      <dl class="mail-counts money-counts money-counts--small">
+        <div><dt>{{ t('laps.laps') }}</dt><dd>{{ p.did_not_start ? t('laps.dns_short') : (p.laps ?? '–') }}</dd></div>
+        <div><dt>{{ t('payments.total.owed') }}</dt><dd>{{ sums.owed_cents|money }}</dd></div>
+        <div><dt>{{ t('payments.total.paid') }}</dt><dd>{{ sums.paid_cents|money }}</dd></div>
+        <div><dt>{{ t('payments.total.open') }}</dt><dd>{{ sums.open_cents|money }}</dd></div>
+      </dl>
+      <p><span class="badge badge--state-{{ sums.state }}">{{ t('payments.state_' ~ sums.state) }}</span>{% if sums.unknown_count > 0 %} <span class="muted small">{{ t('payments.plus_laps') }}</span>{% endif %}</p>
+    {% endif %}
     {% if pledges is empty %}
       <p class="muted">{{ t('participants.no_pledges') }}</p>
     {% else %}
@@ -44,22 +56,73 @@
           <thead><tr>
             <th scope="col">{{ t('pledge.field.sponsor_name') }}</th>
             <th scope="col" class="num">{{ t('pledge.field.amount') }}</th>
-            <th scope="col">{{ t('pledge.field.method') }}</th>
+            <th scope="col" class="num">{{ t('payments.total.owed') }}</th>
             <th scope="col">{{ t('pledge.payment.status') }}</th>
+            {% if can_pay %}<th scope="col"><span class="visually-hidden">{{ t('events.teams.actions') }}</span></th>{% endif %}
           </tr></thead>
           <tbody>
             {% for pl in pledges %}
-              <tr>
-                <td>{{ pl.sponsor_name }}<br><span class="muted small">{{ pl.created_at|datetime }} · {{ t('pledge.source.' ~ pl.source) }}</span></td>
+              <tr{{ pl.status == 'cancelled' ? ' class="is-muted"' }}>
+                <td>
+                  <strong>{{ pl.sponsor_name }}</strong><br>
+                  <span class="muted small break">{{ pl.sponsor_email }}</span><br>
+                  <span class="muted small">{{ pl.created_at|datetime }} · {{ t('pledge.source.' ~ pl.source) }} · {{ t('pledge.method.' ~ pl.payment_method) }}</span>
+                  {% if pl.sponsor_message %}<br><span class="small">«{{ pl.sponsor_message }}»</span>{% endif %}
+                </td>
                 <td class="num nowrap">{{ pl.amount_cents|money }}{% if pl.type == 'per_lap' %}<br><span class="muted small">{{ t('pledge.per_lap_short') }}</span>{% endif %}</td>
-                <td>{{ t('pledge.method.' ~ pl.payment_method) }}</td>
-                <td><span class="badge badge--pledge-{{ pl.status }}">{{ t('pledge.status.' ~ pl.status) }}</span></td>
+                <td class="num nowrap">{{ pl.unknown ? '–' : pl.owed_cents|money }}</td>
+                <td>
+                  <span class="badge badge--pledge-{{ pl.status }}">{{ t('pledge.status.' ~ pl.status) }}</span>
+                  {% if pl.status == 'paid' %}<br><span class="muted small">{{ pl.paid_at|date_ch }} · {{ t('pledge.method.' ~ pl.paid_method) }} · {{ pl.paid_amount_cents|money }}{% if pl.paid_by_name %} · {{ pl.paid_by_name }}{% endif %}</span>{% endif %}
+                  {% if pl.status == 'cancelled' %}<br><span class="muted small">{{ pl.cancel_reason }}</span>{% endif %}
+                  {% if pl.payment_requested_at %}<br><span class="muted small">{{ t('pledges.admin.requested_on', {date: pl.payment_requested_at|date_ch}) }}{% if pl.reminder_count > 0 %} · {{ t('pledges.admin.reminders', {count: pl.reminder_count}) }}{% endif %}</span>{% endif %}
+                </td>
+                {% if can_pay %}
+                  <td class="actions-col">
+                    {% if pl.status in ['open', 'cash_received'] %}
+                      {% if not pl.unknown %}
+                        <details class="inline-details">
+                          <summary class="btn btn--secondary btn--small">{{ t('pledges.admin.mark_paid') }}</summary>
+                          <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/participants/' ~ p.id ~ '/pledges/' ~ pl.id ~ '/paid') }}" class="stack paid-form">
+                            {{ csrf_field() }}
+                            <label>{{ t('pledges.admin.paid_date') }} <input type="date" name="date" value="{{ today }}" max="{{ today }}"></label>
+                            <label>{{ t('pledge.field.method') }} <select name="method">{% for v in ['twint', 'cash'] %}<option value="{{ v }}"{{ pl.payment_method == v ? ' selected' }}>{{ t('pledge.method.' ~ v) }}</option>{% endfor %}</select></label>
+                            <label>{{ t('pledges.admin.paid_amount') }} <input type="text" name="amount" inputmode="decimal" value="{{ '%.2f'|format(pl.owed_cents / 100) }}"></label>
+                            <button type="submit" class="btn btn--primary btn--small">{{ t('pledges.admin.confirm_paid') }}</button>
+                          </form>
+                        </details>
+                      {% endif %}
+                      <a href="{{ url('/admin/events/' ~ event.id ~ '/participants/' ~ p.id ~ '/pledges/' ~ pl.id) }}" class="small">{{ t('pledges.admin.edit') }}</a>
+                    {% elseif pl.status == 'paid' %}
+                      <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/participants/' ~ p.id ~ '/pledges/' ~ pl.id ~ '/unpaid') }}" data-confirm="{{ t('pledges.admin.unpaid_confirm') }}">
+                        {{ csrf_field() }}<button type="submit" class="btn btn--link small">{{ t('pledges.admin.mark_unpaid') }}</button>
+                      </form>
+                    {% endif %}
+                  </td>
+                {% endif %}
               </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
-      <p class="muted small">{{ t('participants.pledges_later') }}</p>
+      {% if can_pay and sums and sums.open_cents > 0 %}
+        <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/participants/' ~ p.id ~ '/paid') }}" class="all-paid" data-confirm="{{ t('pledges.admin.all_paid_confirm', {amount: sums.open_cents|money}) }}">
+          {{ csrf_field() }}
+          <strong>{{ t('pledges.admin.all_paid_title') }}</strong>
+          <span class="muted small">{{ t('pledges.admin.all_paid_help') }}</span>
+          <div class="all-paid__fields">
+            <label>{{ t('pledges.admin.paid_date') }} <input type="date" name="date" value="{{ today }}" max="{{ today }}"></label>
+            <label>{{ t('pledge.field.method') }} <select name="method"><option value="cash" selected>{{ t('pledge.method.cash') }}</option><option value="twint">{{ t('pledge.method.twint') }}</option></select></label>
+            <button type="submit" class="btn btn--primary">{{ t('pledges.admin.all_paid_button', {amount: sums.open_cents|money}) }}</button>
+          </div>
+        </form>
+      {% endif %}
+      {% if can_pay and undo_group %}
+        <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/participants/' ~ p.id ~ '/paid/undo') }}" data-confirm="{{ t('pledges.admin.undo_confirm') }}">
+          {{ csrf_field() }}<button type="submit" class="btn btn--link small">{{ t('pledges.admin.undo') }}</button>
+        </form>
+      {% endif %}
+      {% if not can_pay %}<p class="muted small">{{ perm.payments ? t('pledges.admin.not_now') : t('pledges.admin.only_event_admin') }}</p>{% endif %}
     {% endif %}
   </section>
 

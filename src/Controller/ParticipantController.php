@@ -372,7 +372,19 @@ final class ParticipantController extends EventScopedController
             'can_pay' => $this->perm['payments'] && in_array($this->event['status'], PledgeAdminController::CHANGE_STATES, true),
             'undo_group' => $this->app->billingService()->lastGroup((int) $p['id']),
             'today' => gmdate('Y-m-d'),
+            'history' => $this->history($p),
         ], $status);
+    }
+
+    /** Change log of this participation, its laps and its pledges (AD-07). */
+    private function history(array $p): array
+    {
+        $entities = [['participation', (int) $p['id']], ['participant', (int) $p['participant_id']]];
+        foreach ($this->app->billing()->pledgesOf((int) $p['id']) as $pl) {
+            $entities[] = ['pledge', (int) $pl['id']];
+        }
+
+        return array_reverse($this->app->audit()->history($entities, (int) $this->event['id']));
     }
 
     /** @return array<string, string> */

@@ -1,0 +1,211 @@
+{% extends 'layout/admin.html.twig' %}
+
+{% block title %}{{ t('events.tab.reports') }} · {{ event.name }}{% endblock %}
+
+{% macro km(value) %}{{ value is null ? '–' : value|number_format(1, '.', '’') ~ ' km' }}{% endmacro %}
+
+{% block content %}
+  {% import _self as r %}
+  {% include 'partials/event_header.html.twig' %}
+
+  {# Dashboard (AD-03) #}
+  <section aria-labelledby="dash-title" class="stack">
+    <h2 class="h2 visually-hidden" id="dash-title">{{ t('reports.dashboard') }}</h2>
+    {% if after_run %}
+      <dl class="mail-counts money-counts">
+        <div><dt>{{ t('payments.total.owed') }}</dt><dd>{{ s.owed|money }}</dd></div>
+        <div><dt>{{ t('payments.total.paid') }}</dt><dd>{{ s.paid|money }}</dd></div>
+        <div><dt>{{ t('payments.total.open') }}</dt><dd>{{ s.open|money }}</dd></div>
+        <div><dt>{{ t('reports.sponsors') }}</dt><dd>{{ s.pledges }}</dd></div>
+      </dl>
+      {% if s.paid_share is not null %}
+        <div class="paid-bar">
+          <label for="paid-progress" class="small">{{ t('reports.paid_share', {percent: s.paid_share}) }}</label>
+          <progress id="paid-progress" max="100" value="{{ s.paid_share }}">{{ s.paid_share }} %</progress>
+        </div>
+      {% endif %}
+      {% if s.unknown > 0 %}
+        <div class="notice notice--warning">{{ t('reports.unknown', {count: s.laps_missing}) }} <a href="{{ url('/admin/events/' ~ event.id ~ '/laps') }}">{{ t('payments.to_laps') }}</a></div>
+      {% endif %}
+    {% else %}
+      <dl class="mail-counts money-counts">
+        <div><dt>{{ t('reports.pledged_flat') }}</dt><dd>{{ s.flat|money }}</dd></div>
+        <div><dt>{{ t('reports.pledged_per_lap') }}</dt><dd>{{ s.per_lap|money }}</dd></div>
+        <div><dt>{{ t('reports.sponsors') }}</dt><dd>{{ s.pledges }}</dd></div>
+        <div><dt>{{ t('reports.with_sponsors') }}</dt><dd>{{ s.with_sponsors }} / {{ s.participants }}</dd></div>
+      </dl>
+      <p class="muted small">{{ t('reports.before_run_hint', {amount: s.per_lap|money}) }}</p>
+    {% endif %}
+
+    <div class="cards">
+      <section class="card stack" aria-labelledby="facts-title">
+        <h3 class="h3" id="facts-title">{{ t('reports.pledges_title') }}</h3>
+        <dl class="facts">
+          <div><dt>{{ t('reports.pledged_flat') }}</dt><dd>{{ s.flat|money }}</dd></div>
+          <div><dt>{{ t('reports.pledged_per_lap') }}</dt><dd>{{ s.per_lap|money }}</dd></div>
+          {% if after_run and s.owed > 0 %}
+            <div><dt>{{ t('reports.share') }}</dt><dd>{{ t('reports.share_value', {flat: s.flat_share, per_lap: 100 - s.flat_share}) }}</dd></div>
+            <div><dt>{{ t('reports.owed_flat') }}</dt><dd>{{ s.owed_flat|money }}</dd></div>
+            <div><dt>{{ t('reports.owed_per_lap') }}</dt><dd>{{ s.owed_per_lap|money }}</dd></div>
+            <div><dt>{{ t('reports.avg_owed') }}</dt><dd>{{ s.avg_owed is null ? '–' : s.avg_owed|money }}</dd></div>
+          {% endif %}
+          <div><dt>{{ t('reports.sponsors') }}</dt><dd>{{ s.pledges }}</dd></div>
+          <div><dt>{{ t('reports.with_sponsors') }}</dt><dd>{{ s.with_sponsors }} / {{ s.participants }}</dd></div>
+        </dl>
+      </section>
+      <section class="card stack" aria-labelledby="run-title">
+        <h3 class="h3" id="run-title">{{ t('reports.run_title') }}</h3>
+        {% if s.with_laps > 0 or s.did_not_start > 0 %}
+          <dl class="facts">
+            <div><dt>{{ t('reports.laps_total') }}</dt><dd>{{ s.laps }}</dd></div>
+            <div><dt>{{ t('reports.avg_laps') }}</dt><dd>{{ s.avg_laps is null ? '–' : s.avg_laps|number_format(1, '.', '’') }}</dd></div>
+            <div><dt>{{ t('reports.km_total') }}</dt><dd>{{ r.km(s.km) }}</dd></div>
+            <div><dt>{{ t('reports.runners') }}</dt><dd>{{ s.with_laps }}</dd></div>
+            <div><dt>{{ t('laps.dns') }}</dt><dd>{{ s.did_not_start }}</dd></div>
+            {% if s.laps_missing > 0 %}<div><dt>{{ t('reports.laps_missing') }}</dt><dd>{{ s.laps_missing }}</dd></div>{% endif %}
+            <div><dt>{{ t('reports.fully_paid') }}</dt><dd>{{ s.state_done }} / {{ s.with_sponsors }}</dd></div>
+          </dl>
+          {% if s.km is null and event.lap_length_m is null %}<p class="muted small">{{ t('reports.no_lap_length') }} <a href="{{ url('/admin/events/' ~ event.id ~ '/settings') }}">{{ t('events.tab.settings') }}</a></p>{% endif %}
+        {% else %}
+          <p class="muted">{{ t('reports.no_laps') }}</p>
+        {% endif %}
+      </section>
+    </div>
+  </section>
+
+  {# Teams (AD-04) #}
+  {% if teams|length > 1 or (teams|length == 1 and teams[0].name is not null) %}
+    <section class="stack" aria-labelledby="teams-title">
+      <h2 class="h2" id="teams-title">{{ t('reports.teams_title') }}</h2>
+      <div class="table-wrap">
+        <table class="table table--compact">
+          <thead>
+            <tr>
+              <th scope="col">{{ t('participants.team') }}</th>
+              <th scope="col" class="num">{{ t('reports.col.participants') }}</th>
+              <th scope="col" class="num">{{ t('reports.sponsors') }}</th>
+              {% if after_run %}
+                <th scope="col" class="num">{{ t('reports.col.laps') }}</th>
+                <th scope="col" class="num">{{ t('reports.col.km') }}</th>
+                <th scope="col" class="num">{{ t('payments.total.owed') }}</th>
+                <th scope="col" class="num">{{ t('payments.total.paid') }}</th>
+                <th scope="col" class="num">{{ t('payments.total.open') }}</th>
+              {% else %}
+                <th scope="col" class="num">{{ t('reports.col.flat') }}</th>
+                <th scope="col" class="num">{{ t('reports.col.per_lap') }}</th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for tm in teams %}
+              <tr>
+                <th scope="row">{{ tm.name ?? t('laps.no_team') }}</th>
+                <td class="num">{{ tm.participants }}</td>
+                <td class="num">{{ tm.pledges }}</td>
+                {% if after_run %}
+                  <td class="num">{{ tm.laps }}{% if tm.avg_laps is not null %}<br><span class="muted small">Ø {{ tm.avg_laps|number_format(1, '.', '’') }}</span>{% endif %}</td>
+                  <td class="num nowrap">{{ tm.km is null ? '–' : tm.km|number_format(1, '.', '’') }}</td>
+                  <td class="num nowrap">{{ tm.owed|money }}</td>
+                  <td class="num nowrap">{{ tm.paid|money }}</td>
+                  <td class="num nowrap">{{ tm.open|money }}</td>
+                {% else %}
+                  <td class="num nowrap">{{ tm.flat|money }}</td>
+                  <td class="num nowrap">{{ tm.per_lap|money }}</td>
+                {% endif %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+
+  {# Rankings, admins only (AD-04, EV-06) #}
+  <section class="stack" aria-labelledby="rank-title">
+    <h2 class="h2" id="rank-title">{{ t('reports.ranking_title') }}</h2>
+    <p class="muted small">{{ t('reports.ranking_private') }}</p>
+    <div class="cards">
+      <section class="card stack" aria-labelledby="rank-laps-title">
+        <h3 class="h3" id="rank-laps-title">{{ t('reports.rank_laps') }}</h3>
+        {% if rank_laps is empty %}
+          <p class="muted">{{ t('reports.no_laps') }}</p>
+        {% else %}
+          <ol class="ranking">
+            {% for p in rank_laps %}
+              <li><span class="ranking__no">{{ p.rank }}.</span><span class="ranking__name">{{ p.first_name }} {{ p.last_name }}{% if p.team_name %} <span class="muted small">{{ p.team_name }}</span>{% endif %}</span><span class="ranking__value">{{ t('reports.laps_value', {count: p.value}) }}</span></li>
+            {% endfor %}
+          </ol>
+        {% endif %}
+      </section>
+      <section class="card stack" aria-labelledby="rank-amount-title">
+        <h3 class="h3" id="rank-amount-title">{{ rank_amount_by == 'amount' ? t('reports.rank_amount') : t('reports.rank_sponsors') }}</h3>
+        {% if rank_amount is empty %}
+          <p class="muted">{{ t('reports.no_pledges') }}</p>
+        {% else %}
+          <ol class="ranking">
+            {% for p in rank_amount %}
+              <li><span class="ranking__no">{{ p.rank }}.</span><span class="ranking__name">{{ p.first_name }} {{ p.last_name }}{% if p.team_name %} <span class="muted small">{{ p.team_name }}</span>{% endif %}</span><span class="ranking__value">{{ rank_amount_by == 'amount' ? p.value|money : t('reports.sponsors_value', {count: p.value}) }}</span></li>
+            {% endfor %}
+          </ol>
+        {% endif %}
+      </section>
+    </div>
+    {% if rank_more %}<p><a href="{{ url('/admin/events/' ~ event.id ~ '/reports?all=1#rank-title') }}">{{ t('reports.rank_all') }}</a></p>{% endif %}
+  </section>
+
+  {# Comparison with earlier events (AD-04) #}
+  {% if compare|length > 1 %}
+    <section class="stack" aria-labelledby="cmp-title">
+      <h2 class="h2" id="cmp-title">{{ t('reports.compare_title') }}</h2>
+      <div class="table-wrap">
+        <table class="table table--compact">
+          <thead>
+            <tr>
+              <th scope="col">{{ t('reports.col.event') }}</th>
+              <th scope="col" class="num">{{ t('reports.col.participants') }}</th>
+              <th scope="col" class="num">{{ t('reports.sponsors') }}</th>
+              <th scope="col" class="num">{{ t('reports.col.laps') }}</th>
+              <th scope="col" class="num">{{ t('reports.col.km') }}</th>
+              <th scope="col" class="num">{{ t('reports.col.total') }}</th>
+              <th scope="col" class="num">{{ t('reports.col.avg_owed') }}</th>
+              <th scope="col" class="num">{{ t('payments.total.paid') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for e in compare %}
+              <tr{% if e.id == event.id %} class="is-current"{% endif %}>
+                <th scope="row">
+                  {% if e.id == event.id %}<strong>{{ e.name }}</strong>{% else %}<a href="{{ url('/admin/events/' ~ e.id ~ '/reports') }}">{{ e.name }}</a>{% endif %}
+                  <br><span class="muted small">{{ e.event_date ? e.event_date|date('d.m.Y') : t('events.no_date') }} · {{ t('events.status.' ~ e.status) }}</span>
+                </th>
+                <td class="num">{{ e.participants }}</td>
+                <td class="num">{{ e.pledges }}</td>
+                <td class="num">{{ e.run_done and e.with_laps > 0 ? e.laps : '–' }}</td>
+                <td class="num nowrap">{{ e.km is null ? '–' : e.km|number_format(1, '.', '’') }}</td>
+                <td class="num nowrap">{% if e.run_done %}{{ e.owed|money }}{% else %}<span class="muted" title="{{ t('reports.compare_before_run') }}">{{ e.flat|money }} + {{ e.per_lap|money }}/R</span>{% endif %}</td>
+                <td class="num nowrap">{{ e.run_done and e.avg_owed is not null ? e.avg_owed|money : '–' }}</td>
+                <td class="num nowrap">{{ e.paid|money }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="muted small">{{ t('reports.compare_help') }}</p>
+    </section>
+  {% endif %}
+
+  {# Export (AD-05) #}
+  <section class="card stack" aria-labelledby="export-title">
+    <h2 class="h2" id="export-title">{{ t('reports.export.title') }}</h2>
+    <p class="muted">{{ t('reports.export.help') }}</p>
+    <ul class="export-list">
+      {% for kind in exports %}
+        <li>
+          <a class="btn btn--secondary" href="{{ url('/admin/events/' ~ event.id ~ '/export/' ~ kind ~ '.csv') }}" download>{{ t('reports.export.' ~ kind) }}</a>
+          <span class="muted small">{{ t('reports.export.' ~ kind ~ '_help') }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+    <p class="small">{{ t('reports.export.privacy') }}</p>
+  </section>
+{% endblock %}

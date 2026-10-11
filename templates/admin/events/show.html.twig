@@ -76,6 +76,24 @@
     {% endif %}
   </div>
 
+  {% if event.status == 'closed' %}
+    <section class="card stack" aria-labelledby="privacy-title">
+      <h2 class="h2" id="privacy-title">{{ t('events.privacy_title') }}</h2>
+      {% if event.anonymized_at %}
+        <p>{{ t('events.anonymized_since', {date: event.anonymized_at|date_ch}) }}</p>
+      {% else %}
+        <p>{{ t('events.anonymize_info', {date: anonymize_at|date_ch, months: retention_months}) }}</p>
+        {% if perm.anonymize %}
+          <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/anonymize') }}" data-confirm="{{ t('events.anonymize_confirm') }}">
+            {{ csrf_field() }}
+            <button type="submit" class="btn btn--secondary">{{ t('events.anonymize_now') }}</button>
+          </form>
+          <p class="muted small">{{ t('events.anonymize_help') }}</p>
+        {% endif %}
+      {% endif %}
+    </section>
+  {% endif %}
+
   {% if perm.archive %}
     <section class="card stack" aria-labelledby="archive-title">
       <h2 class="h2" id="archive-title">{{ t('events.archive_title') }}</h2>

@@ -226,6 +226,7 @@ final class PledgeAdminController extends EventScopedController
             'input' => $input,
             'errors' => $errors,
             'methods' => $methods,
+            'history' => $pl === null ? [] : array_reverse($this->app->audit()->history([['pledge', (int) $pl['id']]])),
         ], $status);
     }
 }

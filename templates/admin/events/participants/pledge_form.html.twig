@@ -52,4 +52,18 @@
       <div><button type="submit" class="btn btn--danger">{{ t('pledges.admin.cancel') }}</button></div>
     </form>
   {% endif %}
+
+  {% if history is not empty %}
+    <details class="card history">
+      <summary class="h3">{{ t('admin.audit.history', {count: history|length}) }}</summary>
+      <ul class="history__list">
+        {% for e in history %}
+          <li>
+            <span class="nowrap small muted">{{ e.created_at|datetime }} · {{ e.display_name ?? t('admin.audit.system') }}</span><br>
+            <strong>{{ t('admin.audit.action.' ~ e.action) }}</strong>{% set lines = audit_details(e) %}{% if lines is not empty %} <span class="small">– {{ lines|join(', ') }}</span>{% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </details>
+  {% endif %}
 {% endblock %}

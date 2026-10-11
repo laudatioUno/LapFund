@@ -17,6 +17,7 @@ use LapFund\Controller\PaymentsController;
 use LapFund\Controller\PledgeAdminController;
 use LapFund\Controller\PoolController;
 use LapFund\Controller\PublicController;
+use LapFund\Controller\ReportsController;
 use LapFund\Controller\SettingsController;
 use LapFund\Controller\SponsorController;
 use LapFund\Controller\TeamController;
@@ -78,6 +79,7 @@ final class Routes
         $r->get('/admin', $c(AdminController::class, 'dashboard'));
         $r->get('/admin/system', $c(AdminController::class, 'system'));
         $r->post('/admin/system/migrate', $c(AdminController::class, 'migrate'));
+        $r->post('/admin/system/backup', $c(AdminController::class, 'backup'));
         $r->get('/admin/audit', $c(AdminController::class, 'audit'));
         $r->get('/admin/mail', $c(MailController::class, 'edit'));
         $r->post('/admin/mail', $c(MailController::class, 'update'));
@@ -103,6 +105,7 @@ final class Routes
         $r->get('/admin/events/{id}', $c(EventController::class, 'show'));
         $r->post('/admin/events/{id}/status', $c(EventController::class, 'status'));
         $r->post('/admin/events/{id}/archive', $c(EventController::class, 'archive'));
+        $r->post('/admin/events/{id}/anonymize', $c(EventController::class, 'anonymize'));
         $r->get('/admin/events/{id}/settings', $c(EventController::class, 'settings'));
         $r->post('/admin/events/{id}/settings', $c(EventController::class, 'updateSettings'));
 
@@ -147,7 +150,14 @@ final class Routes
         $r->post($pp . '/paid', $c(PledgeAdminController::class, 'allPaid'));
         $r->post($pp . '/paid/undo', $c(PledgeAdminController::class, 'undoAll'));
 
+        // Reports, export, change log (stage 6)
+        $r->get('/admin/events/{id}/reports', $c(ReportsController::class, 'index'));
+        $r->get('/admin/events/{id}/export/{kind:[a-z]+}.csv', $c(ReportsController::class, 'export'));
+        $r->get('/admin/events/{id}/log', $c(ReportsController::class, 'log'));
+
         $r->get('/admin/participants', $c(PoolController::class, 'index'));
+        $r->post('/admin/participants/{pid:[1-9][0-9]*}/delete', $c(PoolController::class, 'delete'));
+        $r->post('/admin/participants/delete-inactive', $c(PoolController::class, 'deleteInactive'));
 
         $r->get('/admin/settings', $c(SettingsController::class, 'edit'));
         $r->post('/admin/settings', $c(SettingsController::class, 'update'));

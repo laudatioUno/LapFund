@@ -5,28 +5,27 @@
 {% block content %}
   <header class="page-head"><h1 class="h1">{{ t('app.nav.audit') }}</h1></header>
   <p class="muted">{{ t('admin.audit.intro') }}</p>
-  <div class="table-wrap">
-    <table class="table">
-      <thead>
-        <tr>
-          <th scope="col">{{ t('admin.audit.when') }}</th>
-          <th scope="col">{{ t('admin.audit.who') }}</th>
-          <th scope="col">{{ t('admin.audit.what') }}</th>
-          <th scope="col">{{ t('admin.audit.object') }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for e in entries %}
-          <tr>
-            <td class="nowrap">{{ e.created_at|datetime }}</td>
-            <td>{{ e.display_name ?? '–' }}</td>
-            <td>{{ t('admin.audit.action.' ~ e.action) }}</td>
-            <td class="muted">{{ e.entity_type }}{% if e.entity_id %} #{{ e.entity_id }}{% endif %}</td>
-          </tr>
-        {% else %}
-          <tr><td colspan="4">{{ t('admin.audit.empty') }}</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+
+  <form method="get" action="{{ url('/admin/audit') }}" class="filter-bar">
+    <div class="field">
+      <label for="f-event">{{ t('admin.audit.event') }}</label>
+      <select id="f-event" name="event">
+        <option value="">{{ t('admin.audit.all_events') }}</option>
+        {% for ev in events %}<option value="{{ ev.id }}"{{ event_id == ev.id ? ' selected' }}>{{ ev.name }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="f-area">{{ t('admin.audit.area') }}</label>
+      <select id="f-area" name="area">
+        <option value="">{{ t('admin.audit.all_areas') }}</option>
+        {% for a in areas %}<option value="{{ a }}"{{ area == a ? ' selected' }}>{{ t('admin.audit.areas.' ~ a) }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="filter-bar__actions">
+      <button type="submit" class="btn btn--secondary">{{ t('participants.filter_apply') }}</button>
+      {% if area != '' or event_id %}<a href="{{ url('/admin/audit') }}" class="small">{{ t('participants.filter_reset') }}</a>{% endif %}
+    </div>
+  </form>
+
+  {% include 'partials/audit_table.html.twig' with {show_event: true, page_url: '/admin/audit?' ~ {event: event_id, area: area}|url_encode ~ '&'} %}
 {% endblock %}

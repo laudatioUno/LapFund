@@ -47,7 +47,7 @@ use LapFund\View\View;
  */
 final class App
 {
-    public const VERSION = '0.5.0';
+    public const VERSION = '1.0.0';
 
     public Config $config;
     public readonly Translator $translator;
@@ -82,7 +82,7 @@ final class App
 
     /**
      * Fallback without cron (NF-03): after the response has been delivered, send due
-     * mails, at most once a minute. Needs PHP-FPM (fastcgi_finish_request), as on
+     * mails, at most once a minute, and run the daily data retention. Needs PHP-FPM (fastcgi_finish_request), as on
      * most shared hosting; with cron set up this only finds an empty queue.
      */
     private function sendMailsAfterResponse(): void
@@ -93,14 +93,23 @@ final class App
         try {
             $settings = $this->settings();
             $last = (int) $settings->get('mail_last_web_run', '0');
-            if (time() - $last < 60 || !$this->mailQueue()->hasDue() || $this->migrator()->pending() !== []) {
+            $mails = time() - $last >= 60 && $this->mailQueue()->hasDue();
+            $daily = $settings->get('housekeeping_day') !== gmdate('Y-m-d');
+            if ((!$mails && !$daily) || $this->migrator()->pending() !== []) {
                 return;
             }
-            $settings->set('mail_last_web_run', (string) time());
+            if ($mails) {
+                $settings->set('mail_last_web_run', (string) time());
+            }
             fastcgi_finish_request();
             ignore_user_abort(true);
             @set_time_limit(60);
-            $this->mailWorker()->run(50, 40);
+            if ($daily) {
+                $this->retention()->runDaily(); // data retention once a day (NF-11)
+            }
+            if ($mails) {
+                $this->mailWorker()->run(50, 40);
+            }
         } catch (\Throwable $e) {
             $this->logError($e);
         }
@@ -314,6 +323,37 @@ final class App
             $this->formatter,
             $this->audit(),
         ));
+    }
+
+    public function reports(): \LapFund\Repository\ReportRepository
+    {
+        return $this->service(\LapFund\Repository\ReportRepository::class, fn () => new \LapFund\Repository\ReportRepository($this->db(), $this->billing()));
+    }
+
+    public function exports(): \LapFund\Service\ExportService
+    {
+        return $this->service(\LapFund\Service\ExportService::class, fn () => new \LapFund\Service\ExportService(
+            $this->db(),
+            $this->billing(),
+            $this->translator,
+            $this->formatter,
+        ));
+    }
+
+    public function retention(): \LapFund\Service\Retention
+    {
+        return $this->service(\LapFund\Service\Retention::class, fn () => new \LapFund\Service\Retention(
+            $this->db(),
+            $this->settings(),
+            $this->audit(),
+            $this->mailQueue(),
+            $this->translator->t('participants.deleted_name'),
+        ));
+    }
+
+    public function databaseExport(): \LapFund\Service\DatabaseExport
+    {
+        return $this->service(\LapFund\Service\DatabaseExport::class, fn () => new \LapFund\Service\DatabaseExport($this->db()));
     }
 
     public function pdf(): Pdf

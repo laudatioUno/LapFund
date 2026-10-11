@@ -50,6 +50,15 @@
       {{ m.field('imprint_url', t('admin.settings.imprint_url'), input.imprint_url, errors, 'url', {optional: true}) }}
     </section>
 
+    <section class="card stack" id="retention" aria-labelledby="retention-title">
+      <h2 class="h2" id="retention-title">{{ t('admin.settings.retention') }}</h2>
+      <p class="muted">{{ t('admin.settings.retention_help') }}</p>
+      <div class="grid-2">
+        {{ m.field('retention_months', t('admin.settings.retention_months'), input.retention_months, errors, 'text', {inputmode: 'numeric', help: t('admin.settings.retention_months_help')}) }}
+        {{ m.field('inactive_years', t('admin.settings.inactive_years'), input.inactive_years, errors, 'text', {inputmode: 'numeric', help: t('admin.settings.inactive_years_help')}) }}
+      </div>
+    </section>
+
     <div><button type="submit" class="btn btn--primary">{{ t('app.save') }}</button></div>
   </form>
 

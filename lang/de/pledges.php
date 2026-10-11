@@ -45,4 +45,6 @@ return [
     'admin.undone' => '{count} Zahlungen zurückgenommen.',
     'admin.requested_on' => 'Aufforderung {date}',
     'admin.reminders' => 'Erinnerungen: {count}',
+
+    'anonymized' => 'Sponsor anonymisiert',
 ];

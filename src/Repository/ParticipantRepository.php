@@ -72,7 +72,7 @@ final class ParticipantRepository
                     (SELECT COUNT(*) FROM participations x WHERE x.participant_id = p.id) AS event_count,
                     (SELECT e.name FROM participations x JOIN events e ON e.id = x.event_id
                      WHERE x.participant_id = p.id ORDER BY e.event_date DESC, e.id DESC LIMIT 1) AS last_event
-                FROM participants p WHERE 1 = 1';
+                FROM participants p WHERE p.anonymized_at IS NULL';
         $params = [];
         if ($query !== '') {
             $like = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $query) . '%';
@@ -91,7 +91,7 @@ final class ParticipantRepository
 
     public function poolCount(): int
     {
-        return (int) $this->db->value('SELECT COUNT(*) FROM participants');
+        return (int) $this->db->value('SELECT COUNT(*) FROM participants WHERE anonymized_at IS NULL');
     }
 
     // --- Participations -----------------------------------------------------

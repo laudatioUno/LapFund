@@ -7,6 +7,7 @@ namespace LapFund\Controller;
 use LapFund\Http\Request;
 use LapFund\Http\Response;
 use LapFund\Service\Branding;
+use LapFund\Service\Retention;
 use LapFund\Validation;
 
 /**
@@ -26,6 +27,8 @@ final class SettingsController extends Controller
             $input[$field] = $settings->get($field);
         }
         $input['primary_color'] = Branding::validColor($input['primary_color']) ?? Branding::DEFAULT_COLOR;
+        $input['retention_months'] = (string) $this->app->retention()->months();
+        $input['inactive_years'] = (string) $this->app->retention()->inactiveYears();
 
         return $this->form($input, []);
     }
@@ -48,6 +51,18 @@ final class SettingsController extends Controller
         foreach (['club_website', 'imprint_url', 'privacy_url'] as $field) {
             if ($e = Validation::optionalUrl($input[$field])) {
                 $errors[$field] = $e;
+            }
+        }
+        $defaults = ['retention_months' => Retention::DEFAULT_MONTHS, 'inactive_years' => Retention::DEFAULT_INACTIVE_YEARS];
+        foreach (['retention_months' => [1, 60], 'inactive_years' => [1, 10]] as $field => [$min, $max]) {
+            $input[$field] = trim($request->input($field));
+            if ($input[$field] === '') {
+                $input[$field] = (string) $defaults[$field];
+            }
+            if (!ctype_digit($input[$field]) || (int) $input[$field] < $min || (int) $input[$field] > $max) {
+                $errors[$field] = 'admin.settings.' . $field . '_invalid';
+            } else {
+                $input[$field] = (string) (int) $input[$field];
             }
         }
         $color = Branding::validColor($input['primary_color']);

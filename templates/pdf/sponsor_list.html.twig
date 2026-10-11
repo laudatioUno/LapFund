@@ -50,7 +50,7 @@
   <tbody>
   {% for pl in pledges %}
     <tr>
-      <td class="filled">{{ pl.sponsor_name }}</td>
+      <td class="filled">{{ pl.sponsor_name ?? '' }}</td>
       <td class="filled muted">{{ t('pdf.online') }}</td>
       <td class="filled">{{ t('pledge.type.' ~ pl.type) }}</td>
       <td class="filled">{{ pl.amount_cents|money }}</td>

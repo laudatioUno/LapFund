@@ -1,0 +1,41 @@
+{# Change log table (AD-07). Needs: log {entries, total, page, pages}, show_event, page_url (base with ? or &) #}
+{% if log.entries is empty %}
+  <section class="card empty"><p class="muted">{{ t('admin.audit.empty') }}</p></section>
+{% else %}
+  <div class="table-wrap">
+    <table class="table table--compact audit-table">
+      <thead>
+        <tr>
+          <th scope="col">{{ t('admin.audit.when') }}</th>
+          <th scope="col">{{ t('admin.audit.who') }}</th>
+          <th scope="col">{{ t('admin.audit.what') }}</th>
+          <th scope="col">{{ t('admin.audit.details') }}</th>
+          {% if show_event %}<th scope="col">{{ t('admin.audit.event') }}</th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in log.entries %}
+          <tr>
+            <td class="nowrap">{{ e.created_at|datetime }}</td>
+            <td>{{ e.display_name ?? (e.admin_user_id is null ? t('admin.audit.system') : '–') }}</td>
+            <td>
+              {{ t('admin.audit.action.' ~ e.action) }}
+              {% if e.entity_id and e.entity_type != 'event' %}<br><span class="muted small">{{ t('admin.audit.entity.' ~ e.entity_type, {id: e.entity_id}) }}</span>{% endif %}
+            </td>
+            <td class="small">
+              {% for line in audit_details(e) %}{{ line }}{% if not loop.last %}<br>{% endif %}{% endfor %}
+            </td>
+            {% if show_event %}<td class="small">{{ e.event_name ?? '–' }}</td>{% endif %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if log.pages > 1 %}
+    <nav class="pager" aria-label="{{ t('admin.audit.pages') }}">
+      {% if log.page > 1 %}<a class="btn btn--secondary btn--small" href="{{ url(page_url ~ 'page=' ~ (log.page - 1)) }}">← {{ t('admin.audit.newer') }}</a>{% endif %}
+      <span class="muted small">{{ t('admin.audit.page_of', {page: log.page, pages: log.pages, total: log.total}) }}</span>
+      {% if log.page < log.pages %}<a class="btn btn--secondary btn--small" href="{{ url(page_url ~ 'page=' ~ (log.page + 1)) }}">{{ t('admin.audit.older') }} →</a>{% endif %}
+    </nav>
+  {% endif %}
+{% endif %}

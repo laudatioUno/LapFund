@@ -20,11 +20,31 @@
     {% else %}
       <p>{{ t('admin.system.pending', {count: pending|length}) }}</p>
       <ul>{% for v in pending %}<li><code>{{ v }}</code></li>{% endfor %}</ul>
-      <p class="muted">{{ t('admin.system.backup_first') }}</p>
+      <p class="muted">{{ t('admin.system.backup_first') }} <a href="#backup-title">{{ t('admin.system.backup_title') }}</a></p>
       <form method="post" action="{{ url('/admin/system/migrate') }}">
         {{ csrf_field() }}
         <button type="submit" class="btn btn--primary">{{ t('admin.system.run') }}</button>
       </form>
     {% endif %}
+  </section>
+
+  <section class="card stack" aria-labelledby="backup-title">
+    <h2 class="h2" id="backup-title">{{ t('admin.system.backup_title') }}</h2>
+    <p>{{ t('admin.system.backup_help') }}</p>
+    <ul class="small">
+      <li>{{ t('admin.system.backup_also_config') }}</li>
+      <li>{{ t('admin.system.backup_also_uploads') }}</li>
+      <li>{{ t('admin.system.backup_restore') }}</li>
+    </ul>
+    <form method="post" action="{{ url('/admin/system/backup') }}" class="stack form-narrow" novalidate>
+      {{ csrf_field() }}
+      <div class="field">
+        <label for="f-code">{{ t('admin.system.backup_code') }}</label>
+        <input id="f-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="20" required aria-describedby="h-code">
+        <p class="field__help" id="h-code">{{ t('admin.system.backup_code_help') }}</p>
+      </div>
+      <div><button type="submit" class="btn btn--primary">{{ t('admin.system.backup_download') }}</button></div>
+    </form>
+    <p class="muted small">{{ t('admin.system.backup_privacy') }}</p>
   </section>
 {% endblock %}

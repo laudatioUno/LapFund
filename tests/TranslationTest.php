@@ -35,10 +35,14 @@ final class TranslationTest extends TestCase
         'pledge.method_help_participant.' => ['twint', 'cash'],
         'pledge.status.' => ['open', 'cash_received', 'paid', 'cancelled'],
         'pledge.source.' => ['online', 'participant', 'admin'],
+        'admin.audit.areas.' => ['payments', 'laps', 'participants', 'event', 'mail', 'system'],
+        'admin.audit.entity.' => ['event', 'pledge', 'participation', 'participant', 'team', 'admin_user', 'settings', 'system', 'mail'],
+        'reports.export.' => ['participants', 'pledges', 'payments', 'participants_help', 'pledges_help', 'payments_help'],
+        'reports.export.file.' => ['participants', 'pledges', 'payments'],
     ];
 
     /** Keys of config/config.php and permission names that look like translation keys. */
-    private const CONFIG_KEYS = ['app.timezone', 'app.locale', 'app.debug', 'app.key', 'app.cron_secret', 'events.list', 'mail.manage'];
+    private const CONFIG_KEYS = ['app.timezone', 'app.locale', 'app.debug', 'app.key', 'app.cron_secret', 'events.list', 'mail.manage', 'participants.delete'];
 
     public function testAllUsedKeysExist(): void
     {
@@ -91,7 +95,7 @@ final class TranslationTest extends TestCase
         $keys = [];
         $patterns = [
             "/\\bt\\(\\s*'([a-z0-9_]+\\.[a-z0-9_.]+)'/",
-            "/'((?:app|auth|admin|install|errors|validation|upload|events|participants|mail|mails|public|pledge|pdf|laps|payments|pledges)\\.[a-z0-9_.]+)'/",
+            "/'((?:app|auth|admin|install|errors|validation|upload|events|participants|mail|mails|public|pledge|pdf|laps|payments|pledges|reports)\\.[a-z0-9_.]+)'/",
         ];
         $files = [...$this->phpFiles($root . '/src'), ...$this->phpFiles($root . '/templates', 'twig')];
         foreach (array_unique($files) as $file) {

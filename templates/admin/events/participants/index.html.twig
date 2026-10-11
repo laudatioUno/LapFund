@@ -38,6 +38,9 @@
       <label for="f-q">{{ t('participants.search') }}</label>
       <input id="f-q" name="q" type="search" value="{{ query }}" maxlength="100" placeholder="{{ t('participants.search_placeholder') }}">
     </div>
+    {% if money_view %}
+      <label class="inline-check filter-bar__check"><input type="checkbox" name="state" value="open"{{ only_open ? ' checked' }}> {{ t('payments.only_open') }}</label>
+    {% endif %}
     <div class="filter-bar__actions">
       <button type="submit" class="btn btn--secondary">{{ t('participants.filter_apply') }}</button>
       {% if team_filter != '' or query != '' %}<a href="{{ url('/admin/events/' ~ event.id ~ '/participants') }}" class="small">{{ t('participants.filter_reset') }}</a>{% endif %}
@@ -45,7 +48,7 @@
   </form>
 
   <p class="muted small" role="status">
-    {% if team_filter != '' or query != '' %}{{ t('participants.count_filtered', {count: rows|length, total: total}) }}{% else %}{{ t('participants.count', {count: total}) }}{% endif %}
+    {% if team_filter != '' or query != '' or only_open %}{{ t('participants.count_filtered', {count: rows|length, total: total}) }}{% else %}{{ t('participants.count', {count: total}) }}{% endif %}
   </p>
 
   {% if rows is empty %}
@@ -58,20 +61,43 @@
         <thead>
           <tr>
             <th scope="col">{{ t('participants.name') }}</th>
-            <th scope="col">{{ t('participants.email') }}</th>
+            {% if not money_view %}<th scope="col">{{ t('participants.email') }}</th>{% endif %}
             <th scope="col">{{ t('participants.team') }}</th>
-            <th scope="col">{{ t('participants.access.invitation') }}</th>
-            <th scope="col" class="num">{{ t('participants.pledges') }}</th>
+            {% if money_view %}
+              <th scope="col" class="num">{{ t('participants.pledges') }}</th>
+              <th scope="col" class="num">{{ t('pledge.type.flat') }}</th>
+              <th scope="col" class="num">{{ t('pledge.type.per_lap') }}</th>
+              <th scope="col" class="num">{{ t('laps.laps') }}</th>
+              <th scope="col" class="num">{{ t('payments.total.owed') }}</th>
+              <th scope="col" class="num">{{ t('payments.total.paid') }}</th>
+              <th scope="col" class="num"><a href="{{ url('/admin/events/' ~ event.id ~ '/participants?' ~ {team: team_filter, q: query, state: only_open ? 'open' : '', sort: 'open'}|url_encode) }}">{{ t('payments.total.open') }}{{ sort == 'open' ? ' ↓' }}</a></th>
+              <th scope="col">{{ t('payments.state') }}</th>
+            {% else %}
+              <th scope="col">{{ t('participants.access.invitation') }}</th>
+              <th scope="col" class="num">{{ t('participants.pledges') }}</th>
+            {% endif %}
           </tr>
         </thead>
         <tbody>
           {% for r in rows %}
             <tr>
               <td><a href="{{ url('/admin/events/' ~ event.id ~ '/participants/' ~ r.participation_id) }}"><strong>{{ r.first_name }} {{ r.last_name }}</strong></a></td>
-              <td class="break">{{ r.email }}</td>
+              {% if not money_view %}<td class="break">{{ r.email }}</td>{% endif %}
               <td>{{ r.team_name ?? '–' }}</td>
-              <td>{% include 'admin/events/participants/_invite_state.html.twig' with {inv: invites[r.participation_id] ?? null, invited_at: r.invited_at} %}</td>
-              <td class="num">{{ r.pledge_count }}</td>
+              {% if money_view %}
+                {% set b = r.b %}
+                <td class="num">{{ b.sponsor_count }}</td>
+                <td class="num nowrap">{{ b.flat_cents|money }}</td>
+                <td class="num nowrap">{{ b.per_lap_cents|money }}</td>
+                <td class="num">{{ r.b.did_not_start ? t('laps.dns_short') : (b.laps ?? '–') }}</td>
+                <td class="num nowrap">{{ b.owed_cents|money }}</td>
+                <td class="num nowrap">{{ b.paid_cents|money }}</td>
+                <td class="num nowrap strong">{{ b.open_cents|money }}</td>
+                <td><span class="badge badge--state-{{ b.state }}">{{ t('payments.state_' ~ b.state) }}</span></td>
+              {% else %}
+                <td>{% include 'admin/events/participants/_invite_state.html.twig' with {inv: invites[r.participation_id] ?? null, invited_at: r.invited_at} %}</td>
+                <td class="num">{{ r.pledge_count }}</td>
+              {% endif %}
             </tr>
           {% endfor %}
         </tbody>

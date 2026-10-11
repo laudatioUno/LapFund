@@ -160,6 +160,7 @@ final class EventController extends EventScopedController
             'lap_length_m' => $request->input('lap_length_m'),
             'entry_deadline' => $request->input('entry_deadline'),
             'goal_chf' => $request->input('goal_chf'),
+            'reminder_days' => $request->input('reminder_days'),
             'sender_name' => $request->input('sender_name'),
             'own_color' => $request->input('own_color') === '1',
             'primary_color' => $request->input('primary_color'),
@@ -183,6 +184,12 @@ final class EventController extends EventScopedController
         }
         if ($e = Validation::optionalInt($input['lap_length_m'], 1, 100000)) {
             $errors['lap_length_m'] = $e;
+        }
+        if ($input['reminder_days'] === '') {
+            $input['reminder_days'] = '14';
+        }
+        if ($e = Validation::optionalInt($input['reminder_days'], 1, 90)) {
+            $errors['reminder_days'] = 'validation.number';
         }
         if ($e = Validation::optionalInt($input['goal_chf'], 1, 10000000)) {
             $errors['goal_chf'] = $e;
@@ -227,6 +234,7 @@ final class EventController extends EventScopedController
             'lap_length_m' => $input['lap_length_m'] !== '' ? (int) $input['lap_length_m'] : null,
             'entry_deadline' => $this->localToUtc($input['entry_deadline']),
             'goal_cents' => $input['goal_chf'] !== '' ? (int) $input['goal_chf'] * 100 : null,
+            'reminder_days' => (int) $input['reminder_days'],
             'sender_name' => $input['sender_name'] !== '' ? $input['sender_name'] : null,
             'primary_color' => $color,
             'texts' => ['welcome' => $input['welcome'], 'purpose' => $input['purpose'], 'mail_footer' => $input['mail_footer'], 'invite_subject' => $input['invite_subject'], 'invite_intro' => $input['invite_intro']],
@@ -269,6 +277,7 @@ final class EventController extends EventScopedController
             'lap_length_m' => $event['lap_length_m'] === null ? '' : (string) $event['lap_length_m'],
             'entry_deadline' => $this->utcToLocal($event['entry_deadline']),
             'goal_chf' => $event['goal_cents'] === null ? '' : (string) intdiv((int) $event['goal_cents'], 100),
+            'reminder_days' => (string) ($event['reminder_days'] ?? 14),
             'sender_name' => (string) ($event['sender_name'] ?? ''),
             'own_color' => $event['primary_color'] !== null,
             'primary_color' => (string) ($event['primary_color'] ?? $this->app->branding()->club()['primary_color']),

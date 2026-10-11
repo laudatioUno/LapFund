@@ -1,0 +1,55 @@
+{% extends 'layout/admin.html.twig' %}
+{% import 'partials/macros.html.twig' as m %}
+
+{% block title %}{{ pl ? t('pledges.admin.edit_title') : t('pledges.admin.new_title') }} · {{ p.first_name }} {{ p.last_name }}{% endblock %}
+
+{% block content %}
+  {% include 'partials/event_header.html.twig' %}
+  <p><a href="{{ url('/admin/events/' ~ event.id ~ '/participants/' ~ p.id) }}">← {{ p.first_name }} {{ p.last_name }}</a></p>
+
+  <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/participants/' ~ p.id ~ '/pledges/' ~ (pl ? pl.id : 'new')) }}" class="card stack form-narrow" novalidate>
+    {{ csrf_field() }}
+    <h2 class="h2">{{ pl ? t('pledges.admin.edit_title') : t('pledges.admin.new_title') }}</h2>
+    {% if errors is not empty %}<div class="notice notice--error" role="alert">{{ t('events.form_has_errors') }}</div>{% endif %}
+    {% if pl and pl.payment_requested_at %}<p class="notice notice--info small">{{ t('pledges.admin.already_requested', {date: pl.payment_requested_at|datetime, amount: (pl.payment_mail_amount_cents ?? 0)|money}) }}</p>{% endif %}
+
+    <div class="grid-2">
+      <div class="field">
+        <label for="f-type">{{ t('pledge.field.type') }}</label>
+        <select id="f-type" name="type">{% for v in ['flat', 'per_lap'] %}<option value="{{ v }}"{{ input.type == v ? ' selected' }}>{{ t('pledge.type.' ~ v) }}</option>{% endfor %}</select>
+      </div>
+      {{ m.field('amount', t('pledge.field.amount') ~ ' (CHF)', input.amount, errors, 'text', {required: true, inputmode: 'decimal'}) }}
+    </div>
+    <div class="field{{ errors.method is defined ? ' field--error' }}">
+      <label for="f-method">{{ t('pledge.field.method') }}</label>
+      <select id="f-method" name="method">{% for v in methods %}<option value="{{ v }}"{{ input.method == v ? ' selected' }}>{{ t('pledge.method.' ~ v) }}</option>{% endfor %}</select>
+      {% if errors.method is defined %}<p class="field__error">{{ t(errors.method) }}</p>{% endif %}
+    </div>
+    <div class="grid-2">
+      {{ m.field('name', t('pledge.field.sponsor_name'), input.name, errors, 'text', {required: true, maxlength: 120}) }}
+      {{ m.field('email', t('pledge.field.sponsor_email'), input.email, errors, 'email', {required: true, maxlength: 190}) }}
+    </div>
+    {% if pl %}
+      {{ m.textarea('message', t('pledges.admin.message'), input.message, errors, {optional: true, rows: 2, maxlength: 500}) }}
+      {% if pl.payment_requested_at %}
+        <label class="inline-check"><input type="checkbox" name="send_correction" value="1"> {{ t('pledges.admin.send_correction') }}</label>
+      {% endif %}
+    {% else %}
+      <label class="inline-check"><input type="checkbox" name="confirm" value="1"{{ input.confirm ? ' checked' }}> {{ t('pledges.admin.send_confirmation') }}</label>
+    {% endif %}
+    <div><button type="submit" class="btn btn--primary">{{ t('app.save') }}</button></div>
+  </form>
+
+  {% if pl and pl.status != 'cancelled' %}
+    <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/participants/' ~ p.id ~ '/pledges/' ~ pl.id ~ '/cancel') }}" class="card stack form-narrow" data-confirm="{{ t('pledges.admin.cancel_confirm') }}">
+      {{ csrf_field() }}
+      <h2 class="h2">{{ t('pledges.admin.cancel_title') }}</h2>
+      <p class="muted">{{ t('pledges.admin.cancel_help') }}</p>
+      <div class="field">
+        <label for="f-reason">{{ t('pledges.admin.cancel_reason_label') }}</label>
+        <input id="f-reason" name="reason" type="text" maxlength="255" required>
+      </div>
+      <div><button type="submit" class="btn btn--danger">{{ t('pledges.admin.cancel') }}</button></div>
+    </form>
+  {% endif %}
+{% endblock %}

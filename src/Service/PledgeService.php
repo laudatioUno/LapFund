@@ -10,6 +10,7 @@ use LapFund\I18n\Translator;
 use LapFund\Mail\MailComposer;
 use LapFund\Mail\MailQueue;
 use LapFund\Mail\MailSettings;
+use LapFund\Security\Crypto;
 use LapFund\Security\Tokens;
 use LapFund\Validation;
 
@@ -33,6 +34,7 @@ final class PledgeService
         private readonly Branding $branding,
         private readonly Translator $translator,
         private readonly Formatter $formatter,
+        private readonly Crypto $crypto,
     ) {
     }
 
@@ -130,22 +132,23 @@ final class PledgeService
      * @param array<string, mixed> $data from validate()
      * @return array{id: int, token: string}
      */
-    public function create(array $event, array $p, array $data, string $source): array
+    public function create(array $event, array $p, array $data, string $source, bool $confirm = true): array
     {
-        return $this->db->transaction(function () use ($event, $p, $data, $source): array {
+        return $this->db->transaction(function () use ($event, $p, $data, $source, $confirm): array {
             $token = Tokens::random(32);
             $now = Database::now();
             $id = $this->db->insert('pledges', $data + [
                 'participation_id' => (int) $p['id'],
                 'source' => $source,
-                'consent_at' => $now,
+                'consent_at' => $source === 'admin' ? null : $now,
                 'payment_token_hash' => Tokens::hash($token),
+                'payment_token_enc' => $this->crypto->encrypt($token),
                 'status' => 'open',
                 'created_at' => $now,
                 'updated_at' => $now,
             ]);
             $pledge = $this->find($id);
-            if ($pledge !== null && $this->mail->isConfigured()) {
+            if ($pledge !== null && $confirm && $this->mail->isConfigured()) {
                 $this->queueMail('pledge_confirmation', $pledge, $token, $event);
             }
 
@@ -162,6 +165,34 @@ final class PledgeService
         $this->queueMail('payment_info', $pledge, $token, $event);
 
         return true;
+    }
+
+    /**
+     * Token of the payment link for mails. Pledges from 0.4.0 have no stored token;
+     * they get a new one (the old link from the confirmation then stops working).
+     */
+    public function paymentToken(int $pledgeId): string
+    {
+        $enc = $this->db->value('SELECT payment_token_enc FROM pledges WHERE id = ?', [$pledgeId]);
+        if (is_string($enc) && $enc !== '') {
+            try {
+                return $this->crypto->decrypt($enc);
+            } catch (\Throwable) {
+                // fall through: issue a new one
+            }
+        }
+        $token = Tokens::random(32);
+        $this->db->update('pledges', [
+            'payment_token_hash' => Tokens::hash($token),
+            'payment_token_enc' => $this->crypto->encrypt($token),
+        ], ['id' => $pledgeId]);
+
+        return $token;
+    }
+
+    public function paymentUrl(int $pledgeId): string
+    {
+        return $this->mail->url('/p/' . $this->paymentToken($pledgeId));
     }
 
     /** @return array<string, mixed>|null pledge with participant and event names */

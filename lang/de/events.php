@@ -138,4 +138,8 @@ return [
     'field.invite_subject_help' => 'Standard: {default}',
     'field.invite_intro' => 'Einleitung',
     'field.invite_intro_help' => 'Steht nach «Hallo Vorname». Standard: {default}',
+    'tab.laps' => 'Runden',
+    'tab.payments' => 'Abrechnung',
+    'field.reminder_days' => 'Erinnerung nach Tagen',
+    'field.reminder_days_help' => 'Frühestens so viele Tage nach der Zahlungsaufforderung oder der letzten Erinnerung.',
 ];

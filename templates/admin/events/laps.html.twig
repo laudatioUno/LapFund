@@ -1,0 +1,78 @@
+{% extends 'layout/admin.html.twig' %}
+
+{% block title %}{{ t('events.tab.laps') }} · {{ event.name }}{% endblock %}
+
+{% block content %}
+  {% include 'partials/event_header.html.twig' %}
+
+  <section class="card stack" aria-labelledby="pdf-title">
+    <h2 class="h2" id="pdf-title">{{ t('laps.pdf_heading') }}</h2>
+    <p class="muted">{{ t('laps.pdf_help') }}</p>
+    <div class="button-row">
+      <a href="{{ url('/admin/events/' ~ event.id ~ '/laps.pdf') }}" class="btn btn--secondary" target="_blank" rel="noopener">{{ t('laps.pdf_all') }}</a>
+      {% for team in teams %}
+        <a href="{{ url('/admin/events/' ~ event.id ~ '/laps.pdf?team=' ~ team.id) }}" class="btn btn--secondary btn--small" target="_blank" rel="noopener">{{ team.name }}</a>
+      {% endfor %}
+    </div>
+  </section>
+
+  {% if not can_edit %}
+    <div class="notice notice--info">{{ perm.laps ? t('laps.edit_after_run') : t('laps.only_event_admin') }}</div>
+  {% endif %}
+
+  {% if rows is empty %}
+    <section class="card"><p class="muted">{{ t('participants.empty') }}</p></section>
+  {% else %}
+    <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/laps') }}" class="stack" novalidate>
+      {{ csrf_field() }}
+      {% if errors is not empty %}<div class="notice notice--error" role="alert">{{ t('laps.has_errors') }}</div>{% endif %}
+      <div class="table-wrap">
+        <table class="table lap-table">
+          <thead>
+            <tr>
+              <th scope="col" class="num">{{ t('laps.no') }}</th>
+              <th scope="col">{{ t('participants.name') }}</th>
+              <th scope="col">{{ t('participants.team') }}</th>
+              <th scope="col" class="num">{{ t('laps.laps') }}</th>
+              <th scope="col">{{ t('laps.dns') }}</th>
+              <th scope="col" class="num">{{ t('laps.per_lap') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in rows %}
+              {% set id = r.participation_id %}
+              {% set value = r.input is defined ? r.input : (r.laps is null ? '' : r.laps) %}
+              {% set dns = r.input_dns is defined ? r.input_dns : r.did_not_start %}
+              <tr{{ errors[id] is defined ? ' class="is-error"' }}>
+                <td class="num">{{ r.no }}</td>
+                <td><label for="lap-{{ id }}">{{ r.last_name }} {{ r.first_name }}</label></td>
+                <td>{{ r.team_name ?? '–' }}</td>
+                <td class="num">
+                  {% if can_edit %}
+                    <input id="lap-{{ id }}" name="laps[{{ id }}]" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="{{ value }}" class="lap-input" autocomplete="off"{% if errors[id] is defined %} aria-invalid="true"{% endif %}>
+                  {% else %}
+                    {{ r.did_not_start ? '–' : (r.laps ?? '') }}
+                  {% endif %}
+                  {% if errors[id] is defined %}<br><span class="field__error small">{{ t(errors[id]) }}</span>{% endif %}
+                </td>
+                <td>
+                  {% if can_edit %}
+                    <label class="inline-check small"><input type="checkbox" name="dns[{{ id }}]" value="1" tabindex="-1"{{ dns ? ' checked' }}> {{ t('laps.dns_short') }}</label>
+                  {% elseif r.did_not_start %}{{ t('laps.dns_short') }}{% endif %}
+                </td>
+                <td class="num muted">{{ r.per_lap_cents > 0 ? r.per_lap_cents|money : '' }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if can_edit %}
+        {% if requested %}
+          <label class="inline-check"><input type="checkbox" name="send_corrections" value="1"> {{ t('laps.send_corrections') }}</label>
+        {% endif %}
+        <div><button type="submit" class="btn btn--primary">{{ t('laps.save') }}</button></div>
+        <p class="muted small">{{ t('laps.help') }}</p>
+      {% endif %}
+    </form>
+  {% endif %}
+{% endblock %}

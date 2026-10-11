@@ -26,6 +26,7 @@
         {{ m.field('lap_length_m', t('events.field.lap_length_m'), input.lap_length_m, errors, 'text', {optional: true, inputmode: 'numeric', help: t('events.field.lap_length_help')}) }}
         {{ m.field('entry_deadline', t('events.field.entry_deadline'), input.entry_deadline, errors, 'datetime-local', {optional: true, help: t('events.field.entry_deadline_help')}) }}
       </div>
+      {{ m.field('reminder_days', t('events.field.reminder_days'), input.reminder_days, errors, 'text', {inputmode: 'numeric', help: t('events.field.reminder_days_help')}) }}
       {{ m.field('goal_chf', t('events.field.goal_chf'), input.goal_chf, errors, 'text', {optional: true, inputmode: 'numeric', help: t('events.field.goal_help')}) }}
     </section>
 

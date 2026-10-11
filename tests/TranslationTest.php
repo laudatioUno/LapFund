@@ -23,7 +23,9 @@ final class TranslationTest extends TestCase
         'participants.import.status.' => ['new', 'existing', 'in_event', 'duplicate', 'invalid'],
         'mail.settings.enc.' => ['ssl', 'starttls', 'none'],
         'mail.status.' => ['queued', 'sending', 'sent', 'failed', 'cancelled'],
-        'mail.type.' => ['invite', 'new_link', 'links', 'test', 'pledge_confirmation', 'payment_info'],
+        'mail.type.' => ['invite', 'new_link', 'links', 'test', 'pledge_confirmation', 'payment_info', 'payment_request', 'payment_reminder', 'payment_correction', 'payment_info_due'],
+        'payments.state_' => ['none', 'open', 'partial', 'done'],
+        'payments.type.' => ['all', 'flat', 'per_lap'],
         'mail.error.' => ['not_configured_hint', 'connect_hint', 'auth_hint', 'tls_hint', 'recipient_hint', 'sender_hint', 'other_hint'],
         'public.me.method.' => ['twint', 'cash'],
         'pledge.type.' => ['flat', 'per_lap'],
@@ -89,7 +91,7 @@ final class TranslationTest extends TestCase
         $keys = [];
         $patterns = [
             "/\\bt\\(\\s*'([a-z0-9_]+\\.[a-z0-9_.]+)'/",
-            "/'((?:app|auth|admin|install|errors|validation|upload|events|participants|mail|mails|public|pledge|pdf)\\.[a-z0-9_.]+)'/",
+            "/'((?:app|auth|admin|install|errors|validation|upload|events|participants|mail|mails|public|pledge|pdf|laps|payments|pledges)\\.[a-z0-9_.]+)'/",
         ];
         $files = [...$this->phpFiles($root . '/src'), ...$this->phpFiles($root . '/templates', 'twig')];
         foreach (array_unique($files) as $file) {

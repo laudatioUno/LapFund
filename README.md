@@ -2,7 +2,7 @@
 
 **LapFund** is a self-hosted web tool for sponsored runs ("Sponsorenlauf"): participants share a personal link, sponsors pledge online – a fixed amount or an amount per lap – and the club records laps and keeps track of payments. Made for clubs that want to replace paper lists without paying platform fees.
 
-> Status: **stage 4 of 6**. Installer, admin login with two-factor authentication, admin accounts, club branding, events, teams, participants, mail sending, invitations with personal links, the participant page and sponsor pledges work. Laps, billing and reports follow in the next stages.
+> Status: **stage 5 of 6**. A sponsored run can be handled from preparation to billing: events, participants, invitations, sponsor pledges, laps and payments. Reports, export and the data retention follow in the last stage.
 
 ## Features
 
@@ -39,6 +39,16 @@ Stage 4 – sponsors
 - Participants enter pledges themselves (e.g. from the paper list) and tick cash payments as received
 - Sponsor list as PDF for printing, with a QR code to the sponsor link
 - Entry deadline per event; after the run no new pledges
+
+Stage 5 – run and billing
+- Lap list as PDF for counting on the day, per team or for the whole event
+- Quick entry of the laps (keyboard friendly), «did not start» separate from 0 laps
+- Amounts owed are calculated: fixed amount, or laps × amount per lap
+- Payment requests, one mail per pledge, with preview, test mail and filters; correction mails when laps or pledges change afterwards
+- Tick payments as paid (date, method, amount received), or all pledges of a participant at once when the cash is handed in; undo possible
+- Correct, cancel and add pledges as event admin
+- Participant list with sums and payment state, filter «still open», open amounts per participant and team, reminders after a configurable number of days
+- Participants and sponsors see laps and amounts after the run
 
 ## Requirements
 

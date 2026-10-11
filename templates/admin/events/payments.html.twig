@@ -1,0 +1,123 @@
+{% extends 'layout/admin.html.twig' %}
+
+{% block title %}{{ t('events.tab.payments') }} · {{ event.name }}{% endblock %}
+
+{% block content %}
+  {% include 'partials/event_header.html.twig' %}
+
+  <dl class="mail-counts money-counts">
+    <div><dt>{{ t('payments.total.owed') }}</dt><dd>{{ totals.owed|money }}</dd></div>
+    <div><dt>{{ t('payments.total.paid') }}</dt><dd>{{ totals.paid|money }}</dd></div>
+    <div><dt>{{ t('payments.total.open') }}</dt><dd>{{ totals.open|money }}</dd></div>
+  </dl>
+  {% if totals.laps_missing > 0 and event.status in ['run_done', 'billing'] %}
+    <div class="notice notice--warning">{{ t('payments.laps_missing', {count: totals.laps_missing}) }} <a href="{{ url('/admin/events/' ~ event.id ~ '/laps') }}">{{ t('payments.to_laps') }}</a></div>
+  {% endif %}
+
+  <section class="card stack" aria-labelledby="req-title">
+    <h2 class="h2" id="req-title">{{ t('payments.requests_title') }}</h2>
+    <p class="muted">{{ t('payments.requests_help') }}</p>
+    {% if not billing %}
+      <p class="notice notice--info">{{ t('payments.only_billing') }}</p>
+    {% else %}
+      <form method="get" action="{{ url('/admin/events/' ~ event.id ~ '/payments') }}" class="filter-bar">
+        <div class="field">
+          <label for="f-type">{{ t('payments.filter_type') }}</label>
+          <select id="f-type" name="type">
+            {% for v in ['all', 'flat', 'per_lap'] %}<option value="{{ v }}"{{ filter_type == v ? ' selected' }}>{{ t('payments.type.' ~ v) }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-team">{{ t('participants.team') }}</label>
+          <select id="f-team" name="team">
+            <option value="">{{ t('participants.filter_all_teams') }}</option>
+            {% for team in teams %}<option value="{{ team.id }}"{{ filter_team == team.id ? ' selected' }}>{{ team.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="filter-bar__actions">
+          <button type="submit" class="btn btn--secondary">{{ t('participants.filter_apply') }}</button>
+          <button type="submit" name="preview" value="1" class="btn btn--link">{{ t('payments.preview') }}</button>
+        </div>
+      </form>
+      <p class="strong">{{ t('payments.due_count', {count: due|length}) }}</p>
+      {% if preview %}
+        <div class="mail-preview">
+          <p class="small muted">{{ t('payments.preview_to') }}: {{ preview.to }}<br>{{ t('payments.preview_subject') }}: <strong>{{ preview.subject }}</strong></p>
+          <pre>{{ preview.text }}</pre>
+        </div>
+      {% endif %}
+      {% if perm.payments %}
+        <div class="button-row">
+          <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/payments/test') }}">
+            {{ csrf_field() }}<input type="hidden" name="type" value="{{ filter_type }}"><input type="hidden" name="team" value="{{ filter_team }}">
+            <button type="submit" class="btn btn--secondary"{{ due is empty or not configured ? ' disabled' }}>{{ t('payments.test', {email: current_user.email}) }}</button>
+          </form>
+          <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/payments/send') }}" data-confirm="{{ t('payments.confirm', {count: due|length}) }}">
+            {{ csrf_field() }}<input type="hidden" name="type" value="{{ filter_type }}"><input type="hidden" name="team" value="{{ filter_team }}">
+            <button type="submit" class="btn btn--primary"{{ due is empty or not configured ? ' disabled' }}>{{ t('payments.send', {count: due|length}) }}</button>
+          </form>
+        </div>
+      {% else %}
+        <p class="muted small">{{ t('mails.only_event_admin') }}</p>
+      {% endif %}
+    {% endif %}
+  </section>
+
+  {% if billing %}
+    <section class="card stack" aria-labelledby="rem-title">
+      <h2 class="h2" id="rem-title">{{ t('payments.reminders_title') }}</h2>
+      <p class="muted">{{ t('payments.reminders_help', {days: event.reminder_days}) }}</p>
+      <p class="strong">{{ t('payments.reminders_due', {count: reminders|length}) }}</p>
+      {% if perm.payments and reminders is not empty %}
+        <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/payments/remind') }}" data-confirm="{{ t('payments.reminders_confirm', {count: reminders|length}) }}">
+          {{ csrf_field() }}
+          <button type="submit" class="btn btn--secondary"{{ configured ? '' : ' disabled' }}>{{ t('payments.reminders_send', {count: reminders|length}) }}</button>
+        </form>
+      {% endif %}
+    </section>
+  {% endif %}
+
+  {% if team_totals is not empty %}
+    <h2 class="h2">{{ t('payments.by_team') }}</h2>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th scope="col">{{ t('participants.team') }}</th><th scope="col" class="num">{{ t('payments.total.owed') }}</th><th scope="col" class="num">{{ t('payments.total.paid') }}</th><th scope="col" class="num">{{ t('payments.total.open') }}</th></tr></thead>
+        <tbody>
+          {% for tt in team_totals %}
+            <tr><td>{{ tt.name ?? t('laps.no_team') }}</td><td class="num">{{ tt.owed|money }}</td><td class="num">{{ tt.paid|money }}</td><td class="num strong">{{ tt.open|money }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+
+  <h2 class="h2">{{ t('payments.open_title') }}</h2>
+  {% if open_rows is empty %}
+    <section class="card"><p class="muted">{{ t('payments.nothing_open') }}</p></section>
+  {% else %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr>
+          <th scope="col">{{ t('participants.name') }}</th>
+          <th scope="col">{{ t('participants.team') }}</th>
+          <th scope="col" class="num">{{ t('payments.total.owed') }}</th>
+          <th scope="col" class="num">{{ t('payments.total.paid') }}</th>
+          <th scope="col" class="num">{{ t('payments.total.open') }}</th>
+          <th scope="col">{{ t('payments.state') }}</th>
+        </tr></thead>
+        <tbody>
+          {% for r in open_rows %}
+            <tr>
+              <td><a href="{{ url('/admin/events/' ~ event.id ~ '/participants/' ~ r.participation_id) }}"><strong>{{ r.first_name }} {{ r.last_name }}</strong></a></td>
+              <td>{{ r.team_name ?? '–' }}</td>
+              <td class="num">{{ r.owed_cents|money }}</td>
+              <td class="num">{{ r.paid_cents|money }}</td>
+              <td class="num strong">{{ r.open_cents|money }}{% if r.unknown_count > 0 %}<br><span class="muted small">{{ t('payments.plus_laps') }}</span>{% endif %}</td>
+              <td><span class="badge badge--state-{{ r.state }}">{{ t('payments.state_' ~ r.state) }}</span></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+{% endblock %}

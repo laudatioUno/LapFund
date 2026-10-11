@@ -16,33 +16,45 @@
     </dl>
   </section>
 
+  {% set owed = due ? due.owed_cents : pledge.amount_cents %}
   {% if pledge.status == 'paid' %}
     <section class="card"><p>{{ t('pledge.payment.paid_text') }}</p></section>
   {% elseif pledge.status == 'cancelled' %}
     <section class="card"><p>{{ t('pledge.payment.cancelled_text') }}</p></section>
-  {% elseif pledge.type == 'per_lap' %}
+  {% elseif pledge.type == 'per_lap' and did_not_start %}
+    <section class="card"><p>{{ t('pledge.payment.did_not_start', {name: pledge.first_name}) }}</p></section>
+  {% elseif pledge.type == 'per_lap' and (due is null or due.unknown) %}
     <section class="card stack">
       <h2 class="h2">{{ t('pledge.payment.how') }}</h2>
       <p>{{ t('pledge.payment.per_lap_text', {name: pledge.first_name}) }}</p>
       {% if event.lap_length_m %}<p class="muted small">{{ t('pledge.payment.per_lap_example', {amount: (pledge.amount_cents * 20)|money}) }}</p>{% endif %}
     </section>
-  {% elseif twint %}
-    <section class="card stack" aria-labelledby="twint-title">
-      <h2 class="h2" id="twint-title">{{ t('pledge.payment.twint_title') }}</h2>
-      <ol class="steps">
-        <li>{{ t('pledge.payment.twint_step1') }}</li>
-        <li>{{ t('pledge.payment.twint_step2', {amount: pledge.amount_cents|money}) }}</li>
-        <li>{{ t('pledge.payment.twint_step3') }}<br><code class="secret" id="twint-message">{{ twint_message }}</code>
-          <button type="button" class="btn btn--link small" data-copy-target="twint-message" data-copied="{{ t('app.copied') }}">{{ t('app.copy') }}</button></li>
-      </ol>
-      {% if event.twint_qr_file %}<div class="twint-qr"><img src="{{ url('/media/' ~ event.twint_qr_file) }}" alt="{{ t('pledge.payment.twint_qr_alt') }}"></div>{% endif %}
-      <p class="muted small">{{ t('pledge.payment.twint_phone') }}</p>
-    </section>
   {% else %}
-    <section class="card stack">
-      <h2 class="h2">{{ t('pledge.payment.how') }}</h2>
-      <p>{{ t('pledge.payment.cash_text', {name: pledge.first_name, amount: pledge.amount_cents|money}) }}</p>
-    </section>
+    {% if pledge.type == 'per_lap' %}
+      <section class="summary summary--small">
+        <p class="summary__label">{{ t('pledge.payment.laps_run', {name: pledge.first_name, laps: laps}) }}</p>
+        <span class="summary__value">{{ owed|money }}</span>
+        <span class="summary__hint">{{ t('pledge.payment.laps_calc', {laps: laps, rate: pledge.amount_cents|money}) }}</span>
+      </section>
+    {% endif %}
+    {% if twint %}
+      <section class="card stack" aria-labelledby="twint-title">
+        <h2 class="h2" id="twint-title">{{ t('pledge.payment.twint_title') }}</h2>
+        <ol class="steps">
+          <li>{{ t('pledge.payment.twint_step1') }}</li>
+          <li>{{ t('pledge.payment.twint_step2', {amount: owed|money}) }}</li>
+          <li>{{ t('pledge.payment.twint_step3') }}<br><code class="secret" id="twint-message">{{ twint_message }}</code>
+            <button type="button" class="btn btn--link small" data-copy-target="twint-message" data-copied="{{ t('app.copied') }}">{{ t('app.copy') }}</button></li>
+        </ol>
+        {% if event.twint_qr_file %}<div class="twint-qr"><img src="{{ url('/media/' ~ event.twint_qr_file) }}" alt="{{ t('pledge.payment.twint_qr_alt') }}"></div>{% endif %}
+        <p class="muted small">{{ t('pledge.payment.twint_phone') }}</p>
+      </section>
+    {% else %}
+      <section class="card stack">
+        <h2 class="h2">{{ t('pledge.payment.how') }}</h2>
+        <p>{{ t('pledge.payment.cash_text', {name: pledge.first_name, amount: owed|money}) }}</p>
+      </section>
+    {% endif %}
   {% endif %}
 
   {% if pledge.status in ['open', 'cash_received'] and mail_configured %}

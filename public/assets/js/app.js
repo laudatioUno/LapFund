@@ -110,4 +110,16 @@
     });
     sync();
   }
+
+  // Lap entry: Enter jumps to the next participant instead of sending the form
+  var lapInputs = Array.prototype.slice.call(document.querySelectorAll('.lap-input'));
+  lapInputs.forEach(function (input, i) {
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        var next = lapInputs[i + 1];
+        if (next) { next.focus(); next.select(); }
+      }
+    });
+  });
 })();

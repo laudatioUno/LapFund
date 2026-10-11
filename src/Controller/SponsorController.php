@@ -102,13 +102,18 @@ final class SponsorController extends Controller
             throw new HttpException(404);
         }
 
+        $due = $this->app->billing()->pledge((int) $event['id'], (int) $pledge['id']);
+
         return $this->render('public/payment.html.twig', [
             'pledge' => $pledge,
+            'due' => $due,
+            'laps' => $due['laps'] ?? null,
+            'did_not_start' => (bool) ($due['did_not_start'] ?? false),
             'event' => $event,
             'brand' => $this->app->branding()->forEvent($event),
             'theme_event' => (int) $event['id'],
             'token' => (string) $params['token'],
-            'twint' => $pledge['type'] === 'flat' && $pledge['payment_method'] === 'twint',
+            'twint' => $pledge['payment_method'] === 'twint',
             'twint_message' => PledgeService::twintMessage($pledge),
             'mail_configured' => $this->app->mailSettings()->isConfigured(),
         ]);
@@ -127,9 +132,13 @@ final class SponsorController extends Controller
         if ($event === null) {
             throw new HttpException(404);
         }
-        if ($this->app->rateLimiter()->hit('payment_mail', (string) $pledge['id'], 3, 3600)
-            && in_array($pledge['status'], ['open', 'cash_received'], true)
-            && $this->app->pledgeService()->queuePaymentInfo($pledge, $token, $event)) {
+        $due = $this->app->billing()->pledge((int) $event['id'], (int) $pledge['id']);
+        $allowed = $this->app->rateLimiter()->hit('payment_mail', (string) $pledge['id'], 3, 3600)
+            && in_array($pledge['status'], ['open', 'cash_received'], true) && $this->app->mailSettings()->isConfigured();
+        if ($allowed && $due !== null && $pledge['type'] === 'per_lap' && (int) $due['unknown'] === 0 && (int) $due['owed_cents'] > 0) {
+            $this->app->billingService()->queueDueInfo($event, $due);
+            $this->flash('success', 'pledge.payment.mail_sent', ['email' => $pledge['sponsor_email']]);
+        } elseif ($allowed && $this->app->pledgeService()->queuePaymentInfo($pledge, $token, $event)) {
             $this->flash('success', 'pledge.payment.mail_sent', ['email' => $pledge['sponsor_email']]);
         } else {
             $this->flash('error', 'pledge.payment.mail_not_sent');

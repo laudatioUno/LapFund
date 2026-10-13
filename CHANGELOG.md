@@ -3,6 +3,11 @@
 All notable changes to LapFund. Versions follow [semantic versioning](https://semver.org/).
 The section of a version is used as the release notes on GitHub.
 
+## [1.0.2] – 2026-10
+
+### Fixed
+- Admin console: name, role and «Abmelden» at the bottom of the side bar were pushed below long pages (e.g. Vereinseinstellungen, Mailversand, Änderungsprotokoll) and only visible after scrolling to the end. The side bar now stays in view, with the account box always at its bottom ([#15](https://github.com/laudatioUno/LapFund/issues/15)).
+
 ## [1.0.1] – 2026-10
 
 ### Fixed

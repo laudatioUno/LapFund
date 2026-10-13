@@ -59,28 +59,52 @@ final class LapsController extends EventScopedController
     public function pdf(Request $request, array $params): Response
     {
         $this->loadEvent($params, 'event.view');
-        $teamFilter = $request->input('team');
-        $rows = $this->app->billing()->participants((int) $this->event['id']);
         $groups = [];
-        foreach ($rows as $row) {
+        foreach ($this->rowsForPdf($request) as $row) {
             $key = $row['team_id'] === null ? 'none' : (string) $row['team_id'];
-            if ($teamFilter !== '' && $teamFilter !== $key) {
-                continue;
-            }
             $groups[$key] ??= ['name' => $row['team_name'], 'rows' => []];
             $groups[$key]['rows'][] = $row;
         }
+
+        return $this->pdfResponse('pdf/lap_list.html.twig', ['groups' => $groups], 'laps.pdf_title', 'Zaehlliste.pdf', true);
+    }
+
+    /**
+     * Counting strips: one strip per participant, six per A4 page to cut apart and
+     * hand to the counters (issue #8). Whole event in one run, or one team.
+     */
+    public function strips(Request $request, array $params): Response
+    {
+        $this->loadEvent($params, 'event.view');
+
+        return $this->pdfResponse('pdf/lap_strips.html.twig', ['rows' => $this->rowsForPdf($request)], 'laps.strips_title', 'Zaehlstreifen.pdf', false);
+    }
+
+    /** Participants in the order of the lap entry, optionally of one team (?team=<id> or none). */
+    private function rowsForPdf(Request $request): array
+    {
+        $team = $request->input('team');
+
+        return array_values(array_filter(
+            $this->app->billing()->participants((int) $this->event['id']),
+            static fn (array $r) => $team === '' || $team === ($r['team_id'] === null ? 'none' : (string) $r['team_id']),
+        ));
+    }
+
+    /** @param array<string, mixed> $data */
+    private function pdfResponse(string $template, array $data, string $titleKey, string $filename, bool $pageNumbers): Response
+    {
         $brand = $this->app->branding()->forEvent($this->event);
-        $html = $this->app->view()->renderMail('pdf/lap_list.html.twig', [
+        $html = $this->app->view()->renderMail($template, $data + [
             'event' => $this->event,
             'brand' => $brand,
             'logo_path' => $brand['logo'] !== '' ? $this->app->images()->path($brand['logo']) : null,
-            'groups' => $groups,
         ]);
+        $title = $this->t($titleKey, ['event' => $this->event['name']]);
 
-        return new Response($this->app->pdf()->render($html, $this->t('laps.pdf_title', ['event' => $this->event['name']])), 200, [
+        return new Response($this->app->pdf()->render($html, $title, $pageNumbers), 200, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="Zaehlliste.pdf"',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"',
         ]);
     }
 

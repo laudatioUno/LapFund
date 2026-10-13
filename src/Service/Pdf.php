@@ -17,7 +17,7 @@ final class Pdf
     {
     }
 
-    public function render(string $html, string $title = ''): string
+    public function render(string $html, string $title = '', bool $pageNumbers = true): string
     {
         $cache = $this->root . '/storage/cache/dompdf';
         if (!is_dir($cache)) {
@@ -38,9 +38,11 @@ final class Pdf
         $dompdf->loadHtml($html, 'UTF-8');
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
-        $canvas = $dompdf->getCanvas();
-        $font = $dompdf->getFontMetrics()->getFont('DejaVu Sans');
-        $canvas->page_text(520, 810, '{PAGE_NUM} / {PAGE_COUNT}', $font, 8, [0.35, 0.4, 0.46]);
+        if ($pageNumbers) {
+            $canvas = $dompdf->getCanvas();
+            $font = $dompdf->getFontMetrics()->getFont('DejaVu Sans');
+            $canvas->page_text(520, 810, '{PAGE_NUM} / {PAGE_COUNT}', $font, 8, [0.35, 0.4, 0.46]);
+        }
         if ($title !== '') {
             $dompdf->addInfo('Title', $title);
         }

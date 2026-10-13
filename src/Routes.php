@@ -135,6 +135,7 @@ final class Routes
         $r->get('/admin/events/{id}/laps', $c(LapsController::class, 'index'));
         $r->post('/admin/events/{id}/laps', $c(LapsController::class, 'save'));
         $r->get('/admin/events/{id}/laps.pdf', $c(LapsController::class, 'pdf'));
+        $r->get('/admin/events/{id}/lap-strips.pdf', $c(LapsController::class, 'strips'));
         $r->get('/admin/events/{id}/payments', $c(PaymentsController::class, 'index'));
         $r->post('/admin/events/{id}/payments/send', $c(PaymentsController::class, 'send'));
         $r->post('/admin/events/{id}/payments/test', $c(PaymentsController::class, 'test'));

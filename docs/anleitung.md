@@ -79,7 +79,12 @@ Auf ihrer Seite finden die Kinder (oder ihre Eltern):
 
 ## 3. Lauftag
 
-Unter **Runden** die **Zählliste** als PDF drucken, für den ganzen Event oder pro Team: pro Team eine Seite mit Nummer, Name, Feld für die Strichliste, Total und Visum.
+Unter **Runden** gibt es zwei Vorlagen zum Drucken, jeweils für den ganzen Event oder pro Team:
+
+- **Zählliste**: pro Team eine Seite mit Nummer, Name, Feld für die Strichliste, Total und Visum. Praktisch, wenn eine Person ein ganzes Team zählt.
+- **Zählstreifen**: ein Streifen pro Kind, sechs pro A4-Seite zum Auseinanderschneiden. Jeder Zähler bekommt seinen Streifen, macht pro Runde einen Strich und trägt am Schluss das Total ein.
+
+Die Nummern auf beiden Vorlagen entsprechen der Reihenfolge bei der Runden-Erfassung.
 
 ## 4. Nach dem Lauf
 

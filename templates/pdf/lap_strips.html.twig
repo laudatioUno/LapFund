@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<title>{{ t('laps.strips_title', {event: event.name}) }}</title>
+{# Six strips per A4 page (297 mm / 6 = 49.5 mm), cut along the dashed lines (issue #8). #}
+<style>
+  @page { margin: 0; }
+  body { margin: 0; font-family: "DejaVu Sans", sans-serif; color: #14212E; }
+  .sheet { width: 210mm; height: 297mm; position: relative; page-break-after: always; }
+  .sheet-last { page-break-after: auto; }
+  .strip { position: absolute; left: 12mm; width: 186mm; }
+  .cut { position: absolute; left: 0; width: 210mm; border-top: 0.8pt dashed #8A99A8; }
+  .scissors { position: absolute; left: 3mm; font-size: 9pt; color: #8A99A8; background: #FFFFFF; }
+  .top { width: 100%; border-collapse: collapse; }
+  .top td { vertical-align: middle; }
+  .no { width: 11mm; padding-right: 3mm; }
+  .no div { width: 10mm; height: 7.5mm; padding-top: 1.5mm; border-radius: 5pt; background: {{ brand.primary_color }}; color: #FFFFFF; text-align: center; font-weight: bold; font-size: 12pt; }
+  .name { font-size: 14pt; font-weight: bold; }
+  .team { font-size: 9pt; font-weight: bold; color: {{ brand.primary_color }}; padding-left: 8pt; }
+  .meta { text-align: right; font-size: 7pt; color: #586776; width: 66mm; }
+  .meta div { display: inline-block; vertical-align: middle; text-align: left; padding-left: 4pt; }
+  .logo { width: 18pt; height: 18pt; vertical-align: middle; }
+  .count { width: 100%; border-collapse: collapse; margin-top: 2.5mm; }
+  .count td { height: 19mm; vertical-align: top; }
+  .tally { border: 1.4pt solid #14212E; border-radius: 4pt; }
+  .gap { width: 3mm; }
+  .total { width: 30mm; border: 1.4pt solid #14212E; border-radius: 4pt; background: #F3F6F9; }
+  .lbl { font-size: 6.5pt; color: #586776; padding: 1.5pt 0 0 3pt; display: block; }
+  .foot { width: 100%; border-collapse: collapse; margin-top: 2mm; }
+  .foot td { font-size: 7.5pt; color: #3B4A58; vertical-align: bottom; }
+  .dns { width: 40mm; }
+  .box { display: inline-block; width: 8pt; height: 8pt; border: 1pt solid #14212E; vertical-align: middle; margin-right: 3pt; }
+  .who { width: 16mm; text-align: right; padding-right: 3pt; }
+  .line { border-bottom: 0.8pt solid #14212E; height: 10pt; }
+</style>
+</head>
+<body>
+{% set height = 49.5 %}
+{% for page in rows|batch(6) %}
+<div class="sheet{{ loop.last ? ' sheet-last' }}">
+  {% for r in page %}
+    {% set i = loop.index0 %}
+    <div class="strip" style="top: {{ i * height + 6 }}mm">
+      <table class="top"><tr>
+        <td class="no"><div>{{ r.no }}</div></td>
+        <td class="name">{{ r.first_name }} {{ r.last_name }}{% if r.team_name %}<span class="team">{{ r.team_name }}</span>{% endif %}</td>
+        <td class="meta">{% if logo_path %}<img src="{{ logo_path }}" class="logo">{% endif %}<div>{{ brand.club_name }}<br>{{ event.name }}{% if event.event_date %} · {{ event.event_date|date('d.m.Y') }}{% endif %}</div></td>
+      </tr></table>
+      <table class="count"><tr>
+        <td class="tally"><span class="lbl">{{ t('laps.strips_tally') }}</span></td>
+        <td class="gap"></td>
+        <td class="total"><span class="lbl">{{ t('laps.total') }}</span></td>
+      </tr></table>
+      <table class="foot"><tr>
+        <td class="dns"><span class="box"></span> {{ t('laps.dns_short') }}</td>
+        <td class="who">{{ t('laps.strips_counter') }}</td>
+        <td class="line"></td>
+      </tr></table>
+    </div>
+  {% endfor %}
+  {# cut lines between all six places, also below the last strip of a partly filled page #}
+  {% for i in 1..5 %}
+    <div class="cut" style="top: {{ i * height }}mm"></div>
+    <div class="scissors" style="top: {{ i * height - 2.3 }}mm">✂</div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="sheet sheet-last"><p style="padding: 20mm">{{ t('participants.empty') }}</p></div>
+{% endfor %}
+</body>
+</html>

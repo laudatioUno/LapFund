@@ -14,6 +14,14 @@
         <a href="{{ url('/admin/events/' ~ event.id ~ '/laps.pdf?team=' ~ team.id) }}" class="btn btn--secondary btn--small" target="_blank" rel="noopener">{{ team.name }}</a>
       {% endfor %}
     </div>
+    <h3 class="h3">{{ t('laps.strips_heading') }}</h3>
+    <p class="muted">{{ t('laps.strips_help') }}</p>
+    <div class="button-row">
+      <a href="{{ url('/admin/events/' ~ event.id ~ '/lap-strips.pdf') }}" class="btn btn--secondary" target="_blank" rel="noopener">{{ t('laps.strips_all') }}</a>
+      {% for team in teams %}
+        <a href="{{ url('/admin/events/' ~ event.id ~ '/lap-strips.pdf?team=' ~ team.id) }}" class="btn btn--secondary btn--small" target="_blank" rel="noopener">{{ team.name }}</a>
+      {% endfor %}
+    </div>
   </section>
 
   {% if not can_edit %}

@@ -3,6 +3,11 @@
 All notable changes to LapFund. Versions follow [semantic versioning](https://semver.org/).
 The section of a version is used as the release notes on GitHub.
 
+## [1.1.0] – 2026-10
+
+### Added
+- Counting strips (tab *Runden*): one strip per participant with number, name, team, an empty field for the tally marks, total, «did not start» and counter; six strips per A4 page to cut apart and hand to the counters. For the whole event or per team ([#8](https://github.com/laudatioUno/LapFund/issues/8)). The lap list stays as before.
+
 ## [1.0.2] – 2026-10
 
 ### Fixed

@@ -22,6 +22,7 @@
 **Sponsors**
 - Sponsor page behind the personal sponsor link: a fixed amount or an amount per lap, Twint or cash, with consent and spam protection
 - Payment page with the Twint QR code of the event, amount and message, or the cash note; confirmation mail with the payment details
+- Mail to the participant for every new online pledge, with the new totals (switchable per event)
 - Participants enter pledges themselves (e.g. from the paper list) and tick cash as received; sponsor list as PDF
 
 **Run and billing**

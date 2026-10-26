@@ -14,7 +14,7 @@ use LapFund\Database\Database;
 final class MailWorker
 {
     /** Mail types that are about finding sponsors; they stop after the run (EV-03). */
-    private const SPONSOR_SEARCH_TYPES = ['invite'];
+    private const SPONSOR_SEARCH_TYPES = ['invite', 'new_sponsor'];
 
     public function __construct(
         private readonly Database $db,

@@ -77,6 +77,8 @@ Auf ihrer Seite finden die Kinder (oder ihre Eltern):
 
 Über den Link des Kindes tragen sich Sponsoren ein: pauschal oder pro Runde, Zahlung mit Twint oder bar. Sie erhalten eine Bestätigung mit den Zahlungsangaben. Pauschale Twint-Beträge können sie sofort bezahlen.
 
+Gleichzeitig erhält das Kind (bzw. die Mailadresse der Eltern) eine Mail «Neuer Sponsor» mit Name, Betrag und Nachricht des Sponsors und dem Link zur persönlichen Seite. Diese Mail lässt sich in den Einstellungen des Events abschalten.
+
 ## 3. Lauftag
 
 Unter **Runden** gibt es zwei Vorlagen zum Drucken, jeweils für den ganzen Event oder pro Team:

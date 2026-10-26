@@ -155,4 +155,7 @@ return [
     'anonymized_since' => 'Die Personendaten der Sponsoren sind seit dem {date} gelöscht. Beträge, Runden und Zahlungen sind für die Auswertung erhalten.',
     'anonymize_not_allowed' => 'Anonymisieren ist nur bei abgeschlossenen Events möglich, und nur einmal.',
     'reopen_anonymized' => 'Die Sponsorendaten dieses Events sind gelöscht. Es kann nicht mehr geöffnet werden.',
+
+    'field.notify_new_sponsor' => 'Teilnehmende per Mail informieren, wenn sich ein Sponsor online einträgt',
+    'field.notify_new_sponsor_help' => 'Die Mail geht an die Adresse der Teilnehmenden, mit Name, Betrag und Nachricht des Sponsors und dem Link zur persönlichen Seite. Nur während der Sponsorensuche.',
 ];

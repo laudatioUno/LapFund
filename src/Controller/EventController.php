@@ -189,6 +189,7 @@ final class EventController extends EventScopedController
             'reminder_days' => $request->input('reminder_days'),
             'sender_name' => $request->input('sender_name'),
             'own_color' => $request->input('own_color') === '1',
+            'notify_new_sponsor' => $request->input('notify_new_sponsor') === '1',
             'primary_color' => $request->input('primary_color'),
             'welcome' => $request->input('welcome'),
             'invite_subject' => $request->input('invite_subject'),
@@ -261,6 +262,7 @@ final class EventController extends EventScopedController
             'entry_deadline' => $this->localToUtc($input['entry_deadline']),
             'goal_cents' => $input['goal_chf'] !== '' ? (int) $input['goal_chf'] * 100 : null,
             'reminder_days' => (int) $input['reminder_days'],
+            'notify_new_sponsor' => $input['notify_new_sponsor'] ? 1 : 0,
             'sender_name' => $input['sender_name'] !== '' ? $input['sender_name'] : null,
             'primary_color' => $color,
             'texts' => ['welcome' => $input['welcome'], 'purpose' => $input['purpose'], 'mail_footer' => $input['mail_footer'], 'invite_subject' => $input['invite_subject'], 'invite_intro' => $input['invite_intro']],
@@ -306,6 +308,7 @@ final class EventController extends EventScopedController
             'reminder_days' => (string) ($event['reminder_days'] ?? 14),
             'sender_name' => (string) ($event['sender_name'] ?? ''),
             'own_color' => $event['primary_color'] !== null,
+            'notify_new_sponsor' => (int) ($event['notify_new_sponsor'] ?? 1) === 1,
             'primary_color' => (string) ($event['primary_color'] ?? $this->app->branding()->club()['primary_color']),
             'welcome' => $event['texts']['welcome'],
             'invite_subject' => $event['texts']['invite_subject'],
@@ -386,7 +389,7 @@ final class EventController extends EventScopedController
     {
         return array_intersect_key($data, array_flip([
             'name', 'event_date', 'location', 'lap_length_m', 'entry_deadline', 'goal_cents',
-            'sender_name', 'primary_color', 'logo_file', 'twint_qr_file', 'texts',
+            'sender_name', 'primary_color', 'logo_file', 'twint_qr_file', 'texts', 'reminder_days', 'notify_new_sponsor',
         ]));
     }
 }

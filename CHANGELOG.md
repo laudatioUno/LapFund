@@ -3,6 +3,17 @@
 All notable changes to LapFund. Versions follow [semantic versioning](https://semver.org/).
 The section of a version is used as the release notes on GitHub.
 
+## [1.2.0] – 2026-10
+
+### Added
+- Mail to the participant when a sponsor pledges online («Neuer Sponsor für Lea»): sponsor name, amount, message, the new totals and the button to the participant page (EM-04). Not for pledges the participant or an admin enters. Only during the sponsor search; switchable per event in the settings (on by default).
+
+### Changed
+- Data retention: when a closed event is anonymized, the content of these mails (sponsor names) is deleted as well; queued ones are cancelled once the run is done.
+
+### Database
+- Migration `006_sponsor_notice.sql`: setting `notify_new_sponsor` per event.
+
 ## [1.1.0] – 2026-10
 
 ### Added

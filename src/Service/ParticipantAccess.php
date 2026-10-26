@@ -160,6 +160,44 @@ final class ParticipantAccess
     }
 
     /**
+     * Tells the participant about a new online pledge (EM-04): sponsor name, amount,
+     * message and the new totals, with the link to the participant page. Only while
+     * sponsors are searched and if the event has it switched on.
+     *
+     * @param array<string, mixed> $event
+     * @param array<string, mixed> $pledge row from PledgeService::find()
+     * @param array{count: int, flat_cents: int, per_lap_cents: int} $totals
+     */
+    public function queueNewSponsor(array $event, array $pledge, array $totals): bool
+    {
+        if ((int) ($event['notify_new_sponsor'] ?? 1) !== 1 || $event['status'] !== 'collecting' || !$this->mail->isConfigured()) {
+            return false;
+        }
+        $p = $this->participation((int) $pledge['participation_id']);
+        if ($p === null) {
+            return false;
+        }
+        $brand = $this->branding->forEvent($event);
+        // The subject leaves out the sponsor: mail logs keep subjects longer than contents.
+        $subject = $this->translator->t('mail.new_sponsor.subject', ['name' => $p['first_name'], 'event' => $event['name']]);
+        $mail = $this->composer->build('new_sponsor', (string) $p['email'], $p['first_name'] . ' ' . $p['last_name'], $subject, $brand, [
+            'first_name' => $p['first_name'],
+            'sponsor' => (string) $pledge['sponsor_name'],
+            'message' => (string) ($pledge['sponsor_message'] ?? ''),
+            'amount' => $this->formatter->money((int) $pledge['amount_cents']),
+            'per_lap' => $pledge['type'] === 'per_lap',
+            'count' => $totals['count'],
+            'flat_total' => $this->formatter->money($totals['flat_cents']),
+            'per_lap_total' => $this->formatter->money($totals['per_lap_cents']),
+            'magic_url' => $this->mail->url('/t/' . $this->magicToken((int) $p['id'])),
+            'event' => $this->eventFacts($event),
+        ]);
+        $this->queue->enqueue($mail + ['event_id' => (int) $event['id'], 'participation_id' => (int) $p['id']]);
+
+        return true;
+    }
+
+    /**
      * Invites everyone of the event who was not invited yet, as one send wave.
      *
      * @return array{batch_id: int, count: int}|null

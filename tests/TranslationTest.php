@@ -23,7 +23,7 @@ final class TranslationTest extends TestCase
         'participants.import.status.' => ['new', 'existing', 'in_event', 'duplicate', 'invalid'],
         'mail.settings.enc.' => ['ssl', 'starttls', 'none'],
         'mail.status.' => ['queued', 'sending', 'sent', 'failed', 'cancelled'],
-        'mail.type.' => ['invite', 'new_link', 'links', 'test', 'pledge_confirmation', 'payment_info', 'payment_request', 'payment_reminder', 'payment_correction', 'payment_info_due'],
+        'mail.type.' => ['invite', 'new_link', 'links', 'test', 'pledge_confirmation', 'payment_info', 'payment_request', 'payment_reminder', 'payment_correction', 'payment_info_due', 'new_sponsor'],
         'payments.state_' => ['none', 'open', 'partial', 'done'],
         'payments.type.' => ['all', 'flat', 'per_lap'],
         'mail.error.' => ['not_configured_hint', 'connect_hint', 'auth_hint', 'tls_hint', 'recipient_hint', 'sender_hint', 'other_hint'],

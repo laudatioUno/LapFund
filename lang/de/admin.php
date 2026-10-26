@@ -200,6 +200,8 @@ return [
     'audit.key.team' => 'Team',
     'audit.key.with_teams' => 'Mit Teams',
     'audit.key.password_changed' => 'Passwort geändert',
+    'audit.key.reminder_days' => 'Erinnerung nach Tagen',
+    'audit.key.notify_new_sponsor' => 'Info neuer Sponsor',
     'audit.key.event_date' => 'Datum',
     'audit.key.location' => 'Ort',
     'audit.key.lap_length_m' => 'Rundenlänge (m)',

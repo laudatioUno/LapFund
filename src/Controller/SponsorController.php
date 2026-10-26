@@ -80,6 +80,10 @@ final class SponsorController extends Controller
         }
 
         $result = $this->app->pledgeService()->create($event, $p, $checked['data'], 'online');
+        $pledge = $this->app->pledgeService()->find($result['id']);
+        if ($pledge !== null) {
+            $this->app->access()->queueNewSponsor($event, $pledge, $this->app->pledges()->totals((int) $p['id']));
+        }
         $this->app->session->remove('pledge_form.' . $p['id']);
         $this->flash('success', 'pledge.saved', ['name' => $p['first_name']]);
 

@@ -1,0 +1,17 @@
+{% extends 'mail/de/_layout.txt.twig' %}
+{% block content %}{{ t('mail.hello', {name: first_name}) }}
+
+{{ t('mail.new_sponsor.text', {event: event.name}) }}
+
+{{ t('mail.new_sponsor.sponsor') }}: {{ sponsor }}
+{{ t('mail.pledge.amount') }}: {{ amount }}{% if per_lap %} {{ t('pledge.per_lap_short') }}{% endif %}
+{% if message %}{{ t('mail.new_sponsor.message') }}: «{{ message }}»
+{% endif %}
+
+{{ t(count == 1 ? 'mail.new_sponsor.totals_one' : 'mail.new_sponsor.totals', {count: count, flat: flat_total, per_lap: per_lap_total}) }}
+
+{{ t('mail.new_sponsor.thanks') }}
+
+{{ t('mail.invite.button') }}:
+{{ magic_url }}
+{% endblock %}

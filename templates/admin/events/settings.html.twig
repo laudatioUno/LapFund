@@ -40,6 +40,8 @@
       <p class="muted small">{{ t('events.section.invite_mail_help') }}</p>
       {{ m.field('invite_subject', t('events.field.invite_subject'), input.invite_subject, errors, 'text', {optional: true, maxlength: 150, help: t('events.field.invite_subject_help', {default: t('mail.invite.subject', {event: event.name})})}) }}
       {{ m.textarea('invite_intro', t('events.field.invite_intro'), input.invite_intro, errors, {optional: true, rows: 3, maxlength: 1000, help: t('events.field.invite_intro_help', {default: t('mail.invite.intro', {event: event.name})})}) }}
+      <label class="inline-check"><input type="checkbox" name="notify_new_sponsor" value="1"{{ input.notify_new_sponsor ? ' checked' }}> {{ t('events.field.notify_new_sponsor') }}</label>
+      <p class="field__help">{{ t('events.field.notify_new_sponsor_help') }}</p>
       {{ m.textarea('mail_footer', t('events.field.mail_footer'), input.mail_footer, errors, {optional: true, rows: 2, maxlength: 1000, help: t('events.field.mail_footer_help')}) }}
     </section>
 

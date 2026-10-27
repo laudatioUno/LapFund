@@ -147,4 +147,14 @@ return [
     'type.payment_reminder' => 'Erinnerung',
     'type.payment_correction' => 'Korrektur',
     'type.payment_info_due' => 'Zahlungsangaben',
+
+    // EM-04: new sponsor
+    'new_sponsor.subject' => 'Neuer Sponsor für {name}',
+    'new_sponsor.text' => 'du hast für den {event} einen neuen Sponsor:',
+    'new_sponsor.sponsor' => 'Sponsor',
+    'new_sponsor.message' => 'Nachricht',
+    'new_sponsor.totals' => 'Damit hast du {count} Sponsoren: {flat} pauschal und {per_lap} pro Runde.',
+    'new_sponsor.totals_one' => 'Das ist dein erster Sponsor: {flat} pauschal und {per_lap} pro Runde.',
+    'new_sponsor.thanks' => 'Weiter so! Auf deiner Seite siehst du alle Sponsoren.',
+    'type.new_sponsor' => 'Info neuer Sponsor',
 ];

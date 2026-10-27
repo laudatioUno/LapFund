@@ -121,6 +121,13 @@ final class Retention
                  WHERE event_id = ? AND type IN ('" . implode("','", self::SPONSOR_MAIL_TYPES) . "')",
                 [$eventId],
             );
+            // «New sponsor» mails to participants name the sponsor in their content
+            $this->db->run(
+                "UPDATE mail_queue SET body_html = NULL, body_text = NULL, inline_images = NULL,
+                    status = CASE WHEN status IN ('queued', 'sending') THEN 'cancelled' ELSE status END
+                 WHERE event_id = ? AND type = 'new_sponsor'",
+                [$eventId],
+            );
             $this->db->update('events', ['anonymized_at' => $now], ['id' => $eventId]);
 
             return count($ids);

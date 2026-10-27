@@ -32,6 +32,23 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
+      # Tells on the PR's Checks tab (Summary) whether merging publishes a release.
+      - name: Release preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="$(php -r 'require "src/App.php"; echo LapFund\App::VERSION;')"
+          if gh api "repos/$GITHUB_REPOSITORY/releases/tags/v$VERSION" > /dev/null 2>&1; then
+            MSG="Merging publishes **no** release: v$VERSION exists already. Raise App::VERSION in src/App.php for a new release."
+          else
+            MSG="Merging publishes release **v$VERSION** automatically."
+            if ! grep -q "^## \[$VERSION\]" CHANGELOG.md; then
+              MSG="$MSG CHANGELOG.md has no section for $VERSION yet, so GitHub generates the release notes."
+              echo "::warning::CHANGELOG.md has no section for $VERSION"
+            fi
+          fi
+          echo "::notice::$MSG"
+          echo "$MSG" >> "$GITHUB_STEP_SUMMARY"
       - name: Build ZIP
         id: build
         run: |

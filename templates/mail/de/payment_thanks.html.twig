@@ -1,0 +1,11 @@
+{% extends 'mail/de/_layout.html.twig' %}
+{% block content %}
+<p style="margin:0 0 16px;font-size:20px;font-weight:bold;">{{ t('mail.hello', {name: pledge.sponsor_name}) }}</p>
+<p style="margin:0 0 16px;">{{ t('mail.payment_thanks.text', {name: participant, event: event.name}) }}</p>
+<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin:0 0 16px;background:#F3F6F9;border-radius:10px;"><tr><td style="padding:14px 16px;">
+<p style="margin:0 0 4px;font-size:22px;font-weight:bold;">{{ amount }}</p>
+<p style="margin:0;font-size:15px;color:#3B4A58;">{{ t('mail.payment_thanks.date') }}: {{ paid_on }} · {{ t('pledge.method.' ~ method) }}</p>
+</td></tr></table>
+<p style="margin:0 0 16px;">{{ t('mail.payment_thanks.closing') }}</p>
+{% include 'mail/de/_button.html.twig' with {href: payment_url, label: t('mail.payment_thanks.button')} %}
+{% endblock %}

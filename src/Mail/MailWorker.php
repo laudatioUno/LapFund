@@ -108,6 +108,10 @@ final class MailWorker
                 return 'mail.cancel.not_collecting';
             }
         }
+        // Thank-you for a payment that was taken back in the meantime (EM-07)
+        if ($mail['type'] === 'payment_thanks' && ($mail['pledge_status'] ?? 'paid') !== 'paid') {
+            return 'mail.cancel.not_paid';
+        }
         if ($mail['body_html'] === null) {
             return 'mail.cancel.content_deleted';
         }

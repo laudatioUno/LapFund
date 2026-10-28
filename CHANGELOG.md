@@ -3,6 +3,14 @@
 All notable changes to LapFund. Versions follow [semantic versioning](https://semver.org/).
 The section of a version is used as the release notes on GitHub.
 
+## [1.3.0] – 2026-10
+
+### Added
+- Thank-you mail to the sponsor when the payment is ticked (EM-07): amount received, date, payment method and the button to the pledge. Also for «Vollständig bezahlt» (one mail per pledge). Sent 10 minutes after ticking; if the payment is taken back in the meantime, the mail is dropped. Switchable per event in the settings (on by default).
+
+### Database
+- Migration `007_payment_thanks.sql`: setting `thank_on_payment` per event; mails can refer to their pledge.
+
 ## [1.2.0] – 2026-10
 
 ### Added

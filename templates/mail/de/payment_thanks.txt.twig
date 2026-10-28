@@ -1,0 +1,14 @@
+{% extends 'mail/de/_layout.txt.twig' %}
+{% block content %}{{ t('mail.hello', {name: pledge.sponsor_name}) }}
+
+{{ t('mail.payment_thanks.text', {name: participant, event: event.name}) }}
+
+{{ t('mail.payment_thanks.amount') }}: {{ amount }}
+{{ t('mail.payment_thanks.date') }}: {{ paid_on }}
+{{ t('mail.pledge.method') }}: {{ t('pledge.method.' ~ method) }}
+
+{{ t('mail.payment_thanks.closing') }}
+
+{{ t('mail.payment_thanks.button') }}:
+{{ payment_url }}
+{% endblock %}

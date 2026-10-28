@@ -114,6 +114,8 @@ Beim Kind unter **Teilnehmende › Name**:
 - **Einzeln**: Datum, Zahlungsart und erhaltener Betrag (kann vom geschuldeten Betrag abweichen).
 - **Vollständig bezahlt**: hakt alle offenen Zusagen eines Kindes auf einmal ab, z. B. wenn es das gesammelte Bargeld abgibt. Lässt sich rückgängig machen.
 
+Nach dem Abhaken erhält der Sponsor eine Dankesmail mit Betrag, Datum und Zahlungsart. Sie geht erst 10 Minuten später raus: Nimmst du ein versehentliches Abhaken vorher zurück, wird sie nicht verschickt. Die Dankesmail lässt sich in den Einstellungen des Events abschalten.
+
 Die Teilnehmerliste zeigt pro Kind geschuldet, bezahlt und offen; mit dem Filter «noch offen» siehst du, wo noch etwas fehlt.
 
 ### Erinnerungen

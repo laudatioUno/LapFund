@@ -158,4 +158,7 @@ return [
 
     'field.notify_new_sponsor' => 'Teilnehmende per Mail informieren, wenn sich ein Sponsor online einträgt',
     'field.notify_new_sponsor_help' => 'Die Mail geht an die Adresse der Teilnehmenden, mit Name, Betrag und Nachricht des Sponsors und dem Link zur persönlichen Seite. Nur während der Sponsorensuche.',
+
+    'field.thank_on_payment' => 'Sponsoren per Mail danken, wenn ihre Zahlung abgehakt wird',
+    'field.thank_on_payment_help' => 'Die Mail nennt Betrag, Datum und Zahlungsart und geht 10 Minuten nach dem Abhaken raus. Wird die Zahlung vorher zurückgenommen, entfällt sie.',
 ];

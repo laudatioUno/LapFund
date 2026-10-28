@@ -112,7 +112,7 @@ final class PledgeAdminController extends EventScopedController
 
             return $this->redirect($this->participantPath($p));
         }
-        $this->app->billingService()->markPaid($pl, $date, $method, $amount, (int) $this->user['id']);
+        $this->app->billingService()->markPaid($pl, $date, $method, $amount, (int) $this->user['id'], null, $this->event);
         $this->flash('success', 'pledges.admin.paid', ['name' => $pl['sponsor_name'], 'amount' => $this->app->formatter->money($amount)]);
 
         return $this->redirect($this->participantPath($p));

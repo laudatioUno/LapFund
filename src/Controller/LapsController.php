@@ -46,6 +46,17 @@ final class LapsController extends EventScopedController
         }
         $result = $this->app->billingService()->saveLaps($this->event, $parsed['values'], (int) $this->user['id'], $request->input('send_corrections') === '1');
         $this->flash('success', 'laps.saved', ['count' => $result['changed']]);
+        if ($request->input('send_results') === '1') {
+            // Result mail to the participants (EM-08): only new ones and changed laps
+            $r = $this->app->access()->queueResults($this->event, $this->app->billing()->participants((int) $this->event['id']));
+            if ($r['sent'] + $r['corrected'] > 0) {
+                $this->audit('result_mails_sent', 'event', (int) $this->event['id'], null, ['count' => $r['sent'], 'corrections' => $r['corrected']]);
+                $this->flash('info', 'laps.results_queued', ['count' => $r['sent'], 'corrections' => $r['corrected']]);
+            }
+            if ($r['waiting'] > 0) {
+                $this->flash('info', 'laps.results_waiting', ['count' => $r['waiting']]);
+            }
+        }
         if ($result['affected'] !== []) {
             $this->flash($request->input('send_corrections') === '1' ? 'info' : 'warning',
                 $request->input('send_corrections') === '1' ? 'laps.corrections_sent' : 'laps.corrections_hint',

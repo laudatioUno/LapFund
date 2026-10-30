@@ -17,7 +17,7 @@ final class AuditLog
     /** Filter groups of the log page and the actions they contain. */
     public const AREAS = [
         'payments' => ['pledge_created', 'pledge_updated', 'pledge_cancelled', 'pledge_paid', 'pledge_unpaid', 'payment_requests_sent', 'payment_reminders_sent'],
-        'laps' => ['laps_updated'],
+        'laps' => ['laps_updated', 'result_mails_sent'],
         'participants' => ['participant_added', 'participant_updated', 'participant_removed', 'participants_imported', 'participants_copied', 'participant_deleted', 'participants_deleted', 'team_created', 'team_renamed', 'team_deleted'],
         'event' => ['event_created', 'event_updated', 'event_status_changed', 'event_archived', 'event_unarchived', 'event_admins_updated', 'event_anonymized', 'export_downloaded'],
         'mail' => ['invitations_sent', 'invitation_sent', 'magic_link_renewed', 'mails_retried', 'test_mail_sent', 'mail_settings_updated'],

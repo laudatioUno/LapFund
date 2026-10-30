@@ -1,0 +1,16 @@
+{% if correction %}<p style="margin:0 0 16px;padding:10px 14px;background:#FFF4D6;border-radius:8px;">{{ t('mail.result.correction_text', {event: event.name}) }}</p>{% endif %}
+{% if dns %}
+<p style="margin:0 0 16px;">{{ t('mail.result.dns_text', {event: event.name}) }}</p>
+{% if total_cents > 0 %}<p style="margin:0 0 16px;">{{ t('mail.result.dns_total', {total: total}) }}</p>{% endif %}
+{% else %}
+<p style="margin:0 0 16px;">{{ t('mail.result.text', {event: event.name}) }}</p>
+<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin:0 0 16px;background:#F3F6F9;border-radius:10px;"><tr><td style="padding:14px 16px;">
+<p style="margin:0;font-size:28px;font-weight:bold;">{{ laps }} {{ t('mail.result.laps') }}</p>
+{% if km %}<p style="margin:0 0 10px;font-size:16px;color:#3B4A58;">{{ km }} km</p>{% endif %}
+<p style="margin:10px 0 0;font-size:16px;">{{ t('mail.result.sponsors') }}: <strong>{{ sponsors }}</strong></p>
+<p style="margin:4px 0 0;font-size:16px;">{{ t('mail.result.total') }}: <strong>{{ total }}</strong></p>
+{% if per_lap_cents > 0 %}<p style="margin:4px 0 0;font-size:15px;color:#3B4A58;">{{ t('mail.result.per_lap', {amount: per_lap}) }}</p>{% endif %}
+</td></tr></table>
+{% endif %}
+<p style="margin:0 0 16px;">{{ t('mail.result.details') }}</p>
+{% if not dns %}<p style="margin:0 0 16px;">{{ t('mail.result.thanks') }}</p>{% endif %}

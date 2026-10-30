@@ -198,6 +198,71 @@ final class ParticipantAccess
     }
 
     /**
+     * Result mail after the run (EM-08): laps, kilometres and the amount collected, with
+     * the link to the participant page (details per sponsor are there). Goes to everyone
+     * with recorded laps or «did not start» who has not had one yet; if the laps changed
+     * since, a correction goes out instead. Participants without laps are skipped.
+     *
+     * @param list<array<string, mixed>> $rows from BillingRepository::participants()
+     * @return array{sent: int, corrected: int, waiting: int}
+     */
+    public function queueResults(array $event, array $rows): array
+    {
+        $out = ['sent' => 0, 'corrected' => 0, 'waiting' => 0];
+        if (!$this->mail->isConfigured()) {
+            return $out;
+        }
+        $state = [];
+        foreach ($this->db->all('SELECT id, result_sent_at, result_laps, result_dns FROM participations WHERE event_id = ?', [(int) $event['id']]) as $r) {
+            $state[(int) $r['id']] = $r;
+        }
+        $brand = $this->branding->forEvent($event);
+        $length = (int) ($event['lap_length_m'] ?? 0);
+        foreach ($rows as $row) {
+            $id = (int) $row['participation_id'];
+            $dns = (int) $row['did_not_start'] === 1;
+            $laps = $dns || $row['laps'] === null ? null : (int) $row['laps'];
+            if (!$dns && $laps === null) {
+                $out['waiting']++;
+                continue;
+            }
+            $sent = $state[$id] ?? null;
+            $type = 'result';
+            if ($sent !== null && $sent['result_sent_at'] !== null) {
+                $sameLaps = ($sent['result_laps'] === null ? null : (int) $sent['result_laps']) === $laps;
+                if ($sameLaps && (bool) $sent['result_dns'] === $dns) {
+                    continue;
+                }
+                $type = 'result_correction';
+            }
+            $p = $this->participation($id);
+            if ($p === null) {
+                continue;
+            }
+            $perLap = max(0, (int) $row['owed_cents'] - (int) $row['flat_cents']);
+            $mail = $this->composer->build($type, (string) $p['email'], $p['first_name'] . ' ' . $p['last_name'],
+                $this->translator->t('mail.' . $type . '.subject', ['name' => $p['first_name'], 'event' => $event['name']]), $brand, [
+                    'first_name' => $p['first_name'],
+                    'dns' => $dns,
+                    'laps' => $laps,
+                    'km' => $laps !== null && $length > 0 ? number_format($laps * $length / 1000, 1, '.', '’') : null,
+                    'sponsors' => (int) $row['sponsor_count'],
+                    'total' => $this->formatter->money((int) $row['owed_cents']),
+                    'total_cents' => (int) $row['owed_cents'],
+                    'per_lap' => $this->formatter->money($perLap),
+                    'per_lap_cents' => $perLap,
+                    'magic_url' => $this->mail->url('/t/' . $this->magicToken($id)),
+                    'event' => $this->eventFacts($event),
+                ]);
+            $this->queue->enqueue($mail + ['event_id' => (int) $event['id'], 'participation_id' => $id]);
+            $this->db->update('participations', ['result_sent_at' => Database::now(), 'result_laps' => $laps, 'result_dns' => $dns ? 1 : 0], ['id' => $id]);
+            $out[$type === 'result' ? 'sent' : 'corrected']++;
+        }
+
+        return $out;
+    }
+
+    /**
      * Invites everyone of the event who was not invited yet, as one send wave.
      *
      * @return array{batch_id: int, count: int}|null

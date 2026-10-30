@@ -3,6 +3,14 @@
 All notable changes to LapFund. Versions follow [semantic versioning](https://semver.org/).
 The section of a version is used as the release notes on GitHub.
 
+## [1.4.0] – 2026-10
+
+### Added
+- Result mail to the participant after the run (EM-08): laps, kilometres, number of sponsors, amount collected and the part from the laps, with the button to the personal page (sponsor details are there). Sent when the laps are saved (checkbox, ticked by default) to everyone with laps or «did not start» who has not had one yet; participants without laps (e.g. running later) get it once their laps are entered. If the laps change after the mail, a correction goes out. «Did not start» gets its own wording.
+
+### Database
+- Migration `008_result_mail.sql`: what was sent per participation (date, laps, did not start).
+
 ## [1.3.0] – 2026-10
 
 ### Added

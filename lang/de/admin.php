@@ -223,6 +223,8 @@ return [
     'audit.action.participant_deleted' => 'Teilnehmende endgültig gelöscht',
     'audit.action.participants_deleted' => 'Inaktive Teilnehmende gelöscht',
     'audit.action.database_exported' => 'Datenbank exportiert',
+    'audit.action.result_mails_sent' => 'Ergebnis-Mails verschickt',
+    'audit.key.corrections' => 'Korrekturen',
 
     // Stage 6: backup (NF-17)
     'system.backup_title' => 'Datensicherung',

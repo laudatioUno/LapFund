@@ -33,4 +33,9 @@ return [
     'send_corrections' => 'Sponsoren, deren Zahlungsaufforderung schon verschickt ist, eine Korrekturmail mit dem neuen Betrag senden',
     'corrections_sent' => '{count} Korrekturmails sind in der Warteschlange.',
     'corrections_hint' => '{count} Sponsoren haben bereits eine Zahlungsaufforderung mit einem anderen Betrag. Speichere nochmals mit Häkchen, um eine Korrekturmail zu senden, oder korrigiere einzeln.',
+
+    'send_results' => 'Ergebnis-Mail an die Teilnehmenden senden',
+    'send_results_help' => 'Geht an alle mit erfassten Runden oder «nicht gestartet», die noch keine erhalten haben. Wer keine Runden hat, bekommt sie später beim Nachtragen. Ändern sich Runden nach dem Versand, geht eine Korrektur raus.',
+    'results_queued' => 'Ergebnis-Mails: {count} neu, {corrections} Korrekturen in der Warteschlange.',
+    'results_waiting' => '{count} Teilnehmende ohne Runden bekommen noch keine Ergebnis-Mail.',
 ];

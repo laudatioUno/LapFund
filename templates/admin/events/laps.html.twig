@@ -78,6 +78,8 @@
         {% if requested %}
           <label class="inline-check"><input type="checkbox" name="send_corrections" value="1"> {{ t('laps.send_corrections') }}</label>
         {% endif %}
+        <label class="inline-check"><input type="checkbox" name="send_results" value="1" checked> {{ t('laps.send_results') }}</label>
+        <p class="field__help">{{ t('laps.send_results_help') }}</p>
         <div><button type="submit" class="btn btn--primary">{{ t('laps.save') }}</button></div>
         <p class="muted small">{{ t('laps.help') }}</p>
       {% endif %}

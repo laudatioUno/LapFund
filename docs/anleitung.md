@@ -96,6 +96,8 @@ Die Nummern auf beiden Vorlagen entsprechen der Reihenfolge bei der Runden-Erfas
 2. Unter **Runden** die Totale von der Zählliste übertragen. Mit Tab oder Enter springst du zur nächsten Person; die Reihenfolge entspricht der Zählliste.
 3. Wer nicht gelaufen ist, bekommt **Nicht gestartet** (nicht 0 Runden): Beträge pro Runde fallen dann weg, pauschale Beträge bleiben geschuldet.
 
+Beim Speichern geht standardmässig eine **Ergebnis-Mail** an die Kinder: Runden, Kilometer, Anzahl Sponsoren und der gesammelte Betrag. Sie geht nur an Kinder mit erfassten Runden oder «nicht gestartet», und jedes Kind bekommt sie nur einmal. Wer später läuft, bleibt einfach leer und bekommt die Mail, sobald du seine Runden nachträgst und speicherst. Korrigierst du Runden nach dem Versand, geht eine Korrekturmail raus. Willst du einmal ohne Mail speichern, entferne das Häkchen «Ergebnis-Mail an die Teilnehmenden senden».
+
 Die geschuldeten Beträge rechnet LapFund selbst aus: pauschal oder Runden × Betrag pro Runde.
 
 ### Zahlungsaufforderungen

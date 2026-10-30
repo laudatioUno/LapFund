@@ -1,0 +1,7 @@
+{% extends 'mail/de/_layout.html.twig' %}
+{% block content %}
+<p style="margin:0 0 16px;font-size:20px;font-weight:bold;">{{ t('mail.hello', {name: first_name}) }}</p>
+{% include 'mail/de/_result.html.twig' with {correction: false} %}
+{% include 'mail/de/_button.html.twig' with {href: magic_url, label: t('mail.invite.button')} %}
+<p style="margin:0;font-size:13px;color:#586776;word-break:break-all;">{{ t('mail.link_fallback') }}<br><a href="{{ magic_url }}" style="color:#3B4A58;">{{ magic_url }}</a></p>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% if correction %}{{ t('mail.result.correction_text', {event: event.name}) }}
+
+{% endif %}{% if dns %}{{ t('mail.result.dns_text', {event: event.name}) }}
+{% if total_cents > 0 %}
+{{ t('mail.result.dns_total', {total: total}) }}
+{% endif %}{% else %}{{ t('mail.result.text', {event: event.name}) }}
+
+{{ t('mail.result.laps') }}: {{ laps }}{% if km %} ({{ km }} km){% endif %}
+
+{{ t('mail.result.sponsors') }}: {{ sponsors }}
+{{ t('mail.result.total') }}: {{ total }}
+{% if per_lap_cents > 0 %}{{ t('mail.result.per_lap', {amount: per_lap}) }}
+{% endif %}{% endif %}
+
+{{ t('mail.result.details') }}
+{% if not dns %}
+{{ t('mail.result.thanks') }}
+{% endif %}

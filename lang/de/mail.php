@@ -167,4 +167,20 @@ return [
     'payment_thanks.button' => 'Zusage ansehen',
     'type.payment_thanks' => 'Dank für Zahlung',
     'cancel.not_paid' => 'Nicht verschickt: Die Zahlung wurde inzwischen zurückgenommen.',
+
+    // EM-08: result after the run
+    'result.subject' => 'Dein Ergebnis beim {event}',
+    'result_correction.subject' => 'Korrektur: dein Ergebnis beim {event}',
+    'result.text' => 'der {event} ist vorbei – hier ist dein Ergebnis:',
+    'result.laps' => 'Runden',
+    'result.sponsors' => 'Sponsoren',
+    'result.total' => 'Gesammelt',
+    'result.per_lap' => 'davon {amount} durch deine Runden',
+    'result.details' => 'Welcher Sponsor wie viel gibt, siehst du auf deiner persönlichen Seite.',
+    'result.thanks' => 'Super gemacht – vielen Dank für deinen Einsatz!',
+    'result.dns_text' => 'schade, dass du beim {event} nicht mitlaufen konntest.',
+    'result.dns_total' => 'Dank deinen Sponsoren kommen trotzdem {total} zusammen. Vielen Dank!',
+    'result.correction_text' => 'Deine Runden beim {event} wurden korrigiert. Hier ist dein richtiges Ergebnis:',
+    'type.result' => 'Ergebnis nach dem Lauf',
+    'type.result_correction' => 'Korrektur Ergebnis',
 ];

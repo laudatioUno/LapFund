@@ -28,6 +28,7 @@
 **Run and billing**
 - Lap list as PDF for counting on the day; quick entry of the laps, «did not start» separate from 0 laps
 - Amounts owed are calculated (fixed amount, or laps × amount per lap), never stored twice
+- Result mail to the participants after the run (laps, kilometres, amount collected), with a correction if the laps change
 - Payment requests (one mail per pledge) with preview, test mail and filters; correction mails; reminders after a configurable number of days
 - Tick payments (date, method, amount received), or all pledges of a participant at once when the cash is handed in; undo possible
 - Thank-you mail to the sponsor when the payment is ticked (switchable per event)

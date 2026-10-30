@@ -19,18 +19,19 @@
 
     {% if perm.status %}
       <div class="button-row">
-        {% if next_status %}
-          <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/status') }}" data-confirm="{{ t('events.confirm_next.' ~ next_status) }}">
-            {{ csrf_field() }}
-            <input type="hidden" name="status" value="{{ next_status }}">
-            <button type="submit" class="btn btn--primary">{{ t('events.move_to', {status: t('events.status.' ~ next_status)}) }}</button>
-          </form>
-        {% endif %}
+        {# back on the left, forward on the right, like the steps above (issue #21) #}
         {% if previous_status %}
           <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/status') }}" data-confirm="{{ t('events.confirm_back', {status: t('events.status.' ~ previous_status)}) }}">
             {{ csrf_field() }}
             <input type="hidden" name="status" value="{{ previous_status }}">
-            <button type="submit" class="btn btn--secondary">{{ t('events.move_back', {status: t('events.status.' ~ previous_status)}) }}</button>
+            <button type="submit" class="btn btn--secondary">← {{ t('events.move_back', {status: t('events.status.' ~ previous_status)}) }}</button>
+          </form>
+        {% endif %}
+        {% if next_status %}
+          <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/status') }}" data-confirm="{{ t('events.confirm_next.' ~ next_status) }}">
+            {{ csrf_field() }}
+            <input type="hidden" name="status" value="{{ next_status }}">
+            <button type="submit" class="btn btn--primary">{{ t('events.move_to', {status: t('events.status.' ~ next_status)}) }} →</button>
           </form>
         {% endif %}
       </div>

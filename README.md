@@ -174,7 +174,14 @@ Structure:
 | `docs/` | Guide for event admins |
 | `config/`, `storage/` | Created/used at runtime, not public |
 
-Every pull request builds a test package: **Checks › CI › Summary › Artifacts**. Releases are built by GitHub Actions: set the version in `src/App.php` (`App::VERSION`) and add a section to [CHANGELOG.md](CHANGELOG.md), then open **Actions › Release › Run workflow** on GitHub and enter that version (or push a tag `v<version>`). The workflow runs the tests, builds the ZIP including `vendor/` with the versions pinned in `composer.lock`, creates the tag and publishes the release with the changelog section as release notes.
+Every pull request builds a test package: **Checks › CI › Summary › Artifacts**; the summary also says whether merging will publish a release.
+
+Releases are published automatically by GitHub Actions after a merge to `main`. The version comes from the code (`App::VERSION` in `src/App.php`):
+
+- To publish a new version, raise `App::VERSION` and add a section `## [x.y.z]` to [CHANGELOG.md](CHANGELOG.md) in the pull request, then merge. The workflow runs the tests, builds the ZIP including `vendor/` with the versions pinned in `composer.lock`, creates the tag `v<version>` and publishes the release with the changelog section as release notes.
+- If that version has been released already (e.g. a merge that only changes documentation), nothing is published.
+- Versions with a suffix such as `1.3.0-beta.1` become pre-releases.
+- **Actions › Release › Run workflow** does the same by hand, e.g. to retry after a failed run.
 
 Contributions are welcome: please open an issue first for larger changes. Texts for the user interface go into `lang/de/` (a test checks that every key exists).
 

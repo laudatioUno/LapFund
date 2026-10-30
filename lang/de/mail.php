@@ -157,4 +157,14 @@ return [
     'new_sponsor.totals_one' => 'Das ist dein erster Sponsor: {flat} pauschal und {per_lap} pro Runde.',
     'new_sponsor.thanks' => 'Weiter so! Auf deiner Seite siehst du alle Sponsoren.',
     'type.new_sponsor' => 'Info neuer Sponsor',
+
+    // EM-07: thank-you when the payment is ticked
+    'payment_thanks.subject' => 'Danke – deine Zahlung für {name} ist eingegangen',
+    'payment_thanks.text' => 'deine Zahlung für {name} beim {event} ist beim Verein eingegangen. Herzlichen Dank für deine Unterstützung!',
+    'payment_thanks.amount' => 'Betrag',
+    'payment_thanks.date' => 'Eingang',
+    'payment_thanks.closing' => 'Damit ist deine Zusage erledigt, du musst nichts mehr tun.',
+    'payment_thanks.button' => 'Zusage ansehen',
+    'type.payment_thanks' => 'Dank für Zahlung',
+    'cancel.not_paid' => 'Nicht verschickt: Die Zahlung wurde inzwischen zurückgenommen.',
 ];

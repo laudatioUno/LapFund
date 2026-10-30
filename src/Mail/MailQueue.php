@@ -33,6 +33,7 @@ final class MailQueue
             'batch_id' => $mail['batch_id'] ?? null,
             'event_id' => $mail['event_id'] ?? null,
             'participation_id' => $mail['participation_id'] ?? null,
+            ...(isset($mail['pledge_id']) ? ['pledge_id' => $mail['pledge_id']] : []),
             'type' => $mail['type'],
             'to_email' => $mail['to_email'],
             'to_name' => mb_substr($mail['to_name'] ?? '', 0, 190),
@@ -43,7 +44,7 @@ final class MailQueue
             'inline_images' => json_encode($mail['inline_images'] ?? [], JSON_UNESCAPED_SLASHES),
             'status' => 'queued',
             'attempts' => 0,
-            'available_at' => $now,
+            'available_at' => $mail['available_at'] ?? $now,
             'created_by' => $mail['created_by'] ?? null,
             'created_at' => $now,
         ]);
@@ -74,7 +75,8 @@ final class MailQueue
     public function due(int $limit): array
     {
         return $this->db->all(
-            "SELECT q.*, e.status AS event_status, e.archived_at AS event_archived_at
+            "SELECT q.*, e.status AS event_status, e.archived_at AS event_archived_at,
+                (SELECT pl.status FROM pledges pl WHERE pl.id = q.pledge_id) AS pledge_status
              FROM mail_queue q LEFT JOIN events e ON e.id = q.event_id
              WHERE q.status = 'queued' AND q.available_at <= ?
              ORDER BY q.id LIMIT " . max(1, min(500, $limit)),

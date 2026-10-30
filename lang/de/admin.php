@@ -202,6 +202,7 @@ return [
     'audit.key.password_changed' => 'Passwort geändert',
     'audit.key.reminder_days' => 'Erinnerung nach Tagen',
     'audit.key.notify_new_sponsor' => 'Info neuer Sponsor',
+    'audit.key.thank_on_payment' => 'Dank für Zahlung',
     'audit.key.event_date' => 'Datum',
     'audit.key.location' => 'Ort',
     'audit.key.lap_length_m' => 'Rundenlänge (m)',

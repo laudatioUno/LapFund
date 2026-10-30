@@ -42,6 +42,8 @@
       {{ m.textarea('invite_intro', t('events.field.invite_intro'), input.invite_intro, errors, {optional: true, rows: 3, maxlength: 1000, help: t('events.field.invite_intro_help', {default: t('mail.invite.intro', {event: event.name})})}) }}
       <label class="inline-check"><input type="checkbox" name="notify_new_sponsor" value="1"{{ input.notify_new_sponsor ? ' checked' }}> {{ t('events.field.notify_new_sponsor') }}</label>
       <p class="field__help">{{ t('events.field.notify_new_sponsor_help') }}</p>
+      <label class="inline-check"><input type="checkbox" name="thank_on_payment" value="1"{{ input.thank_on_payment ? ' checked' }}> {{ t('events.field.thank_on_payment') }}</label>
+      <p class="field__help">{{ t('events.field.thank_on_payment_help') }}</p>
       {{ m.textarea('mail_footer', t('events.field.mail_footer'), input.mail_footer, errors, {optional: true, rows: 2, maxlength: 1000, help: t('events.field.mail_footer_help')}) }}
     </section>
 

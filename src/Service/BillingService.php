@@ -203,7 +203,7 @@ final class BillingService
     // --- Payments ------------------------------------------------------------------------
 
     /** Marks one pledge as paid (ZA-05): date, method and the amount actually received. */
-    public function markPaid(array $pledge, string $date, string $method, int $cents, int $adminId, ?string $group = null): void
+    public function markPaid(array $pledge, string $date, string $method, int $cents, int $adminId, ?string $group = null, ?array $event = null): void
     {
         $this->db->update('pledges', [
             'status' => 'paid',
@@ -216,6 +216,45 @@ final class BillingService
         ], ['id' => (int) $pledge['id']]);
         $this->audit->log($adminId, 'pledge_paid', 'pledge', (int) $pledge['id'], ['status' => $pledge['status']],
             ['status' => 'paid', 'date' => $date, 'method' => $method, 'amount_cents' => $cents, 'group' => $group]);
+        if ($event !== null) {
+            $this->queueThanks($event, (int) $pledge['id'], $adminId);
+        }
+    }
+
+    /** Minutes a thank-you waits in the queue, so a mistaken tick can still be taken back. */
+    public const THANKS_DELAY_MINUTES = 10;
+
+    /**
+     * Thank-you to the sponsor once the payment is ticked (EM-07). Sent after a short
+     * delay; the worker drops it if the payment has been taken back by then.
+     */
+    private function queueThanks(array $event, int $pledgeId, int $adminId): void
+    {
+        if ((int) ($event['thank_on_payment'] ?? 1) !== 1 || !$this->mail->isConfigured()) {
+            return;
+        }
+        $pledge = $this->billing->pledge((int) $event['id'], $pledgeId);
+        if ($pledge === null || $pledge['status'] !== 'paid' || $pledge['anonymized_at'] !== null || (string) $pledge['sponsor_email'] === '') {
+            return;
+        }
+        $name = $pledge['first_name'] . ' ' . $pledge['last_name'];
+        $mail = $this->composer->build('payment_thanks', (string) $pledge['sponsor_email'], (string) $pledge['sponsor_name'],
+            $this->translator->t('mail.payment_thanks.subject', ['name' => $name, 'event' => $event['name']]), $this->branding->forEvent($event), [
+                'pledge' => $pledge,
+                'participant' => $name,
+                'amount' => $this->formatter->money((int) $pledge['paid_amount_cents']),
+                'paid_on' => $this->formatter->date($pledge['paid_at']),
+                'method' => (string) $pledge['paid_method'],
+                'payment_url' => $this->pledges->paymentUrl($pledgeId),
+                'event' => ['name' => $event['name']],
+            ]);
+        $this->queue->enqueue($mail + [
+            'event_id' => (int) $event['id'],
+            'participation_id' => (int) $pledge['participation_id'],
+            'pledge_id' => $pledgeId,
+            'created_by' => $adminId,
+            'available_at' => gmdate('Y-m-d H:i:s', time() + self::THANKS_DELAY_MINUTES * 60),
+        ]);
     }
 
     /** Takes a «paid» back (AD-09): open again, or «cash received» if the child had ticked it. */
@@ -238,13 +277,13 @@ final class BillingService
      */
     public function markAllPaid(array $event, int $participationId, string $date, string $method, int $adminId): array
     {
-        return $this->db->transaction(function () use ($participationId, $date, $method, $adminId): array {
+        return $this->db->transaction(function () use ($event, $participationId, $date, $method, $adminId): array {
             $group = bin2hex(random_bytes(8));
             $count = 0;
             $cents = 0;
             foreach ($this->billing->pledgesOf($participationId) as $pl) {
                 if (in_array($pl['status'], ['open', 'cash_received'], true) && (int) $pl['unknown'] === 0) {
-                    $this->markPaid($pl, $date, $method, (int) $pl['owed_cents'], $adminId, $group);
+                    $this->markPaid($pl, $date, $method, (int) $pl['owed_cents'], $adminId, $group, $event);
                     $count++;
                     $cents += (int) $pl['owed_cents'];
                 }

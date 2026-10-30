@@ -26,7 +26,7 @@ final class Retention
     public const DEFAULT_INACTIVE_YEARS = 2;
 
     /** Mails to sponsors; their recipient is removed together with the sponsor data. */
-    public const SPONSOR_MAIL_TYPES = ['pledge_confirmation', 'payment_info', 'payment_info_due', 'payment_request', 'payment_reminder', 'payment_correction'];
+    public const SPONSOR_MAIL_TYPES = ['pledge_confirmation', 'payment_info', 'payment_info_due', 'payment_request', 'payment_reminder', 'payment_correction', 'payment_thanks'];
 
     public function __construct(
         private readonly Database $db,

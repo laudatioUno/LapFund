@@ -279,19 +279,27 @@ final class EventController extends EventScopedController
             }
         }
 
-        $this->app->events()->update((int) $event['id'], $data);
+        [$before, $after] = $this->changes($event, $data);
+        if ($after !== []) {
+            $this->app->events()->update((int) $event['id'], $data);
+        }
+        $adminsChanged = false;
         if ($this->perm['assign_admins']) {
-            $before = $this->app->events()->adminIds((int) $event['id']);
-            sort($before);
-            $after = $input['admins'];
-            sort($after);
-            if ($before !== $after) {
+            $beforeAdmins = $this->app->events()->adminIds((int) $event['id']);
+            sort($beforeAdmins);
+            $afterAdmins = array_map('intval', $input['admins']);
+            sort($afterAdmins);
+            if ($beforeAdmins !== $afterAdmins) {
                 $this->app->events()->setAdmins((int) $event['id'], $input['admins']);
-                $this->audit('event_admins_updated', 'event', (int) $event['id'], ['admins' => $before], ['admins' => $after]);
+                $this->audit('event_admins_updated', 'event', (int) $event['id'], ['admins' => $beforeAdmins], ['admins' => $afterAdmins]);
+                $adminsChanged = true;
             }
         }
-        $this->audit('event_updated', 'event', (int) $event['id'], $this->auditFields($event), $this->auditFields($data + ['texts' => $data['texts']]));
-        $this->flash('success', 'events.saved');
+        if ($after !== []) {
+            // Only what really changed goes into the change log
+            $this->audit('event_updated', 'event', (int) $event['id'], $before, $after);
+        }
+        $this->flash($after !== [] || $adminsChanged ? 'success' : 'info', $after !== [] || $adminsChanged ? 'events.saved' : 'events.no_changes');
 
         return $this->redirect($this->eventPath('/settings'));
     }
@@ -387,12 +395,37 @@ final class EventController extends EventScopedController
             ->format('Y-m-d\TH:i');
     }
 
-    /** @return array<string, mixed> */
-    private function auditFields(array $data): array
+    /**
+     * Fields that really changed, as [before, after] for the change log. Texts are
+     * compared one by one; new or removed images are noted without file names.
+     *
+     * @return array{0: array<string, mixed>, 1: array<string, mixed>}
+     */
+    private function changes(array $event, array $data): array
     {
-        return array_intersect_key($data, array_flip([
-            'name', 'event_date', 'location', 'lap_length_m', 'entry_deadline', 'goal_cents',
-            'sender_name', 'primary_color', 'logo_file', 'twint_qr_file', 'texts', 'reminder_days', 'notify_new_sponsor', 'thank_on_payment',
-        ]));
+        $before = [];
+        $after = [];
+        $norm = static fn (mixed $v): string => $v === null ? '' : (is_bool($v) ? ($v ? '1' : '0') : (string) $v);
+        foreach (['name', 'event_date', 'location', 'description', 'lap_length_m', 'entry_deadline', 'goal_cents', 'reminder_days',
+                     'notify_new_sponsor', 'thank_on_payment', 'sender_name', 'primary_color'] as $key) {
+            if (array_key_exists($key, $data) && $norm($event[$key] ?? null) !== $norm($data[$key])) {
+                $before[$key] = $event[$key] ?? null;
+                $after[$key] = $data[$key];
+            }
+        }
+        foreach ($data['texts'] as $key => $value) {
+            $old = (string) ($event['texts'][$key] ?? '');
+            if ($old !== (string) $value) {
+                $before[$key] = $old;
+                $after[$key] = $value;
+            }
+        }
+        foreach (['logo_file' => 'logo', 'twint_qr_file' => 'twint_qr'] as $column => $key) {
+            if (array_key_exists($column, $data)) {
+                $after[$key] = $data[$column] === null ? 'removed' : ((string) ($event[$column] ?? '') === '' ? 'added' : 'replaced');
+            }
+        }
+
+        return [$before, $after];
     }
 }

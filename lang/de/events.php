@@ -161,4 +161,5 @@ return [
 
     'field.thank_on_payment' => 'Sponsoren per Mail danken, wenn ihre Zahlung abgehakt wird',
     'field.thank_on_payment_help' => 'Die Mail nennt Betrag, Datum und Zahlungsart und geht 10 Minuten nach dem Abhaken raus. Wird die Zahlung vorher zurückgenommen, entfällt sie.',
+    'no_changes' => 'Es gab nichts zu speichern, die Einstellungen sind unverändert.',
 ];

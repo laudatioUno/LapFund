@@ -13,7 +13,8 @@ use LapFund\Http\Response;
 final class LapsController extends EventScopedController
 {
     /** Laps are recorded after the run and can be corrected during billing. */
-    public const EDIT_STATES = ['run_done', 'billing'];
+    /** Laps are recorded only while the run is done; in «Abrechnung» they are locked. */
+    public const EDIT_STATES = ['run_done'];
 
     public function index(Request $request, array $params): Response
     {

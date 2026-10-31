@@ -43,6 +43,24 @@
     });
   });
 
+  // Save buttons stay inactive until something in the form changed: <form data-dirty-check>
+  document.querySelectorAll('form[data-dirty-check]').forEach(function (form) {
+    var buttons = form.querySelectorAll('button[type="submit"]');
+    var hint = form.getAttribute('data-dirty-check');
+    var set = function (enabled) {
+      buttons.forEach(function (b) {
+        b.disabled = !enabled;
+        if (hint) { b.title = enabled ? '' : hint; }
+      });
+    };
+    set(false);
+    var enable = function () { set(true); };
+    form.addEventListener('input', enable);
+    form.addEventListener('change', enable);
+    // Back/forward cache: a restored page starts clean again
+    window.addEventListener('pageshow', function (e) { if (e.persisted) { set(false); } });
+  });
+
   // Confirm dialogs: <form data-confirm="Question?">
   document.querySelectorAll('form[data-confirm]').forEach(function (form) {
     form.addEventListener('submit', function (event) {

@@ -6,7 +6,7 @@
 {% block content %}
   {% include 'partials/event_header.html.twig' %}
 
-  <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/settings') }}" enctype="multipart/form-data" class="stack" novalidate>
+  <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/settings') }}" enctype="multipart/form-data" class="stack" novalidate{% if errors is empty %} data-dirty-check="{{ t('app.no_changes_yet') }}"{% endif %}>
     {{ csrf_field() }}
     {% if errors is not empty %}<div class="notice notice--error" role="alert">{{ t('events.form_has_errors') }}</div>{% endif %}
 

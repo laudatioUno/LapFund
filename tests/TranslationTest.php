@@ -38,6 +38,7 @@ final class TranslationTest extends TestCase
         'admin.audit.areas.' => ['payments', 'laps', 'participants', 'event', 'mail', 'system'],
         'admin.audit.entity.' => ['event', 'pledge', 'participation', 'participant', 'team', 'admin_user', 'settings', 'system', 'mail'],
         'reports.export.' => ['participants', 'pledges', 'payments', 'participants_help', 'pledges_help', 'payments_help'],
+        'admin.audit.file.' => ['added', 'replaced', 'removed'],
         'reports.export.file.' => ['participants', 'pledges', 'payments'],
     ];
 

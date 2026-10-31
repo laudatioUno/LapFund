@@ -86,7 +86,20 @@ final class SettingsController extends Controller
         }
 
         $settings = $this->app->settings();
-        $before = $settings->all();
+        $all = $settings->all();
+        $before = [];
+        $after = [];
+        foreach ($input as $key => $value) {
+            if ((string) ($all[$key] ?? '') !== (string) $value) {
+                $before[$key] = $all[$key] ?? '';
+                $after[$key] = $value;
+            }
+        }
+        if ($after === [] && $newLogo === null) {
+            $this->flash('info', 'admin.settings.no_changes');
+
+            return $this->redirect('/admin/settings');
+        }
         $settings->setMany($input);
         if ($newLogo !== null) {
             $old = $settings->get('logo_file');
@@ -94,16 +107,10 @@ final class SettingsController extends Controller
             if ($old !== '') {
                 $this->app->images()->delete($old);
             }
-            $input['logo_file'] = $newLogo;
+            $after['logo'] = $old !== '' ? 'replaced' : 'added';
         }
-        $this->app->audit()->log(
-            (int) $admin['id'],
-            'settings_updated',
-            'settings',
-            null,
-            array_intersect_key($before, $input),
-            $input,
-        );
+        // Only what really changed goes into the change log
+        $this->app->audit()->log((int) $admin['id'], 'settings_updated', 'settings', null, $before, $after);
 
         if (Branding::textColorOn($input['primary_color']) !== '#FFFFFF') {
             $this->flash('info', 'admin.settings.color_light_hint');

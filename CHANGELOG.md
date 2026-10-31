@@ -3,6 +3,14 @@
 All notable changes to LapFund. Versions follow [semantic versioning](https://semver.org/).
 The section of a version is used as the release notes on GitHub.
 
+## [1.4.2] – 2026-10
+
+### Fixed
+- Event and club settings: the change log only lists what really changed, with readable values (e.g. «Ort: Diessbach → Diessbach b. Büren», «Twint-QR-Code: ersetzt»). Saving without changes writes no entry; the save button stays inactive until something in the form is changed.
+
+### Changed
+- Laps can only be recorded in status *Lauf durchgeführt*; in *Abrechnung* they are locked. For a correction, set the status back to *Lauf durchgeführt* (correction mails to sponsors and participants work as before).
+
 ## [1.4.1] – 2026-10
 
 ### Fixed

@@ -6,7 +6,7 @@
 {% block content %}
   <header class="page-head"><h1 class="h1">{{ t('app.nav.settings') }}</h1></header>
 
-  <form method="post" action="{{ url('/admin/settings') }}" enctype="multipart/form-data" class="stack" novalidate>
+  <form method="post" action="{{ url('/admin/settings') }}" enctype="multipart/form-data" class="stack" novalidate{% if errors is empty %} data-dirty-check="{{ t('app.no_changes_yet') }}"{% endif %}>
     {{ csrf_field() }}
 
     <section class="card stack" aria-labelledby="club-title">

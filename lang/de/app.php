@@ -19,4 +19,5 @@ return [
     'nav.events' => 'Events',
     'nav.pool' => 'Personen',
     'nav.mail' => 'Mailversand',
+    'no_changes_yet' => 'Noch nichts geändert',
 ];

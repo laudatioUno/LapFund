@@ -126,7 +126,7 @@ Unter **Abrechnung › Erinnerungen** erscheinen offene Zahlungen, deren Aufford
 
 ### Korrekturen
 
-- **Runden falsch?** Unter **Runden** korrigieren. Hatten Sponsoren schon eine Aufforderung, kannst du mit einem Häkchen eine Korrekturmail mit dem neuen Betrag senden.
+- **Runden falsch?** In der Abrechnung sind die Runden gesperrt. Setze den Status zurück auf «Lauf durchgeführt», korrigiere unter **Runden** und wechsle wieder in die Abrechnung. Hatten Sponsoren schon eine Aufforderung, kannst du mit einem Häkchen eine Korrekturmail mit dem neuen Betrag senden.
 - **Zusage falsch?** Beim Kind die Zusage öffnen und korrigieren, auch hier optional mit Korrekturmail.
 - **Zusage ungültig?** Mit Begründung stornieren.
 - **Zusage fehlt?** Beim Kind **Zusage erfassen**, mit oder ohne Bestätigungsmail.

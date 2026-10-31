@@ -14,9 +14,15 @@ use LapFund\I18n\Translator;
 final class AuditDetails
 {
     /** Technical keys that are not shown. */
-    private const SKIP = ['event_id', 'group', 'batch_id', 'team_id', 'admins', 'bytes', 'anonymized', 'texts', 'logo_file', 'password', 'smtp_password'];
+    private const SKIP = ['event_id', 'group', 'batch_id', 'team_id', 'admins', 'bytes', 'anonymized', 'texts', 'logo_file', 'twint_qr_file', 'password', 'smtp_password'];
 
-    private const MONEY = ['amount_cents', 'paid_amount_cents'];
+    private const MONEY = ['amount_cents', 'paid_amount_cents', 'goal_cents'];
+
+    /** On/off settings stored as 0/1. */
+    private const FLAGS = ['notify_new_sponsor', 'thank_on_payment'];
+
+    /** Image uploads: added, replaced or removed. */
+    private const FILES = ['logo', 'twint_qr'];
 
     public function __construct(private readonly Translator $translator, private readonly Formatter $formatter)
     {
@@ -66,6 +72,15 @@ final class AuditDetails
         }
         if (is_bool($value)) {
             return $this->translator->t($value ? 'admin.audit.yes' : 'admin.audit.no');
+        }
+        if (in_array($key, self::FLAGS, true)) {
+            return $this->translator->t((string) $value === '1' ? 'admin.audit.yes' : 'admin.audit.no');
+        }
+        if (in_array($key, self::FILES, true) && is_string($value) && $this->translator->has('admin.audit.file.' . $value)) {
+            return $this->translator->t('admin.audit.file.' . $value);
+        }
+        if ($key === 'entry_deadline' && is_string($value)) {
+            return $this->formatter->datetime($value);
         }
         if (in_array($key, self::MONEY, true) && is_numeric($value)) {
             return $this->formatter->money((int) $value);

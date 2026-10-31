@@ -4,21 +4,21 @@
 <meta charset="utf-8">
 <title>{{ t('pdf.title', {name: p.first_name ~ ' ' ~ p.last_name}) }}</title>
 <style>
-  @page { margin: 16mm 14mm 18mm; }
+  @page { margin: 12mm 14mm 14mm; }
   body { font-family: "DejaVu Sans", sans-serif; font-size: 9.5pt; color: #14212E; }
   .head { width: 100%; border-bottom: 2pt solid {{ brand.primary_color }}; padding-bottom: 6pt; margin-bottom: 10pt; }
   .head td { vertical-align: top; }
-  .logo { width: 48pt; height: 48pt; }
+  .logo { width: 44pt; height: 44pt; }
   .club { font-size: 13pt; font-weight: bold; }
   .event { font-size: 10pt; color: #3B4A58; }
   h1 { font-size: 16pt; margin: 4pt 0 2pt; }
   .muted { color: #586776; }
   .qr { text-align: right; }
-  .qr img { width: 92pt; height: 92pt; }
+  .qr img { width: 84pt; height: 84pt; }
   .qr div { font-size: 7.5pt; color: #586776; }
   table.list { width: 100%; border-collapse: collapse; margin-top: 8pt; }
   table.list th { text-align: left; font-size: 8pt; color: #3B4A58; border-bottom: 1pt solid #14212E; padding: 4pt 4pt; }
-  table.list td { border-bottom: 0.6pt solid #B9C5D1; padding: 0 4pt; height: 22pt; vertical-align: middle; white-space: nowrap; }
+  table.list td { border-bottom: 0.6pt solid #B9C5D1; padding: 0 6pt; height: 24pt; vertical-align: middle; white-space: nowrap; }
   table.list td.filled { white-space: normal; }
   table.list td.filled { color: #14212E; }
   .box { display: inline-block; width: 8pt; height: 8pt; border: 0.8pt solid #14212E; margin-right: 2pt; vertical-align: middle; }
@@ -41,11 +41,11 @@
 
 <table class="list">
   <thead><tr>
-    <th style="width:21%">{{ t('pdf.col.name') }}</th>
-    <th style="width:23%">{{ t('pdf.col.email') }}</th>
-    <th style="width:24%">{{ t('pdf.col.type') }}</th>
-    <th style="width:13%">{{ t('pdf.col.amount') }}</th>
-    <th style="width:19%">{{ t('pdf.col.method') }}</th>
+    <th style="width:27%">{{ t('pdf.col.name') }}</th>
+    <th style="width:29%">{{ t('pdf.col.email') }}</th>
+    <th style="width:17%">{{ t('pdf.col.type') }}</th>
+    <th style="width:11%">{{ t('pdf.col.amount') }}</th>
+    <th style="width:16%">{{ t('pdf.col.method') }}</th>
   </tr></thead>
   <tbody>
   {% for pl in pledges %}

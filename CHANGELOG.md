@@ -3,6 +3,11 @@
 All notable changes to LapFund. Versions follow [semantic versioning](https://semver.org/).
 The section of a version is used as the release notes on GitHub.
 
+## [1.4.3] – 2026-10
+
+### Changed
+- Sponsor list PDF for the participants is now in landscape format: wider columns for name and e-mail address to write by hand. Still fits on one page with up to 7 pledges plus empty rows.
+
 ## [1.4.2] – 2026-10
 
 ### Fixed

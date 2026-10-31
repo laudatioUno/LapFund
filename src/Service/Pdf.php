@@ -17,7 +17,7 @@ final class Pdf
     {
     }
 
-    public function render(string $html, string $title = '', bool $pageNumbers = true): string
+    public function render(string $html, string $title = '', bool $pageNumbers = true, bool $landscape = false): string
     {
         $cache = $this->root . '/storage/cache/dompdf';
         if (!is_dir($cache)) {
@@ -36,12 +36,14 @@ final class Pdf
         ]);
         $dompdf = new Dompdf($options);
         $dompdf->loadHtml($html, 'UTF-8');
-        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->setPaper('A4', $landscape ? 'landscape' : 'portrait');
         $dompdf->render();
         if ($pageNumbers) {
             $canvas = $dompdf->getCanvas();
             $font = $dompdf->getFontMetrics()->getFont('DejaVu Sans');
-            $canvas->page_text(520, 810, '{PAGE_NUM} / {PAGE_COUNT}', $font, 8, [0.35, 0.4, 0.46]);
+            // bottom right, A4 is 595 × 842 pt
+            [$x, $y] = $landscape ? [768, 565] : [520, 810];
+            $canvas->page_text($x, $y, '{PAGE_NUM} / {PAGE_COUNT}', $font, 8, [0.35, 0.4, 0.46]);
         }
         if ($title !== '') {
             $dompdf->addInfo('Title', $title);

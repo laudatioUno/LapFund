@@ -237,12 +237,13 @@ final class PublicController extends Controller
             'logo_path' => $logo,
             'qr' => $event['status'] === 'collecting' ? QrCode::dataUri($this->absolute('/i/' . $this->app->access()->inviteToken((int) $p['id'])), 6) : null,
             'pledges' => array_reverse($this->app->pledges()->forParticipation((int) $p['id'])),
-            'empty_rows' => max(8, 18 - count($this->app->pledges()->forParticipation((int) $p['id']))),
+            'empty_rows' => max(6, 13 - count($this->app->pledges()->forParticipation((int) $p['id']))),
             'formatter' => $this->app->formatter,
         ]);
         $name = 'Sponsorenliste-' . preg_replace('/[^A-Za-z0-9]+/', '-', $p['first_name'] . '-' . $p['last_name']) . '.pdf';
 
-        return new Response($this->app->pdf()->render($html, $this->t('pdf.title', ['name' => $p['first_name'] . ' ' . $p['last_name']])), 200, [
+        // Landscape: more room for names and e-mail addresses written by hand
+        return new Response($this->app->pdf()->render($html, $this->t('pdf.title', ['name' => $p['first_name'] . ' ' . $p['last_name']]), true, true), 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="' . $name . '"',
         ]);

@@ -3,6 +3,11 @@
 All notable changes to LapFund. Versions follow [semantic versioning](https://semver.org/).
 The section of a version is used as the release notes on GitHub.
 
+## [1.4.1] – 2026-10
+
+### Fixed
+- Event overview: the status buttons are now in a logical order – «← Zurück zu …» on the left, «Weiter zu … →» on the right, like the status steps above ([#21](https://github.com/laudatioUno/LapFund/issues/21)).
+
 ## [1.4.0] – 2026-10
 
 ### Added

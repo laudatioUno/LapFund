@@ -90,6 +90,7 @@ final class AuditDetails
             'method', 'payment_method' => 'pledge.method.',
             'type' => 'pledge.type.',
             'kind' => 'reports.export.',
+            'twint_mode' => 'events.twint_mode.',
             default => null,
         };
         if ($prefix !== null && is_string($value) && $this->translator->has($prefix . $value)) {

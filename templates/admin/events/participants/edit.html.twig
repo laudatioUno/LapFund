@@ -68,6 +68,7 @@
                   {% else %}<strong>{{ pl.sponsor_name }}</strong><br>
                   <span class="muted small break">{{ pl.sponsor_email }}</span><br>{% endif %}
                   <span class="muted small">{{ pl.created_at|datetime }} · {{ t('pledge.source.' ~ pl.source) }} · {{ t('pledge.method.' ~ pl.payment_method) }}</span>
+                  {% if pl.reference %}<br><code class="small" title="{{ t('pledges.admin.reference') }}">{{ pl.reference }}</code>{% endif %}
                   {% if pl.sponsor_message %}<br><span class="small">«{{ pl.sponsor_message }}»</span>{% endif %}
                 </td>
                 <td class="num nowrap">{{ pl.amount_cents|money }}{% if pl.type == 'per_lap' %}<br><span class="muted small">{{ t('pledge.per_lap_short') }}</span>{% endif %}</td>

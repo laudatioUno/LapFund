@@ -140,6 +140,8 @@ final class Routes
         $r->post('/admin/events/{id}/payments/send', $c(PaymentsController::class, 'send'));
         $r->post('/admin/events/{id}/payments/test', $c(PaymentsController::class, 'test'));
         $r->post('/admin/events/{id}/payments/remind', $c(PaymentsController::class, 'remind'));
+        $r->post('/admin/events/{id}/payments/import', $c(PaymentsController::class, 'importPreview'));
+        $r->post('/admin/events/{id}/payments/import/apply', $c(PaymentsController::class, 'importApply'));
         $pp = '/admin/events/{id}/participants/{pid:[1-9][0-9]*}';
         $r->get($pp . '/pledges/new', $c(PledgeAdminController::class, 'create'));
         $r->post($pp . '/pledges/new', $c(PledgeAdminController::class, 'store'));

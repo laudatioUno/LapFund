@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace LapFund\Service;
 
 use LapFund\Database\Database;
+use LapFund\Domain\PaymentReference;
 use LapFund\I18n\Formatter;
 use LapFund\I18n\Translator;
 use LapFund\Mail\MailComposer;
@@ -57,10 +58,27 @@ final class PledgeService
         return null;
     }
 
-    /** Twint is offered only if the event has a Twint QR code (F2). */
+    /** Twint is offered only if the event has a Twint QR code or a payment link (F2). */
     public static function methods(array $event): array
     {
-        return (string) ($event['twint_qr_file'] ?? '') !== '' ? self::METHODS : ['cash'];
+        return self::twintMode($event) !== null || !empty($event['keep_twint']) ? self::METHODS : ['cash'];
+    }
+
+    /**
+     * How sponsors of this event pay with Twint: 'qr' (static QR code, message typed
+     * by the sponsor), 'link' (payment link with amount and reference) or null.
+     */
+    public static function twintMode(array $event): ?string
+    {
+        $mode = (string) ($event['twint_mode'] ?? '');
+        if ($mode === 'qr' && (string) ($event['twint_qr_file'] ?? '') !== '') {
+            return 'qr';
+        }
+        if ($mode === 'link' && TwintPaylink::valid((string) ($event['twint_link'] ?? ''))) {
+            return 'link';
+        }
+
+        return null;
     }
 
     /** "20", "20.50", "20,5", "CHF 20.–" → cents, or null if not a valid amount. */
@@ -147,6 +165,11 @@ final class PledgeService
                 'created_at' => $now,
                 'updated_at' => $now,
             ]);
+            // The payment reference is set once, in the same transaction; the unique key
+            // makes sure no two pledges ever share one.
+            $prefix = (string) ($event['reference_prefix'] ?? '');
+            $prefix = preg_match(PaymentReference::PREFIX_PATTERN, $prefix) === 1 ? $prefix : PaymentReference::defaultPrefix($event['event_date'] ?? null);
+            $this->db->update('pledges', ['reference' => PaymentReference::format($prefix, $id)], ['id' => $id]);
             $pledge = $this->find($id);
             if ($pledge !== null && $confirm && $this->mail->isConfigured()) {
                 $this->queueMail('pledge_confirmation', $pledge, $token, $event);
@@ -225,17 +248,21 @@ final class PledgeService
         )->rowCount() === 1;
     }
 
-    /** Text the sponsor enters as message in Twint, so the admin can match the payment (F2, A5). */
+    /**
+     * Payment reference the sponsor enters as message in Twint (QR code) or that the
+     * payment link fills in, so the admin can match the payment (F2, A5).
+     */
     public static function twintMessage(array $pledge): string
     {
-        return trim($pledge['first_name'] . ' ' . $pledge['last_name']) . ' / ' . trim((string) $pledge['sponsor_name']);
+        return (string) ($pledge['reference'] ?? '');
     }
 
     private function queueMail(string $type, array $pledge, string $token, array $event): void
     {
         $brand = $this->branding->forEvent($event);
         $twint = $pledge['type'] === 'flat' && $pledge['payment_method'] === 'twint';
-        $qr = (string) ($event['twint_qr_file'] ?? '');
+        $mode = self::twintMode($event);
+        $qr = $mode === 'qr' ? (string) $event['twint_qr_file'] : '';
         $subject = $this->translator->t('mail.' . $type . '.subject', ['name' => $pledge['first_name'] . ' ' . $pledge['last_name'], 'event' => $event['name']]);
         $mail = $this->composer->build($type, (string) $pledge['sponsor_email'], (string) $pledge['sponsor_name'], $subject, $brand, [
             'pledge' => $pledge,
@@ -243,6 +270,7 @@ final class PledgeService
             'participant' => $pledge['first_name'] . ' ' . $pledge['last_name'],
             'payment_url' => $this->mail->url('/p/' . $token),
             'twint' => $twint,
+            'twint_link' => $twint && $mode === 'link',
             'twint_message' => self::twintMessage($pledge),
             'twint_qr' => $twint && $qr !== '',
             'event' => ['name' => $event['name'], 'date' => $this->formatter->date($event['event_date']), 'lap_length_m' => $event['lap_length_m']],

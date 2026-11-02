@@ -5,6 +5,8 @@
 {{ t('mail.pledge.method') }}: {{ t('pledge.method.' ~ pledge.payment_method) }}
 
 {% if pledge.type == 'per_lap' %}{{ t('mail.pledge.per_lap_text') }}
+{% elseif twint_link %}{{ t('mail.pledge.twint_title') }}
+{{ t('mail.pledge.twint_link_text', {amount: amount}) }}
 {% elseif twint %}{{ t('mail.pledge.twint_title') }}
 {{ t('mail.pledge.twint_text', {amount: amount}) }}
 {{ twint_message }}

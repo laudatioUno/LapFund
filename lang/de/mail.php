@@ -128,6 +128,7 @@ return [
     'pledge.method' => 'Zahlungsart',
     'pledge.per_lap_text' => 'Bezahlt wird nach dem Lauf: Du erhältst eine Mail mit dem Betrag, sobald die Runden erfasst sind.',
     'pledge.twint_title' => 'Bezahlen mit Twint',
+    'pledge.twint_link_text' => 'Bezahle die {amount} bequem mit Twint auf deiner Beitragsseite: Betrag und Zahlungszweck sind dort schon ausgefüllt. Am Handy öffnet sich direkt die Twint-App, am Computer zeigt Twint einen QR-Code zum Scannen.',
     'pledge.twint_text' => 'Scanne den QR-Code mit der Twint-App, gib den Betrag {amount} ein und als Mitteilung:',
     'pledge.cash_text' => '{name} holt den Betrag von {amount} bei dir ab.',
     'pledge.button' => 'Zusage und Zahlungsangaben anzeigen',

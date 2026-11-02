@@ -65,7 +65,7 @@ final class ExportService
         $rows = [];
         foreach ($this->rows($event, false) as $r) {
             $rows[] = [
-                (int) $r['id'], $r['first_name'], $r['last_name'], $r['team_name'] ?? '',
+                (int) $r['id'], (string) $r['reference'], $r['first_name'], $r['last_name'], $r['team_name'] ?? '',
                 $this->sponsor($r), (string) $r['sponsor_email'], (string) $r['sponsor_message'],
                 $this->t('pledge.type.' . $r['type']), Csv::amount((int) $r['amount_cents']),
                 $this->t('pledge.method.' . $r['payment_method']), $this->t('pledge.source.' . $r['source']),
@@ -81,7 +81,7 @@ final class ExportService
             ];
         }
 
-        return Csv::build($this->headers(['pledge_no', 'first_name', 'last_name', 'team', 'sponsor', 'sponsor_email', 'message',
+        return Csv::build($this->headers(['pledge_no', 'reference', 'first_name', 'last_name', 'team', 'sponsor', 'sponsor_email', 'message',
             'type', 'amount', 'method', 'source', 'created', 'status', 'laps', 'owed', 'paid_amount', 'paid_at',
             'requested_at', 'reminders', 'cancel_reason']), $rows);
     }
@@ -91,7 +91,7 @@ final class ExportService
         $rows = [];
         foreach ($this->rows($event, true) as $r) {
             $rows[] = [
-                $this->formatter->date($r['paid_at']), (int) $r['id'], $r['first_name'], $r['last_name'], $r['team_name'] ?? '',
+                $this->formatter->date($r['paid_at']), (int) $r['id'], (string) $r['reference'], $r['first_name'], $r['last_name'], $r['team_name'] ?? '',
                 $this->sponsor($r), $this->t('pledge.method.' . (string) $r['paid_method']),
                 Csv::amount((int) $r['paid_amount_cents']), Csv::amount((int) $r['owed_cents']),
                 Csv::amount((int) $r['paid_amount_cents'] - (int) $r['owed_cents']),
@@ -99,7 +99,7 @@ final class ExportService
             ];
         }
 
-        return Csv::build($this->headers(['paid_at', 'pledge_no', 'first_name', 'last_name', 'team', 'sponsor', 'paid_method',
+        return Csv::build($this->headers(['paid_at', 'pledge_no', 'reference', 'first_name', 'last_name', 'team', 'sponsor', 'paid_method',
             'paid_amount', 'owed', 'difference', 'paid_by']), $rows);
     }
 

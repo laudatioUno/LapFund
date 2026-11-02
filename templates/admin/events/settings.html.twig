@@ -78,18 +78,33 @@
 
     <section class="card stack" id="twint" aria-labelledby="twint-title">
       <h2 class="h2" id="twint-title">{{ t('events.section.twint') }}</h2>
-      <p class="muted">{{ t('events.section.twint_help') }}</p>
+      <fieldset class="fieldset{{ errors.twint_mode is defined ? ' field--error' }}">
+        <legend>{{ t('events.twint_mode') }}</legend>
+        {% for mode in ['link', 'qr', 'none'] %}
+          <label class="choice">
+            <input type="radio" name="twint_mode" value="{{ mode }}"{{ input.twint_mode == mode ? ' checked' }}>
+            <span><strong>{{ t('events.twint_mode.' ~ mode) }}</strong><br><span class="muted small">{{ t('events.twint_mode_help.' ~ mode) }}</span></span>
+          </label>
+        {% endfor %}
+        {% if errors.twint_mode is defined %}<p class="field__error">{{ t(errors.twint_mode) }}</p>{% endif %}
+      </fieldset>
+
+      {{ m.field('twint_link', t('events.field.twint_link'), input.twint_link, errors, 'url', {optional: true, maxlength: 255, help: t('events.field.twint_link_help')}) }}
+
       <div class="field{{ errors.twint_qr is defined ? ' field--error' }}">
+        <span class="label">{{ t('events.field.twint_qr') }} <span class="muted">{{ t('app.optional') }}</span></span>
         {% if event.twint_qr_file %}
           <div class="logo-preview logo-preview--qr"><img src="{{ url('/media/' ~ event.twint_qr_file) }}" alt="{{ t('events.twint_current') }}"></div>
         {% endif %}
         <label for="f-twint_qr">{{ event.twint_qr_file ? t('events.twint_replace') : t('events.twint_upload') }}</label>
         <input id="f-twint_qr" name="twint_qr" type="file" accept="image/png,image/jpeg">
-        {% if errors.twint_qr is defined %}<p class="field__error">{{ t(errors.twint_qr) }}</p>{% endif %}
+        {% if errors.twint_qr is defined %}<p class="field__error">{{ t(errors.twint_qr) }}</p>{% else %}<p class="field__help">{{ t('events.section.twint_help') }}</p>{% endif %}
         {% if event.twint_qr_file %}
           <label class="inline-check"><input type="checkbox" name="remove_twint_qr" value="1"> {{ t('events.remove_twint') }}</label>
         {% endif %}
       </div>
+
+      {{ m.field('reference_prefix', t('events.field.reference_prefix'), input.reference_prefix, errors, 'text', {maxlength: 8, help: t('events.field.reference_prefix_help', {example: input.reference_prefix ~ '-000123-6'})}) }}
     </section>
 
     {% if perm.assign_admins %}

@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace LapFund\Controller;
 
 use LapFund\Domain\EventStatus;
+use LapFund\Domain\PaymentReference;
 use LapFund\Http\Request;
 use LapFund\Http\Response;
 use LapFund\Service\Branding;
+use LapFund\Service\PledgeService;
+use LapFund\Service\TwintPaylink;
 use LapFund\Validation;
 
 /**
@@ -64,6 +67,7 @@ final class EventController extends EventScopedController
             'location' => $input['location'],
             'description' => $input['description'] !== '' ? $input['description'] : null,
             'texts' => ['welcome' => '', 'purpose' => '', 'mail_footer' => '', 'invite_subject' => '', 'invite_intro' => ''],
+            'reference_prefix' => PaymentReference::defaultPrefix($input['event_date'] !== '' ? $input['event_date'] : null),
             'created_by' => (int) $user['id'],
         ]);
         $this->app->events()->setAdmins($id, $input['admins']);
@@ -87,7 +91,7 @@ final class EventController extends EventScopedController
             ['done' => $this->event['event_date'] !== null && $this->event['location'] !== '', 'label' => 'events.check_date', 'link' => $this->eventPath('/settings')],
             ['done' => $teams !== [], 'label' => 'events.check_teams', 'link' => $this->eventPath('/teams')],
             ['done' => $count > 0, 'label' => 'events.check_participants', 'link' => $this->eventPath('/participants')],
-            ['done' => (string) ($this->event['twint_qr_file'] ?? '') !== '', 'label' => 'events.check_twint', 'link' => $this->eventPath('/settings#twint')],
+            ['done' => PledgeService::twintMode($this->event) !== null, 'label' => 'events.check_twint', 'link' => $this->eventPath('/settings#twint')],
             ['done' => $this->event['texts']['welcome'] !== '', 'label' => 'events.check_texts', 'link' => $this->eventPath('/settings#texts')],
         ];
 
@@ -197,6 +201,9 @@ final class EventController extends EventScopedController
             'invite_intro' => $request->input('invite_intro'),
             'purpose' => $request->input('purpose'),
             'mail_footer' => $request->input('mail_footer'),
+            'twint_mode' => $request->input('twint_mode'),
+            'twint_link' => trim($request->input('twint_link')),
+            'reference_prefix' => PaymentReference::normalize($request->input('reference_prefix')),
             'admins' => $this->perm['assign_admins'] ? $this->selectedAdmins($request) : $this->app->events()->adminIds((int) $event['id']),
         ];
 
@@ -226,6 +233,22 @@ final class EventController extends EventScopedController
             if (mb_strlen($input[$field]) > $max) {
                 $errors[$field] = 'validation.too_long';
             }
+        }
+        if (!in_array($input['twint_mode'], ['none', 'qr', 'link'], true)) {
+            $input['twint_mode'] = 'none';
+        }
+        if ($input['twint_link'] !== '' && !TwintPaylink::valid($input['twint_link'])) {
+            $errors['twint_link'] = 'events.error.twint_link';
+        } elseif ($input['twint_mode'] === 'link' && $input['twint_link'] === '') {
+            $errors['twint_link'] = 'events.error.twint_link_missing';
+        }
+        $hasQr = $request->file('twint_qr') !== null
+            || ((string) ($event['twint_qr_file'] ?? '') !== '' && $request->input('remove_twint_qr') !== '1');
+        if ($input['twint_mode'] === 'qr' && !$hasQr) {
+            $errors['twint_qr'] = 'events.error.twint_qr_missing';
+        }
+        if (preg_match(PaymentReference::PREFIX_PATTERN, $input['reference_prefix']) !== 1) {
+            $errors['reference_prefix'] = 'events.error.reference_prefix';
         }
         $color = null;
         if ($input['own_color']) {
@@ -267,6 +290,9 @@ final class EventController extends EventScopedController
             'thank_on_payment' => $input['thank_on_payment'] ? 1 : 0,
             'sender_name' => $input['sender_name'] !== '' ? $input['sender_name'] : null,
             'primary_color' => $color,
+            'twint_mode' => $input['twint_mode'],
+            'twint_link' => $input['twint_link'] !== '' ? $input['twint_link'] : null,
+            'reference_prefix' => $input['reference_prefix'],
             'texts' => ['welcome' => $input['welcome'], 'purpose' => $input['purpose'], 'mail_footer' => $input['mail_footer'], 'invite_subject' => $input['invite_subject'], 'invite_intro' => $input['invite_intro']],
         ];
         foreach (['logo' => 'logo_file', 'twint_qr' => 'twint_qr_file'] as $field => $column) {
@@ -326,6 +352,9 @@ final class EventController extends EventScopedController
             'invite_intro' => $event['texts']['invite_intro'],
             'purpose' => $event['texts']['purpose'],
             'mail_footer' => $event['texts']['mail_footer'],
+            'twint_mode' => (string) ($event['twint_mode'] ?? 'none'),
+            'twint_link' => (string) ($event['twint_link'] ?? ''),
+            'reference_prefix' => (string) ($event['reference_prefix'] ?? 'SL'),
             'admins' => $this->app->events()->adminIds((int) $event['id']),
         ];
     }
@@ -407,7 +436,7 @@ final class EventController extends EventScopedController
         $after = [];
         $norm = static fn (mixed $v): string => $v === null ? '' : (is_bool($v) ? ($v ? '1' : '0') : (string) $v);
         foreach (['name', 'event_date', 'location', 'description', 'lap_length_m', 'entry_deadline', 'goal_cents', 'reminder_days',
-                     'notify_new_sponsor', 'thank_on_payment', 'sender_name', 'primary_color'] as $key) {
+                     'notify_new_sponsor', 'thank_on_payment', 'sender_name', 'primary_color', 'twint_mode', 'twint_link', 'reference_prefix'] as $key) {
             if (array_key_exists($key, $data) && $norm($event[$key] ?? null) !== $norm($data[$key])) {
                 $before[$key] = $event[$key] ?? null;
                 $after[$key] = $data[$key];

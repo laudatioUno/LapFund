@@ -37,14 +37,20 @@ final class PledgeTest extends TestCase
         self::assertSame('pledge.closed.deadline', PledgeService::closedReason($deadline, strtotime('2027-06-11 20:00:00 UTC')));
     }
 
-    public function testTwintOnlyWithQrCode(): void
+    public function testTwintOnlyWithQrCodeOrPaymentLink(): void
     {
-        self::assertSame(['twint', 'cash'], PledgeService::methods(['twint_qr_file' => 'abc.png']));
-        self::assertSame(['cash'], PledgeService::methods(['twint_qr_file' => null]));
+        $link = 'https://go.twint.ch/1/e/tw?tw=acq.EXAMPLE123.';
+        self::assertSame(['twint', 'cash'], PledgeService::methods(['twint_mode' => 'qr', 'twint_qr_file' => 'abc.png']));
+        self::assertSame(['cash'], PledgeService::methods(['twint_mode' => 'qr', 'twint_qr_file' => null]));
+        self::assertSame(['twint', 'cash'], PledgeService::methods(['twint_mode' => 'link', 'twint_link' => $link]));
+        self::assertSame(['cash'], PledgeService::methods(['twint_mode' => 'link', 'twint_link' => 'https://example.com/pay']));
+        self::assertSame(['cash'], PledgeService::methods(['twint_mode' => 'none', 'twint_qr_file' => 'abc.png', 'twint_link' => $link]));
+        self::assertSame('link', PledgeService::twintMode(['twint_mode' => 'link', 'twint_link' => $link, 'twint_qr_file' => 'abc.png']));
+        self::assertSame(['twint', 'cash'], PledgeService::methods(['twint_mode' => 'none', 'keep_twint' => true]));
     }
 
-    public function testTwintMessageNamesParticipantAndSponsor(): void
+    public function testTwintMessageIsThePaymentReference(): void
     {
-        self::assertSame('Lea Muster / Grosi Muster', PledgeService::twintMessage(['first_name' => 'Lea', 'last_name' => 'Muster', 'sponsor_name' => ' Grosi Muster ']));
+        self::assertSame('SL26-000123-7', PledgeService::twintMessage(['reference' => 'SL26-000123-7', 'first_name' => 'Lea', 'last_name' => 'Muster', 'sponsor_name' => 'Grosi']));
     }
 }

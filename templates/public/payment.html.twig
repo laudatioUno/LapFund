@@ -37,7 +37,17 @@
         <span class="summary__hint">{{ t('pledge.payment.laps_calc', {laps: laps, rate: pledge.amount_cents|money}) }}</span>
       </section>
     {% endif %}
-    {% if twint %}
+    {% if twint_button %}
+      <section class="card stack" aria-labelledby="twint-title">
+        <h2 class="h2" id="twint-title">{{ t('pledge.payment.twint_title') }}</h2>
+        <p>{{ t('pledge.payment.link_text', {amount: owed|money}) }}</p>
+        <div class="twint-pay">{{ twint_button|raw }}</div>
+        <p class="small">{{ t('pledge.payment.link_reference') }} <code class="secret">{{ twint_message }}</code></p>
+        <p class="muted small">{{ t('pledge.payment.link_hint') }}</p>
+      </section>
+    {% elseif twint_link %}
+      <section class="card"><p>{{ t('pledge.payment.link_unavailable') }}</p></section>
+    {% elseif twint %}
       <section class="card stack" aria-labelledby="twint-title">
         <h2 class="h2" id="twint-title">{{ t('pledge.payment.twint_title') }}</h2>
         <ol class="steps">

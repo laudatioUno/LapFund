@@ -267,6 +267,10 @@ select { appearance: auto; }
 .badge--import-invalid { background: var(--err-bg); color: var(--err-ink); }
 .import-row--in_event td, .import-row--duplicate td { color: var(--muted); }
 .import-row--invalid td { background: #FFF8F7; }
+.chip--warning, .badge--import-amount_diff { background: var(--warn-bg); color: var(--warn-ink); }
+.badge--import-ok { background: var(--ok-bg); color: var(--ok-ink); }
+.badge--import-unmatched, .badge--import-other_event, .badge--import-cancelled, .badge--import-laps_missing { background: var(--err-bg); color: var(--err-ink); }
+.import-row--already_paid td, .import-row--duplicate td { color: var(--muted); }
 
 /* Stage 3: mails */
 .h3 { font-size: 17px; font-weight: 700; margin: 8px 0 0; }
@@ -350,6 +354,7 @@ a.chip:hover { background: var(--line); }
 .pdf-link { font-weight: 600; }
 .twint-qr { text-align: center; }
 .twint-qr img { max-width: 260px; width: 100%; border: 1px solid var(--line); border-radius: 10px; }
+.twint-pay { display: flex; justify-content: center; }
 .badge--pledge-open { background: var(--info-bg); color: var(--info-ink); }
 .badge--pledge-cash_received { background: var(--warn-bg); color: var(--warn-ink); }
 .badge--pledge-paid { background: var(--ok-bg); color: var(--ok-ink); }

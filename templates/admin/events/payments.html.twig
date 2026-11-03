@@ -77,6 +77,42 @@
     </section>
   {% endif %}
 
+  <section class="card stack" id="import" aria-labelledby="import-title">
+    <h2 class="h2" id="import-title">{{ t('payments.import.title') }}</h2>
+    <p class="muted">{{ t('payments.import.help') }}</p>
+    <form method="get" action="{{ url('/admin/events/' ~ event.id ~ '/payments') }}#import" class="filter-bar">
+      <div class="field">
+        <label for="f-ref">{{ t('payments.search_reference') }}</label>
+        <input id="f-ref" name="ref" type="text" value="{{ search_ref }}" class="input--mono" autocomplete="off" placeholder="{{ event.reference_prefix }}-000123-6">
+      </div>
+      <div class="filter-bar__actions"><button type="submit" class="btn btn--secondary">{{ t('payments.search') }}</button></div>
+    </form>
+    {% if search_ref != '' %}
+      {% if found %}
+        <p class="notice notice--info">
+          <strong class="nowrap">{{ found.reference }}</strong>: {{ found.anonymized_at ? t('pledges.anonymized') : found.sponsor_name }} → <a href="{{ url('/admin/events/' ~ event.id ~ '/participants/' ~ found.participation_id) }}">{{ found.first_name }} {{ found.last_name }}</a>
+          · {{ t('payments.total.owed') }} {{ found.unknown ? '–' : found.owed_cents|money }}
+          · <span class="badge badge--pledge-{{ found.status }}">{{ t('pledge.status.' ~ found.status) }}</span>
+        </p>
+      {% else %}
+        <p class="notice notice--warning">{{ t('payments.reference_not_found', {ref: search_ref}) }}</p>
+      {% endif %}
+    {% endif %}
+    {% if can_import %}
+      <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/payments/import') }}" enctype="multipart/form-data" class="stack">
+        {{ csrf_field() }}
+        <div class="field">
+          <label for="f-csv">{{ t('payments.import.file') }}</label>
+          <input id="f-csv" name="csv" type="file" accept=".csv,text/csv" aria-describedby="h-csv">
+          <p class="field__help" id="h-csv">{{ t('payments.import.file_help') }}</p>
+        </div>
+        <div><button type="submit" class="btn btn--secondary">{{ t('payments.import.preview_button') }}</button></div>
+      </form>
+    {% elseif not perm.payments %}
+      <p class="muted small">{{ t('mails.only_event_admin') }}</p>
+    {% endif %}
+  </section>
+
   {% if team_totals is not empty %}
     <h2 class="h2">{{ t('payments.by_team') }}</h2>
     <div class="table-wrap">

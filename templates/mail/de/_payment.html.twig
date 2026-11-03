@@ -1,4 +1,4 @@
-{# Pledge summary and payment details. Needs: pledge, amount, participant, payment_url, twint, twint_message #}
+{# Pledge summary and payment details. Needs: pledge, amount, participant, payment_url, twint, twint_link, twint_message #}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;border:1px solid #DCE3EA;border-radius:10px;">
 <tr><td style="padding:14px 16px;font-size:15px;line-height:1.6;">
   {{ t('mail.pledge.for') }}: <strong>{{ participant }}</strong><br>
@@ -9,6 +9,9 @@
 </table>
 {% if pledge.type == 'per_lap' %}
   <p style="margin:0 0 16px;">{{ t('mail.pledge.per_lap_text') }}</p>
+{% elseif twint_link %}
+  <p style="margin:0 0 8px;font-weight:bold;">{{ t('mail.pledge.twint_title') }}</p>
+  <p style="margin:0 0 16px;">{{ t('mail.pledge.twint_link_text', {amount: amount}) }}</p>
 {% elseif twint %}
   <p style="margin:0 0 8px;font-weight:bold;">{{ t('mail.pledge.twint_title') }}</p>
   <p style="margin:0 0 8px;">{{ t('mail.pledge.twint_text', {amount: amount}) }}</p>

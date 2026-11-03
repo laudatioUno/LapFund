@@ -67,7 +67,7 @@ final class PledgeAdminController extends EventScopedController
         $input = $this->input($request) + ['message' => $request->raw('message')];
         $event = $this->event;
         if ($pl['payment_method'] === 'twint') {
-            $event['twint_qr_file'] = $event['twint_qr_file'] ?: 'kept'; // keep Twint selectable for existing Twint pledges
+            $event['keep_twint'] = true; // keep Twint selectable for existing Twint pledges
         }
         $checked = $this->app->pledgeService()->validate($input, $event, false, false);
         if ($checked['errors'] !== []) {

@@ -47,4 +47,5 @@ return [
     'admin.reminders' => 'Erinnerungen: {count}',
 
     'anonymized' => 'Sponsor anonymisiert',
+    'admin.reference' => 'Zahlungszweck',
 ];

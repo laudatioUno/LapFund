@@ -3,7 +3,9 @@
 
 {{ t('mail.due.amount') }}: {{ owed }}
 
-{% if twint %}{{ t('mail.pledge.twint_title') }}
+{% if twint_link %}{{ t('mail.pledge.twint_title') }}
+{{ t('mail.pledge.twint_link_text', {amount: owed}) }}
+{% elseif twint %}{{ t('mail.pledge.twint_title') }}
 {{ t('mail.pledge.twint_text', {amount: owed}) }}
 {{ twint_message }}
 {% else %}{{ t('mail.pledge.cash_text', {name: pledge.first_name, amount: owed}) }}

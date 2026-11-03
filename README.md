@@ -10,7 +10,7 @@
 **Events and participants**
 - Events with date, location, lap length and entry deadline; the club admin creates them and assigns the event admins
 - Event status in five steps (preparation, sponsor search, run done, billing, closed), one step forward or back; archive for finished events
-- Per-event look and texts: logo, color, welcome text, purpose, mail sender name and footer, Twint QR code; empty values fall back to the club's
+- Per-event look and texts: logo, color, welcome text, purpose, mail sender name and footer, Twint payment link or QR code; empty values fall back to the club's
 - Teams per event with custom order
 - One participant pool for all events: add people one by one, from the pool, by CSV import with a preview, or by taking them over from an earlier event
 
@@ -21,7 +21,8 @@
 
 **Sponsors**
 - Sponsor page behind the personal sponsor link: a fixed amount or an amount per lap, Twint or cash, with consent and spam protection
-- Payment page with the Twint QR code of the event, amount and message, or the cash note; confirmation mail with the payment details
+- Every pledge gets its own payment reference (e.g. `SL26-000123-6`, with check digit, no names)
+- Payment page with TWINT's pay button, amount and reference filled in (Twint payment link), or the event's Twint QR code with the reference to enter, or the cash note; confirmation mail with the link to this page
 - Mail to the participant for every new online pledge, with the new totals (switchable per event)
 - Participants enter pledges themselves (e.g. from the paper list) and tick cash as received; sponsor list as PDF
 
@@ -30,6 +31,7 @@
 - Amounts owed are calculated (fixed amount, or laps × amount per lap), never stored twice
 - Result mail to the participants after the run (laps, kilometres, amount collected), with a correction if the laps change
 - Payment requests (one mail per pledge) with preview, test mail and filters; correction mails; reminders after a configurable number of days
+- Import of Twint payments from a CSV list (date, amount, costs, reference) with a preview, then mark them as paid at once
 - Tick payments (date, method, amount received), or all pledges of a participant at once when the cash is handed in; undo possible
 - Thank-you mail to the sponsor when the payment is ticked (switchable per event)
 - Correct, cancel and add pledges as event admin
@@ -151,7 +153,7 @@ LapFund is built for the Swiss data protection act (revDSG) and stores as little
 - Admin login with password (Argon2id) and TOTP, one-time recovery codes, lockout after repeated failures. The database export asks for the TOTP code again.
 - Magic links and admin invitations: 256-bit random tokens, looked up by their SHA-256 hash; sponsor links: 128-bit random tokens, separate from the magic link.
 - Links in mails are built from the website address in the mail settings, never from the request's host name.
-- Strict Content Security Policy: only resources from your own server, no inline scripts or styles. CSV exports neutralise cell values Excel would read as formulas.
+- Strict Content Security Policy: only resources from your own server, no inline scripts or styles. Single exception: on the pledge page with the Twint payment link, TWINT's pay button (its inline style and onclick, allowed by hash) and its image from go.twint.ch. The sponsor's browser then contacts go.twint.ch when the page is opened. CSV exports neutralise cell values Excel would read as formulas.
 - Found a vulnerability? See [SECURITY.md](SECURITY.md).
 
 ## Development

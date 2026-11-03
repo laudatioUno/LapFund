@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace LapFund\Controller;
 
+use LapFund\Domain\PaymentReference;
 use LapFund\Http\Request;
 use LapFund\Http\Response;
+use LapFund\Security\Tokens;
+use LapFund\Service\TwintPaymentImport;
 
 /**
  * Billing of an event: open amounts per participant and team (AD-10), payment
@@ -30,7 +33,16 @@ final class PaymentsController extends EventScopedController
             $teams[$key]['open'] += $r['open_cents'];
         }
 
+        $searchRef = PaymentReference::normalize($request->input('ref'));
+        $found = null;
+        if ($searchRef !== '') {
+            $row = $this->app->twintImport()->classify($eventId, [['line' => 0, 'date' => gmdate('Y-m-d'), 'total_cents' => 0, 'reference' => $searchRef, 'error' => null]])['rows'][0];
+            $found = $row['pledge'] !== null ? $row['pledge'] : null;
+        }
+
         return $this->renderEvent('admin/events/payments.html.twig', 'payments', [
+            'search_ref' => $searchRef,
+            'found' => $found,
             'totals' => $this->app->billing()->totals($eventId),
             'open_rows' => $open,
             'team_totals' => count($teams) > 1 ? array_values($teams) : [],
@@ -42,6 +54,7 @@ final class PaymentsController extends EventScopedController
             'preview' => $request->input('preview') === '1' ? $this->app->billingService()->preview($this->event, $type, $teamId) : null,
             'configured' => $this->app->mailSettings()->isConfigured(),
             'billing' => $this->event['status'] === 'billing',
+            'can_import' => $this->perm['payments'] && in_array($this->event['status'], PledgeAdminController::CHANGE_STATES, true),
         ]);
     }
 
@@ -93,6 +106,100 @@ final class PaymentsController extends EventScopedController
         }
 
         return $this->redirect($this->eventPath('/mails'));
+    }
+
+    // --- Import of Twint payments ------------------------------------------------------
+
+    /** Reads the uploaded list and shows what would be marked as paid. Nothing is changed yet. */
+    public function importPreview(Request $request, array $params): Response
+    {
+        $this->loadEvent($params, 'event.payments');
+        if (!$this->importAllowed()) {
+            return $this->redirect($this->eventPath('/payments'));
+        }
+        $file = $request->file('csv');
+        if ($file === null || $file['error'] !== UPLOAD_ERR_OK) {
+            $parsed = ['rows' => [], 'error' => 'payments.import.no_file'];
+        } elseif ($file['size'] > TwintPaymentImport::MAX_BYTES) {
+            $parsed = ['rows' => [], 'error' => 'payments.import.too_large'];
+        } else {
+            $parsed = TwintPaymentImport::parse((string) file_get_contents($file['tmp_name']));
+        }
+        if ($parsed['error'] !== null) {
+            $this->flash('error', $parsed['error']);
+
+            return $this->redirect($this->eventPath('/payments#import'));
+        }
+        $result = $this->app->twintImport()->classify((int) $this->event['id'], $parsed['rows']);
+        $token = Tokens::random(16);
+        $this->app->session->set('payment_import.' . $this->event['id'], ['token' => $token, 'rows' => $parsed['rows'], 'at' => time()]);
+
+        return $this->renderEvent('admin/events/payments_import.html.twig', 'payments', $result + [
+            'token' => $token,
+            'selectable' => TwintPaymentImport::SELECTABLE,
+        ]);
+    }
+
+    /** Marks the selected rows of the preview as paid (with date and amount from the list). */
+    public function importApply(Request $request, array $params): Response
+    {
+        $this->loadEvent($params, 'event.payments');
+        if (!$this->importAllowed()) {
+            return $this->redirect($this->eventPath('/payments'));
+        }
+        $key = 'payment_import.' . $this->event['id'];
+        $pending = $this->app->session->get($key);
+        if (!is_array($pending) || !hash_equals((string) $pending['token'], $request->input('token')) || time() - (int) $pending['at'] > 3600) {
+            $this->flash('error', 'payments.import.expired');
+
+            return $this->redirect($this->eventPath('/payments#import'));
+        }
+        $selected = array_map('intval', array_filter(is_array($request->post['lines'] ?? null) ? $request->post['lines'] : [], 'is_string'));
+        if ($selected === []) {
+            $this->flash('error', 'payments.import.nothing_selected');
+
+            return $this->redirect($this->eventPath('/payments#import'));
+        }
+        $this->app->session->remove($key);
+
+        // Classify again: payments may have been ticked in the meantime.
+        $rows = $this->app->twintImport()->classify((int) $this->event['id'], $pending['rows'])['rows'];
+        $event = $this->event;
+        $adminId = (int) $this->user['id'];
+        $billing = $this->app->billingService();
+        $done = $this->app->db()->transaction(function () use ($rows, $selected, $event, $adminId, $billing): array {
+            $count = 0;
+            $cents = 0;
+            foreach ($rows as $row) {
+                if (!in_array((int) $row['line'], $selected, true) || !in_array($row['status'], TwintPaymentImport::SELECTABLE, true)) {
+                    continue;
+                }
+                $pledge = $this->app->billing()->pledge((int) $event['id'], (int) $row['pledge']['id']);
+                if ($pledge === null || !in_array($pledge['status'], ['open', 'cash_received'], true)) {
+                    continue;
+                }
+                $billing->markPaid($pledge, (string) $row['date'], 'twint', (int) $row['total_cents'], $adminId, null, $event);
+                $count++;
+                $cents += (int) $row['total_cents'];
+            }
+
+            return ['count' => $count, 'cents' => $cents];
+        });
+        $this->audit('payments_imported', 'event', (int) $this->event['id'], null, ['imported' => $done['count'], 'amount_cents' => $done['cents']]);
+        $this->flash('success', 'payments.import.done', ['count' => $done['count'], 'amount' => $this->app->formatter->money($done['cents'])]);
+
+        return $this->redirect($this->eventPath('/payments'));
+    }
+
+    private function importAllowed(): bool
+    {
+        if (!in_array($this->event['status'], PledgeAdminController::CHANGE_STATES, true)) {
+            $this->flash('error', 'pledges.admin.not_now');
+
+            return false;
+        }
+
+        return true;
     }
 
     private function ready(): bool

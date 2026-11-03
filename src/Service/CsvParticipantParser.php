@@ -112,7 +112,7 @@ final class CsvParticipantParser
         return (string) array_key_first($counts);
     }
 
-    private static function toUtf8(string $content): string
+    public static function toUtf8(string $content): string
     {
         if (str_starts_with($content, "\xEF\xBB\xBF")) {
             $content = substr($content, 3);

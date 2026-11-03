@@ -1,0 +1,81 @@
+{% extends 'layout/admin.html.twig' %}
+
+{% block title %}{{ t('payments.import.preview_title') }} · {{ event.name }}{% endblock %}
+
+{% block content %}
+  {% include 'partials/event_header.html.twig' %}
+
+  <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/payments/import/apply') }}" class="stack">
+    {{ csrf_field() }}
+    <input type="hidden" name="token" value="{{ token }}">
+
+    <section class="card stack" aria-labelledby="summary-title">
+      <h2 class="h2" id="summary-title">{{ t('payments.import.preview_title') }}</h2>
+      <ul class="summary-chips">
+        <li class="chip chip--new">{{ t('payments.import.summary.ok', {count: summary.ok}) }}</li>
+        {% if summary.amount_diff > 0 %}<li class="chip chip--warning">{{ t('payments.import.summary.amount_diff', {count: summary.amount_diff}) }}</li>{% endif %}
+        {% if summary.already_paid > 0 %}<li class="chip">{{ t('payments.import.summary.already_paid', {count: summary.already_paid}) }}</li>{% endif %}
+        {% if summary.not_assigned > 0 %}<li class="chip chip--error">{{ t('payments.import.summary.not_assigned', {count: summary.not_assigned}) }}</li>{% endif %}
+      </ul>
+      <p class="muted">{{ t('payments.import.preview_help') }}</p>
+      {% if summary.ok + summary.amount_diff > 0 %}
+        <div class="button-row">
+          <button type="submit" class="btn btn--primary">{{ t('payments.import.apply_button') }}</button>
+          <a href="{{ url('/admin/events/' ~ event.id ~ '/payments#import') }}" class="btn btn--secondary">{{ t('app.cancel') }}</a>
+        </div>
+      {% else %}
+        <p class="notice notice--info">{{ t('payments.import.nothing_to_mark') }}</p>
+        <p><a href="{{ url('/admin/events/' ~ event.id ~ '/payments#import') }}" class="btn btn--secondary">{{ t('payments.import.other_file') }}</a></p>
+      {% endif %}
+    </section>
+
+    <div class="table-wrap">
+      <table class="table table--compact">
+        <thead>
+          <tr>
+            <th scope="col"><span class="visually-hidden">{{ t('payments.import.select') }}</span></th>
+            <th scope="col" class="num">{{ t('payments.import.line') }}</th>
+            <th scope="col">{{ t('payments.import.date') }}</th>
+            <th scope="col">{{ t('payments.import.reference') }}</th>
+            <th scope="col">{{ t('payments.import.pledge') }}</th>
+            <th scope="col" class="num">{{ t('payments.import.expected') }}</th>
+            <th scope="col" class="num">{{ t('payments.import.received') }}</th>
+            <th scope="col">{{ t('payments.import.status_col') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+            <tr class="import-row import-row--{{ r.status }}">
+              <td>
+                {% if r.status in selectable %}
+                  <input type="checkbox" name="lines[]" value="{{ r.line }}" id="l-{{ r.line }}"{{ r.status == 'ok' ? ' checked' }}>
+                  <label for="l-{{ r.line }}" class="visually-hidden">{{ t('payments.import.select_line', {line: r.line}) }}</label>
+                {% endif %}
+              </td>
+              <td class="num">{{ r.line }}</td>
+              <td class="nowrap">{{ r.date ? r.date|date_ch : '–' }}</td>
+              <td class="nowrap"><code>{{ r.reference ?: '–' }}</code></td>
+              <td>
+                {% if r.pledge %}
+                  {{ r.pledge.anonymized_at ? t('pledges.anonymized') : r.pledge.sponsor_name }}<br>
+                  <a class="small" href="{{ url('/admin/events/' ~ event.id ~ '/participants/' ~ r.pledge.participation_id) }}">{{ r.pledge.first_name }} {{ r.pledge.last_name }}</a>
+                {% else %}–{% endif %}
+              </td>
+              <td class="num nowrap">{{ r.pledge and not r.pledge.unknown ? r.pledge.owed_cents|money : '–' }}</td>
+              <td class="num nowrap">
+                {% if r.total_cents is not null %}{{ r.total_cents|money }}
+                  {% if r.fee_cents > 0 %}<br><span class="muted small">{{ t('payments.import.incl_fee', {amount: r.amount_cents|money, fee: r.fee_cents|money}) }}</span>{% endif %}
+                {% else %}–{% endif %}
+              </td>
+              <td>
+                <span class="badge badge--import-{{ r.status }}">{{ t('payments.import.status.' ~ r.status) }}</span>
+                {% if r.status == 'already_paid' and r.pledge.paid_at %}<br><span class="muted small">{{ r.pledge.paid_at|date_ch }} · {{ r.pledge.paid_amount_cents|money }}</span>{% endif %}
+                {% if r.error %}<br><span class="field__error small">{{ t(r.error) }}</span>{% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </form>
+{% endblock %}

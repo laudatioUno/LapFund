@@ -8,7 +8,9 @@ use LapFund\Http\HttpException;
 use LapFund\Http\Request;
 use LapFund\Http\Response;
 use LapFund\Security\ParticipantSession;
+use LapFund\SecurityHeaders;
 use LapFund\Service\PledgeService;
+use LapFund\Service\TwintPaylink;
 
 /**
  * Sponsor pages (architecture 8.1): invitation page with the pledge form (/i/{token})
@@ -107,8 +109,10 @@ final class SponsorController extends Controller
         }
 
         $due = $this->app->billing()->pledge((int) $event['id'], (int) $pledge['id']);
+        $mode = PledgeService::twintMode($event);
+        $twintUrl = $this->twintUrl($event, $pledge, $due, $mode);
 
-        return $this->render('public/payment.html.twig', [
+        $response = $this->render('public/payment.html.twig', [
             'pledge' => $pledge,
             'due' => $due,
             'laps' => $due['laps'] ?? null,
@@ -117,10 +121,35 @@ final class SponsorController extends Controller
             'brand' => $this->app->branding()->forEvent($event),
             'theme_event' => (int) $event['id'],
             'token' => (string) $params['token'],
-            'twint' => $pledge['payment_method'] === 'twint',
+            'twint' => $pledge['payment_method'] === 'twint' && $mode !== 'link',
+            'twint_link' => $pledge['payment_method'] === 'twint' && $mode === 'link',
+            'twint_button' => $twintUrl !== null ? TwintPaylink::button($twintUrl) : null,
             'twint_message' => PledgeService::twintMessage($pledge),
             'mail_configured' => $this->app->mailSettings()->isConfigured(),
         ]);
+        if ($twintUrl !== null) {
+            // TWINT's snippet needs its inline style, onclick and image: allowed by hash, only here
+            $response->headers['Content-Security-Policy'] = SecurityHeaders::policy(TwintPaylink::cspSources($twintUrl));
+        }
+
+        return $response;
+    }
+
+    /**
+     * Personal Twint payment link, only once the amount is fixed: flat pledges at once,
+     * per-lap pledges after the run when the laps are recorded.
+     */
+    private function twintUrl(array $event, array $pledge, ?array $due, ?string $mode): ?string
+    {
+        if ($mode !== 'link' || $pledge['payment_method'] !== 'twint' || $pledge['status'] !== 'open' || $due === null
+            || (int) $due['unknown'] === 1 || (int) $due['owed_cents'] <= 0 || (string) ($pledge['reference'] ?? '') === '') {
+            return null;
+        }
+        if ($pledge['type'] === 'per_lap' && !in_array($event['status'], ['run_done', 'billing', 'closed'], true)) {
+            return null;
+        }
+
+        return TwintPaylink::url((string) $event['twint_link'], (string) $pledge['reference'], (int) $due['owed_cents']);
     }
 
     /** «Zahlungsangaben per Mail senden» (SP-09). */

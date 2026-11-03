@@ -3,6 +3,20 @@
 All notable changes to LapFund. Versions follow [semantic versioning](https://semver.org/).
 The section of a version is used as the release notes on GitHub.
 
+## [1.5.0] – 2026-11
+
+### Added
+- Twint payment link per event: in the event settings choose *Zahlungslink*, *QR-Code* or *Kein Twint*. With the payment link from the TWINT Business Portal, the pledge page shows TWINT's own pay button (embed snippet, unchanged) with amount and payment reference filled in (`trxInfo`, `amount`) – for flat pledges at once, for per-lap pledges once the laps are recorded after the run. On the phone it opens the Twint app, on a computer Twint shows a QR code. The button image is loaded from go.twint.ch; only this page allows TWINT's inline style and onclick, by hash.
+- Payment reference per pledge, e.g. `SL26-000123-6`: prefix of the event (setting, default «SL» + year), the number of the pledge and a check digit. Set once when the pledge is saved, unique (database key), no names. Shown on the participant page, in the CSV exports and used as the message to enter with the QR code.
+- Import of Twint payments (tab *Abrechnung*): CSV with «Datum», «Betrag Transaktion (CHF)», «Transaktionskosten (CHF)», «Zahlungszweck»; amount + costs is compared with the amount owed. Preview with «passt» (selected), «anderer Betrag», «schon bezahlt» and «nicht zugeordnet»; the selected rows are marked as paid with date and amount from the list. Search by payment reference.
+
+### Changed
+- Mails in payment link mode contain no Twint code, only the link to the pledge page.
+- With the QR code, sponsors enter the payment reference as message instead of the names.
+
+### Database
+- Migration `009_twint_paylink.sql`: Twint mode, payment link and reference prefix per event; reference per pledge (existing pledges get theirs). Events with a QR code keep the QR mode.
+
 ## [1.4.3] – 2026-10
 
 ### Changed

@@ -378,7 +378,8 @@ final class BillingService
         $brand = $this->branding->forEvent($event);
         $owed = (int) $pledge['owed_cents'];
         $twint = $pledge['payment_method'] === 'twint';
-        $qr = (string) ($event['twint_qr_file'] ?? '');
+        $mode = PledgeService::twintMode($event);
+        $qr = $mode === 'qr' ? (string) $event['twint_qr_file'] : '';
         $name = $pledge['first_name'] . ' ' . $pledge['last_name'];
         $mail = $this->composer->build($type, (string) $pledge['sponsor_email'], (string) $pledge['sponsor_name'],
             $this->translator->t('mail.' . $type . '.subject', ['name' => $name, 'event' => $event['name']]), $brand, [
@@ -389,6 +390,7 @@ final class BillingService
                 'laps' => $pledge['laps'] ?? null,
                 'did_not_start' => (bool) ($pledge['did_not_start'] ?? false),
                 'twint' => $twint,
+                'twint_link' => $twint && $mode === 'link',
                 'twint_qr' => $twint && $qr !== '',
                 'twint_message' => PledgeService::twintMessage($pledge),
                 'payment_url' => $url ?? $this->pledges->paymentUrl((int) $pledge['id']),

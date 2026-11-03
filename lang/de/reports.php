@@ -78,6 +78,7 @@ return [
     'export.col.open' => 'Offen CHF',
     'export.col.state' => 'Zahlungsstatus',
     'export.col.pledge_no' => 'Zusage-Nr.',
+    'export.col.reference' => 'Zahlungszweck',
     'export.col.sponsor' => 'Sponsor',
     'export.col.sponsor_email' => 'E-Mail Sponsor',
     'export.col.message' => 'Nachricht',

@@ -47,7 +47,7 @@ use LapFund\View\View;
  */
 final class App
 {
-    public const VERSION = '1.4.3';
+    public const VERSION = '1.5.0';
 
     public Config $config;
     public readonly Translator $translator;
@@ -323,6 +323,11 @@ final class App
             $this->formatter,
             $this->audit(),
         ));
+    }
+
+    public function twintImport(): \LapFund\Service\TwintPaymentImport
+    {
+        return $this->service(\LapFund\Service\TwintPaymentImport::class, fn () => new \LapFund\Service\TwintPaymentImport($this->db()));
     }
 
     public function reports(): \LapFund\Repository\ReportRepository

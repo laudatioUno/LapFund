@@ -37,7 +37,11 @@ Im Event unter **Einstellungen**:
 - **Eintragen bis**: danach können Sponsoren keine Zusagen mehr machen (freiwillig).
 - **Erinnerung nach Tagen**: ab wann eine Zahlungserinnerung fällig ist (Standard 14 Tage).
 - **Texte**: Willkommenstext und Zweck («Wir sammeln für neue Trikots») erscheinen auf der Seite für die Sponsoren. Betreff und Einleitung der Einladungsmail kannst du anpassen.
-- **Twint**: QR-Code des Vereinskontos hochladen. Ohne QR-Code ist nur Barzahlung möglich.
+- **Twint**: wähle, wie Sponsoren mit Twint bezahlen:
+  - **Zahlungslink** (empfohlen): den Zahlungslink aus dem Twint Business Portal einfügen (*Stores › Zahlungslink*, `https://go.twint.ch/1/e/tw?tw=acq.…`). Jeder Sponsor bekommt auf seiner Beitragsseite den Twint-Knopf mit Betrag und Zahlungszweck schon ausgefüllt – sobald der Betrag feststeht: pauschale Beträge sofort, Beträge pro Runde nach dem Lauf. Am Handy öffnet der Knopf die Twint-App, am Computer zeigt Twint einen QR-Code. In den Mails steht kein Twint-Code, nur der Link auf die Beitragsseite.
+  - **QR-Code**: einen QR-Code mit freiem Betrag hochladen; der Sponsor gibt Betrag und Zahlungszweck selbst in der App ein.
+  - **Kein Twint**: nur Barzahlung.
+- **Präfix für den Zahlungszweck**: Jeder Beitrag erhält beim Erfassen einen eigenen Zahlungszweck, z. B. `SL26-000123-6` (Präfix, Nummer des Beitrags, Prüfziffer). Er ändert sich nie mehr, auch wenn du das Präfix später änderst. Namen stehen nicht darin.
 - **Logo und Farbe**: leer lassen, dann gelten die des Vereins.
 
 Die Checkliste auf der Event-Übersicht zeigt, was noch fehlt.
@@ -105,7 +109,7 @@ Die geschuldeten Beträge rechnet LapFund selbst aus: pauschal oder Runden × Be
 1. Status auf **Abrechnung** stellen.
 2. **Vorher:** Pauschale Twint-Zahlungen, die schon eingegangen sind, beim Kind als bezahlt abhaken. Sonst erhalten auch diese Sponsoren eine Aufforderung.
 3. Unter **Abrechnung** mit **Vorschau** prüfen und eine **Testmail** an dich selbst schicken.
-4. **Zahlungsaufforderungen senden**. Jede Zusage erhält eine eigene Mail mit Betrag und Twint-QR-Code oder dem Hinweis auf Barzahlung.
+4. **Zahlungsaufforderungen senden**. Jede Zusage erhält eine eigene Mail mit Betrag und dem Link auf ihre Beitragsseite (Twint-Knopf bzw. QR-Code und Zahlungszweck) oder dem Hinweis auf Barzahlung.
 
 Nicht angeschrieben werden: bezahlte, stornierte und als «bar erhalten» markierte Zusagen sowie Zusagen pro Runde ohne erfasste Runden.
 
@@ -115,6 +119,15 @@ Beim Kind unter **Teilnehmende › Name**:
 
 - **Einzeln**: Datum, Zahlungsart und erhaltener Betrag (kann vom geschuldeten Betrag abweichen).
 - **Vollständig bezahlt**: hakt alle offenen Zusagen eines Kindes auf einmal ab, z. B. wenn es das gesammelte Bargeld abgibt. Lässt sich rückgängig machen.
+
+**Twint-Zahlungen aus einer Liste**: Unter **Abrechnung › Twint-Zahlungen zuordnen** lädst du eine CSV-Datei hoch (getrennt mit Semikolon, Spalten «Datum», «Betrag Transaktion (CHF)», «Transaktionskosten (CHF)», «Zahlungszweck»). Bezahlt ist Betrag + Kosten. Die Vorschau zeigt pro Zeile, zu welchem Beitrag sie gehört:
+
+- **Passt**: Betrag stimmt – vorausgewählt.
+- **Anderer Betrag**: nicht vorausgewählt; prüfen und bei Bedarf anhaken. Gespeichert wird der tatsächlich bezahlte Betrag.
+- **Schon bezahlt**: wird übersprungen; dieselbe Liste zweimal hochladen schadet also nicht.
+- **Nicht zugeordnet**: kein oder unbekannter Zahlungszweck, falsche Prüfziffer (Tippfehler), anderer Event, doppelt in der Liste.
+
+Erst mit **Angehakte als bezahlt markieren** wird etwas geändert. Über das Feld **Zahlungszweck suchen** findest du auch eine einzelne Zahlung.
 
 Nach dem Abhaken erhält der Sponsor eine Dankesmail mit Betrag, Datum und Zahlungsart. Sie geht erst 10 Minuten später raus: Nimmst du ein versehentliches Abhaken vorher zurück, wird sie nicht verschickt. Die Dankesmail lässt sich in den Einstellungen des Events abschalten.
 

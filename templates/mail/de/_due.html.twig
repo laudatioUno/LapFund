@@ -1,4 +1,4 @@
-{# Amount owed and how to pay. Needs: pledge, participant, owed, rate, laps, did_not_start, twint, twint_qr, twint_message, payment_url #}
+{# Amount owed and how to pay. Needs: pledge, participant, owed, rate, laps, did_not_start, twint, twint_link, twint_qr, twint_message, payment_url #}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;border:1px solid #DCE3EA;border-radius:10px;">
 <tr><td style="padding:14px 16px;font-size:15px;line-height:1.6;">
   {{ t('mail.pledge.for') }}: <strong>{{ participant }}</strong><br>
@@ -6,7 +6,10 @@
   <span style="font-size:18px;">{{ t('mail.due.amount') }}: <strong>{{ owed }}</strong></span>
 </td></tr>
 </table>
-{% if twint %}
+{% if twint_link %}
+  <p style="margin:0 0 8px;font-weight:bold;">{{ t('mail.pledge.twint_title') }}</p>
+  <p style="margin:0 0 16px;">{{ t('mail.pledge.twint_link_text', {amount: owed}) }}</p>
+{% elseif twint %}
   <p style="margin:0 0 8px;font-weight:bold;">{{ t('mail.pledge.twint_title') }}</p>
   <p style="margin:0 0 8px;">{{ t('mail.pledge.twint_text', {amount: owed}) }}</p>
   <p style="margin:0 0 12px;padding:10px 12px;background:#F3F6F9;border-radius:8px;font-family:monospace;font-size:15px;">{{ twint_message }}</p>

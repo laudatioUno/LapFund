@@ -104,6 +104,8 @@ input[type="color"] { width: 64px; height: 48px; padding: 4px; border: 1px solid
 .btn[disabled] { opacity: 0.5; cursor: not-allowed; }
 .cols__side form + form { margin-top: 8px; }
 .inline-form { margin-top: 8px; }
+.row-actions { display: flex; gap: 14px; align-items: center; }
+.row-actions .inline-form { margin-top: 0; }
 
 /* Notices and badges */
 .notice { border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; font-size: 15px; }
@@ -344,6 +346,7 @@ a.chip:hover { background: var(--line); }
 .quick { display: flex; flex-wrap: wrap; gap: 8px; }
 .inline-check--top { align-items: flex-start; }
 .inline-check--top input { margin-top: 3px; flex-shrink: 0; }
+.req { color: var(--err-ink); font-weight: 700; }
 .section-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .pledge-list__status { text-align: right; }
 .pledge-list__msg { grid-column: 1 / -1; color: var(--ink-2); font-style: italic; }

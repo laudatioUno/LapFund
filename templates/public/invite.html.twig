@@ -37,10 +37,19 @@
       <div class="field{{ errors.consent is defined ? ' field--error' }}">
         <label class="inline-check inline-check--top">
           <input type="checkbox" name="consent" value="1"{{ input.consent ?? false ? ' checked' }}>
-          <span>{{ t('pledge.consent', {club: brand.club_name}) }}{% if brand.privacy_url %} <a href="{{ brand.privacy_url }}" rel="noopener" target="_blank">{{ t('pledge.privacy_link') }}</a>{% endif %}</span>
+          <span>{{ t('pledge.consent', {club: brand.club_name}) }} <span class="req" aria-hidden="true">*</span>{% if brand.privacy_url %} <a href="{{ brand.privacy_url }}" rel="noopener" target="_blank">{{ t('pledge.privacy_link') }}</a>{% endif %}</span>
         </label>
         {% if errors.consent is defined %}<p class="field__error">{{ t(errors.consent) }}</p>{% endif %}
       </div>
+      {% if stay_in_touch_text %}
+        <div class="field">
+          <label class="inline-check inline-check--top">
+            <input type="checkbox" name="stay_in_touch" value="1"{{ input.stay_in_touch ?? false ? ' checked' }}>
+            <span>{{ stay_in_touch_text }}</span>
+          </label>
+        </div>
+      {% endif %}
+      <p class="muted small">{{ t('pledge.required_note') }}</p>
       <button type="submit" class="btn btn--primary btn--block">{{ t('pledge.submit', {name: p.first_name}) }}</button>
       <p class="muted small">{{ t('pledge.no_changes_after') }}</p>
       {% if event.entry_deadline %}<p class="muted small">{{ t('pledge.deadline', {date: event.entry_deadline|datetime}) }}</p>{% endif %}

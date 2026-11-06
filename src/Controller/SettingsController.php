@@ -18,6 +18,8 @@ final class SettingsController extends Controller
 {
     private const TEXT_FIELDS = ['club_name', 'club_website', 'contact_email', 'primary_color', 'imprint_url', 'privacy_url'];
 
+    private const CONTACTS_TEXT_MAX = 400;
+
     public function edit(Request $request, array $params): Response
     {
         $this->admin('settings.manage');
@@ -29,6 +31,8 @@ final class SettingsController extends Controller
         $input['primary_color'] = Branding::validColor($input['primary_color']) ?? Branding::DEFAULT_COLOR;
         $input['retention_months'] = (string) $this->app->retention()->months();
         $input['inactive_years'] = (string) $this->app->retention()->inactiveYears();
+        $input['contacts_enabled'] = $settings->get('contacts_enabled') === '1' ? '1' : '0';
+        $input['contacts_text'] = $this->app->contactText($settings->get('contacts_text'));
 
         return $this->form($input, []);
     }
@@ -65,6 +69,15 @@ final class SettingsController extends Controller
                 $input[$field] = (string) (int) $input[$field];
             }
         }
+        // «Stay in touch» checkbox on the sponsor form (newsletter consent)
+        $input['contacts_enabled'] = $request->input('contacts_enabled') === '1' ? '1' : '0';
+        $input['contacts_text'] = trim(preg_replace('/\s+/u', ' ', $request->input('contacts_text')) ?? '');
+        if ($input['contacts_text'] === '') {
+            $input['contacts_text'] = $this->app->contactText('');
+        }
+        if (mb_strlen($input['contacts_text']) > self::CONTACTS_TEXT_MAX) {
+            $errors['contacts_text'] = 'admin.settings.contacts_text_too_long';
+        }
         $color = Branding::validColor($input['primary_color']);
         if ($color === null) {
             $errors['primary_color'] = 'validation.color';
@@ -86,7 +99,13 @@ final class SettingsController extends Controller
         }
 
         $settings = $this->app->settings();
+        // The default text is not stored, so it follows a new club name
+        if ($input['contacts_text'] === $this->app->contactText('')) {
+            $input['contacts_text'] = '';
+        }
         $all = $settings->all();
+        $all['contacts_enabled'] = ($all['contacts_enabled'] ?? '') === '1' ? '1' : '0';
+        $all['contacts_text'] ??= '';
         $before = [];
         $after = [];
         foreach ($input as $key => $value) {

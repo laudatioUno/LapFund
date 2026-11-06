@@ -3,6 +3,18 @@
 All notable changes to LapFund. Versions follow [semantic versioning](https://semver.org/).
 The section of a version is used as the release notes on GitHub.
 
+## [1.6.0] – 2026-11
+
+### Added
+- «Stay in touch» (newsletter) checkbox on the sponsor form, below the consent: switch it on and set its text under *Vereinseinstellungen › Kontakt halten* (off by default, default text with the club name). Never preselected and not needed for the pledge; only on the sponsor's own form, not when a participant or admin enters a pledge.
+- New page *Kontakte* for the club admin: name, e-mail, date and exact wording of the consent, source (event, for which participant), search and event filter, CSV export of the active contacts for a newsletter tool, unsubscribe and delete. One contact per e-mail address; a new consent updates it. Contacts are kept when an event is anonymized. Export, unsubscribe and delete are logged.
+
+### Changed
+- Sponsor and participant pledge forms: required fields and the consent are marked with *, with the note «Angaben mit * sind nötig zum Abschicken.»
+
+### Database
+- Migration `010_contacts.sql`: table `contacts`.
+
 ## [1.5.0] – 2026-11
 
 ### Added

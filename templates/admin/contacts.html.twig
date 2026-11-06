@@ -1,0 +1,81 @@
+{% extends 'layout/admin.html.twig' %}
+
+{% block title %}{{ t('app.nav.contacts') }}{% endblock %}
+
+{% block content %}
+  <header class="page-head">
+    <h1 class="h1">{{ t('app.nav.contacts') }}</h1>
+  </header>
+  <p class="muted">{{ t('admin.contacts.intro') }}</p>
+  {% if not enabled %}
+    <p class="notice notice--info">{{ t('admin.contacts.disabled') }} <a href="{{ url('/admin/settings#contacts') }}">{{ t('admin.contacts.to_settings') }}</a></p>
+  {% endif %}
+
+  <section class="card stack">
+    <form method="get" action="{{ url('/admin/contacts') }}" class="filter-bar" role="search">
+      <div class="field filter-bar__grow">
+        <label for="f-q">{{ t('admin.contacts.search') }}</label>
+        <input id="f-q" name="q" type="search" value="{{ filter.q }}" maxlength="100" placeholder="{{ t('admin.contacts.search_placeholder') }}">
+      </div>
+      {% if events is not empty %}
+        <div class="field">
+          <label for="f-event">{{ t('admin.contacts.event') }}</label>
+          <select id="f-event" name="event">
+            <option value="">{{ t('admin.contacts.all_events') }}</option>
+            {% for e in events %}<option value="{{ e.id }}"{{ filter.event_id == e.id ? ' selected' }}>{{ e.name }}</option>{% endfor %}
+          </select>
+        </div>
+      {% endif %}
+      <div class="filter-bar__actions">
+        <button type="submit" class="btn btn--secondary">{{ t('admin.contacts.filter') }}</button>
+        {% if counts.active > 0 %}
+          <a href="{{ url('/admin/contacts/export.csv' ~ (filter.q != '' or filter.event_id ? '?q=' ~ filter.q|url_encode ~ '&event=' ~ filter.event_id : '')) }}" class="btn btn--primary">{{ t('admin.contacts.export') }}</a>
+        {% endif %}
+      </div>
+    </form>
+
+    {% if rows is empty %}
+      <p class="muted">{{ counts.total == 0 ? t('admin.contacts.empty') : t('admin.contacts.none_found') }}</p>
+    {% else %}
+      <div class="table-wrap">
+        <table class="table table--compact">
+          <thead>
+            <tr>
+              <th scope="col">{{ t('admin.contacts.col.name') }}</th>
+              <th scope="col">{{ t('admin.contacts.col.email') }}</th>
+              <th scope="col">{{ t('admin.contacts.col.consent_at') }}</th>
+              <th scope="col">{{ t('admin.contacts.col.source') }}</th>
+              <th scope="col">{{ t('admin.contacts.col.status') }}</th>
+              <th scope="col"><span class="visually-hidden">{{ t('events.teams.actions') }}</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in rows %}
+              <tr>
+                <td>{{ c.name }}</td>
+                <td>{{ c.email }}</td>
+                <td class="nowrap" title="{{ c.consent_text }}">{{ c.consent_at|datetime }}</td>
+                <td>{{ c.source_event_name ?: '–' }}{% if c.for_first_name %}<br><span class="muted small">{{ t('admin.contacts.for', {name: c.for_first_name ~ ' ' ~ c.for_last_name}) }}</span>{% endif %}</td>
+                <td>
+                  {% if c.revoked_at %}<span class="badge">{{ t('admin.contacts.status_revoked', {date: c.revoked_at|date_ch}) }}</span>
+                  {% else %}<span class="badge badge--pledge-paid">{{ t('admin.contacts.status_active') }}</span>{% endif %}
+                </td>
+                <td class="nowrap"><div class="row-actions">
+                  {% if not c.revoked_at %}
+                    <form method="post" action="{{ url('/admin/contacts/' ~ c.id ~ '/revoke') }}" class="inline-form" data-confirm="{{ t('admin.contacts.revoke_confirm', {name: c.name}) }}">
+                      {{ csrf_field() }}<button type="submit" class="btn btn--link">{{ t('admin.contacts.revoke') }}</button>
+                    </form>
+                  {% endif %}
+                  <form method="post" action="{{ url('/admin/contacts/' ~ c.id ~ '/delete') }}" class="inline-form" data-confirm="{{ t('admin.contacts.delete_confirm', {name: c.name}) }}">
+                    {{ csrf_field() }}<button type="submit" class="btn btn--link btn--danger-link">{{ t('admin.contacts.delete') }}</button>
+                  </form>
+                </div></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+    <p class="muted small" role="status">{{ t(counts.total == 1 ? 'admin.contacts.count_one' : 'admin.contacts.count', {total: counts.total, active: counts.active}) }}</p>
+  </section>
+{% endblock %}

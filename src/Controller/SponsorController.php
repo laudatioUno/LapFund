@@ -78,10 +78,15 @@ final class SponsorController extends Controller
         if ($errors !== []) {
             $this->app->session->set('pledge_form.' . $p['id'], $started ?: time());
 
-            return $this->page($p, $event, $input + ['consent' => $request->input('consent') === '1'], $errors, 422);
+            return $this->page($p, $event, $input + ['consent' => $request->input('consent') === '1', 'stay_in_touch' => $request->input('stay_in_touch') === '1'], $errors, 422);
         }
 
         $result = $this->app->pledgeService()->create($event, $p, $checked['data'], 'online');
+        // Optional consent to stay in touch (newsletter), only if the club offers it
+        $optIn = $this->app->contactOptInText();
+        if ($optIn !== null && $request->input('stay_in_touch') === '1') {
+            $this->app->contacts()->subscribe((string) $checked['data']['sponsor_email'], (string) $checked['data']['sponsor_name'], $optIn, $event, $result['id']);
+        }
         $pledge = $this->app->pledgeService()->find($result['id']);
         if ($pledge !== null) {
             $this->app->access()->queueNewSponsor($event, $pledge, $this->app->pledges()->totals((int) $p['id']));
@@ -212,6 +217,7 @@ final class SponsorController extends Controller
             'input' => $input,
             'errors' => $errors,
             'token' => (string) $p['invite_token'],
+            'stay_in_touch_text' => $this->app->contactOptInText(),
         ], $status);
     }
 

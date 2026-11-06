@@ -19,6 +19,7 @@ final class Permissions
         'events.create',
         'mail.manage',      // mail settings, test mail, mail log of the installation
         'participants.delete', // delete participants from the pool for good (NF-11)
+        'contacts.manage',  // newsletter contacts: see, export, remove
     ];
 
     /** Actions every admin may perform. */

@@ -47,7 +47,7 @@ use LapFund\View\View;
  */
 final class App
 {
-    public const VERSION = '1.5.0';
+    public const VERSION = '1.6.0';
 
     public Config $config;
     public readonly Translator $translator;
@@ -323,6 +323,30 @@ final class App
             $this->formatter,
             $this->audit(),
         ));
+    }
+
+    public function contacts(): \LapFund\Repository\ContactRepository
+    {
+        return $this->service(\LapFund\Repository\ContactRepository::class, fn () => new \LapFund\Repository\ContactRepository($this->db()));
+    }
+
+    /** Text of the «stay in touch» checkbox on the sponsor form, or null if the club has it switched off. */
+    public function contactOptInText(): ?string
+    {
+        $settings = $this->settings();
+        if ($settings->get('contacts_enabled') !== '1') {
+            return null;
+        }
+
+        return $this->contactText($settings->get('contacts_text'));
+    }
+
+    /** The club's text, or the default with the club name. */
+    public function contactText(string $text): string
+    {
+        $text = trim($text);
+
+        return $text !== '' ? $text : $this->translator->t('admin.settings.contacts_default', ['club' => $this->settings()->get('club_name')]);
     }
 
     public function twintImport(): \LapFund\Service\TwintPaymentImport

@@ -38,6 +38,7 @@ return [
     'error.amount_flat_max' => 'Das ist mehr als 5000 Franken. Bitte den Betrag prüfen.',
     'error.amount_lap_max' => 'Das ist mehr als 100 Franken pro Runde. Bitte den Betrag prüfen.',
     'error.method' => 'Bitte eine Zahlungsart wählen.',
+    'required_note' => 'Angaben mit * sind nötig zum Abschicken.',
     'error.consent' => 'Bitte bestätige das Einverständnis.',
     'error.too_fast' => 'Bitte prüfe deine Angaben und sende das Formular nochmals ab.',
 

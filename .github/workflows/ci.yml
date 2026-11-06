@@ -15,8 +15,14 @@ jobs:
       - uses: actions/checkout@v6
       - name: PHP version
         run: php -v && composer --version
+      # Downloaded libraries are kept between runs, so a run rarely needs GitHub downloads.
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
       - name: Install dependencies (from composer.lock)
-        run: composer install --no-interaction --no-progress
+        run: bin/composer-install.sh --no-interaction --no-progress
       - name: Lint
         run: find src bin lang public -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
       - name: Unit tests
@@ -32,6 +38,12 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
+      # Downloaded libraries are kept between runs, so a run rarely needs GitHub downloads.
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
       # Tells on the PR's Checks tab (Summary) whether merging publishes a release.
       - name: Release preview
         env:

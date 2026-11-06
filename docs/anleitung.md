@@ -83,6 +83,8 @@ Auf ihrer Seite finden die Kinder (oder ihre Eltern):
 
 Gleichzeitig erhält das Kind (bzw. die Mailadresse der Eltern) eine Mail «Neuer Sponsor» mit Name, Betrag und Nachricht des Sponsors und dem Link zur persönlichen Seite. Diese Mail lässt sich in den Einstellungen des Events abschalten.
 
+Pflichtangaben sind im Formular mit * markiert. Hat der Vereins-Admin **Kontakt halten** eingeschaltet, steht unter der Einverständniserklärung ein zweites Häkchen: Damit erlaubt der Sponsor, dass der Verein ihn auch später per Mail kontaktiert (z. B. Newsletter). Es ist nie vorausgewählt und für die Zusage nicht nötig.
+
 ## 3. Lauftag
 
 Unter **Runden** gibt es zwei Vorlagen zum Drucken, jeweils für den ganzen Event oder pro Team:
@@ -178,14 +180,15 @@ Der Vereins-Admin kann ein abgeschlossenes Event **archivieren**; es verschwinde
 
 ### Was mit den Daten passiert
 
-- **Sponsoren** werden nicht erneut angeschrieben. 12 Monate nach dem Abschluss (einstellbar) löscht LapFund automatisch Name, E-Mail, Nachricht und Zahlungslink. Beträge und Runden bleiben für die Statistik. Der Vereins-Admin kann das auf der Event-Übersicht mit **Jetzt anonymisieren** auch sofort tun. Ein anonymisiertes Event kann nicht mehr geöffnet werden.
+- **Sponsoren** werden nicht erneut angeschrieben – ausser sie haben beim Eintragen das Häkchen **Kontakt halten** gesetzt (siehe unten). 12 Monate nach dem Abschluss (einstellbar) löscht LapFund automatisch Name, E-Mail, Nachricht und Zahlungslink. Beträge und Runden bleiben für die Statistik. Der Vereins-Admin kann das auf der Event-Übersicht mit **Jetzt anonymisieren** auch sofort tun. Ein anonymisiertes Event kann nicht mehr geöffnet werden.
 - **Teilnehmende** bleiben im Pool, damit du sie im nächsten Jahr übernehmen kannst. Unter **Personen › Inaktiv** sieht der Vereins-Admin, wer länger nicht mehr dabei war, und kann diese Personen endgültig löschen.
 
 ## 6. Für den Vereins-Admin
 
 - **Admin-Konten**: Neue Admins erhalten einen Einladungslink (72 Stunden gültig). Dort können Zugang und Zwei-Faktor zurückgesetzt werden.
 - **Mailversand**: SMTP-Zugang, Versandlimit und Testmail; das Mailprotokoll zeigt jeden Versand.
-- **Vereinseinstellungen**: Name, Logo, Farbe, Kontaktadresse, Datenschutzerklärung und Impressum, Aufbewahrungsfristen.
+- **Vereinseinstellungen**: Name, Logo, Farbe, Kontaktadresse, Datenschutzerklärung und Impressum, Aufbewahrungsfristen, **Kontakt halten** (Häkchen für den Newsletter im Sponsorenformular ein- oder ausschalten und den Text festlegen).
+- **Kontakte**: alle Sponsoren, die dem Kontakt zugestimmt haben, mit Datum, Wortlaut der Zustimmung und Herkunft (Event, für welches Kind). Mit **CSV-Export für Newsletter-Tool** lädst du die aktiven Kontakte herunter; meldet sich jemand bei euch ab, setzt du ihn auf **Abmelden** oder löschst ihn. Diese Kontakte bleiben, wenn ein Event anonymisiert wird. Ergänzt eure Datenschutzerklärung entsprechend.
 - **Änderungsprotokoll**: alle Änderungen aller Events, filterbar nach Event und Bereich.
 - **System**: Version, Datenbank-Aktualisierungen nach einem Update und **Datensicherung**. Für den Export der Datenbank ist der Code aus der Authenticator-App nötig. Zu einem vollständigen Backup gehören zusätzlich `config/config.php` und der Ordner `storage/uploads/`.
 

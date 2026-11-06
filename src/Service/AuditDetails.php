@@ -19,7 +19,7 @@ final class AuditDetails
     private const MONEY = ['amount_cents', 'paid_amount_cents', 'goal_cents'];
 
     /** On/off settings stored as 0/1. */
-    private const FLAGS = ['notify_new_sponsor', 'thank_on_payment'];
+    private const FLAGS = ['notify_new_sponsor', 'thank_on_payment', 'contacts_enabled'];
 
     /** Image uploads: added, replaced or removed. */
     private const FILES = ['logo', 'twint_qr'];

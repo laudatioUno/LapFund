@@ -21,7 +21,7 @@ final class AuditLog
         'participants' => ['participant_added', 'participant_updated', 'participant_removed', 'participants_imported', 'participants_copied', 'participant_deleted', 'participants_deleted', 'team_created', 'team_renamed', 'team_deleted'],
         'event' => ['event_created', 'event_updated', 'event_status_changed', 'event_archived', 'event_unarchived', 'event_admins_updated', 'event_anonymized', 'export_downloaded'],
         'mail' => ['invitations_sent', 'invitation_sent', 'magic_link_renewed', 'mails_retried', 'test_mail_sent', 'mail_settings_updated'],
-        'system' => ['install', 'login', 'logout', 'totp_setup', 'invite_accepted', 'admin_created', 'admin_updated', 'admin_invite_created', 'admin_totp_reset', 'admin_unlocked', 'admin_activated', 'admin_deactivated', 'migrate', 'settings_updated', 'logo_deleted', 'database_exported'],
+        'system' => ['install', 'login', 'logout', 'totp_setup', 'invite_accepted', 'admin_created', 'admin_updated', 'admin_invite_created', 'admin_totp_reset', 'admin_unlocked', 'admin_activated', 'admin_deactivated', 'migrate', 'settings_updated', 'logo_deleted', 'database_exported', 'contacts_exported', 'contact_revoked', 'contact_deleted'],
     ];
 
     /** Keys that may hold personal data of sponsors or participants; removed by the retention rules (NF-11). */

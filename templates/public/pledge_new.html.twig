@@ -14,10 +14,11 @@
     <div class="field{{ errors.consent is defined ? ' field--error' }}">
       <label class="inline-check inline-check--top">
         <input type="checkbox" name="consent" value="1"{{ input.consent ?? false ? ' checked' }}>
-        <span>{{ t('pledge.participant.consent') }}</span>
+        <span>{{ t('pledge.participant.consent') }} <span class="req" aria-hidden="true">*</span></span>
       </label>
       {% if errors.consent is defined %}<p class="field__error">{{ t(errors.consent) }}</p>{% endif %}
     </div>
+    <p class="muted small">{{ t('pledge.required_note') }}</p>
     <div class="button-row">
       <button type="submit" class="btn btn--primary">{{ t('pledge.participant.save') }}</button>
       <button type="submit" name="again" value="1" class="btn btn--secondary">{{ t('pledge.participant.save_next') }}</button>

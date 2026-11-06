@@ -9,6 +9,7 @@ return [
     'nav.club' => 'Verein',
     'nav.users' => 'Admin-Konten',
     'nav.settings' => 'Vereinseinstellungen',
+    'nav.contacts' => 'Kontakte',
     'nav.audit' => 'Änderungsprotokoll',
     'nav.system' => 'System',
     'nav.logout' => 'Abmelden',

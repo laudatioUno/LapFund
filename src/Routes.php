@@ -21,6 +21,7 @@ use LapFund\Controller\ReportsController;
 use LapFund\Controller\SettingsController;
 use LapFund\Controller\SponsorController;
 use LapFund\Controller\TeamController;
+use LapFund\Controller\ContactsController;
 use LapFund\Controller\UserController;
 use LapFund\Http\Router;
 
@@ -88,6 +89,10 @@ final class Routes
         $r->post('/admin/mail/retry', $c(MailController::class, 'retry'));
         $r->post('/admin/mail/tick', $c(MailController::class, 'tick'));
 
+        $r->get('/admin/contacts', $c(ContactsController::class, 'index'));
+        $r->get('/admin/contacts/export.csv', $c(ContactsController::class, 'export'));
+        $r->post('/admin/contacts/{id}/revoke', $c(ContactsController::class, 'revoke'));
+        $r->post('/admin/contacts/{id}/delete', $c(ContactsController::class, 'delete'));
         $r->get('/admin/users', $c(UserController::class, 'index'));
         $r->get('/admin/users/new', $c(UserController::class, 'create'));
         $r->post('/admin/users/new', $c(UserController::class, 'store'));

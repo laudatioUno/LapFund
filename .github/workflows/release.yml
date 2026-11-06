@@ -59,9 +59,17 @@ jobs:
           fi
           if echo "$VERSION" | grep -q -- '-'; then echo "prerelease=--prerelease" >> "$GITHUB_OUTPUT"; fi
 
+      # Downloaded libraries are kept between runs, so a run rarely needs GitHub downloads.
+      - uses: actions/cache@v5
+        if: steps.v.outputs.new == 'true'
+        with:
+          path: ~/.cache/composer
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
       - name: Tests
         if: steps.v.outputs.new == 'true'
-        run: composer install --no-interaction --no-progress && vendor/bin/phpunit && composer audit --no-dev
+        run: bin/composer-install.sh --no-interaction --no-progress && vendor/bin/phpunit && composer audit --no-dev
 
       - name: Build ZIP
         if: steps.v.outputs.new == 'true'

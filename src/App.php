@@ -47,7 +47,7 @@ use LapFund\View\View;
  */
 final class App
 {
-    public const VERSION = '1.6.0';
+    public const VERSION = '1.7.0';
 
     public Config $config;
     public readonly Translator $translator;
@@ -330,15 +330,34 @@ final class App
         return $this->service(\LapFund\Repository\ContactRepository::class, fn () => new \LapFund\Repository\ContactRepository($this->db()));
     }
 
-    /** Text of the «stay in touch» checkbox on the sponsor form, or null if the club has it switched off. */
-    public function contactOptInText(): ?string
+    /**
+     * Title and text of the «stay in touch» switch on the sponsor form, or null if the
+     * club has it switched off.
+     *
+     * @return array{title: string, text: string}|null
+     */
+    public function contactOptIn(): ?array
     {
         $settings = $this->settings();
         if ($settings->get('contacts_enabled') !== '1') {
             return null;
         }
 
-        return $this->contactText($settings->get('contacts_text'));
+        return ['title' => $this->contactTitle($settings->get('contacts_title')), 'text' => $this->contactText($settings->get('contacts_text'))];
+    }
+
+    /** Wording stored with a consent: title and text together. */
+    public static function consentWording(array $optIn): string
+    {
+        return $optIn['title'] . "\n" . $optIn['text'];
+    }
+
+    /** The club's title, or the default with the club name. */
+    public function contactTitle(string $title): string
+    {
+        $title = trim($title);
+
+        return $title !== '' ? $title : $this->translator->t('admin.settings.contacts_default_title', ['club' => $this->settings()->get('club_name')]);
     }
 
     /** The club's text, or the default with the club name. */

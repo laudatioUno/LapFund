@@ -3,6 +3,12 @@
 All notable changes to LapFund. Versions follow [semantic versioning](https://semver.org/).
 The section of a version is used as the release notes on GitHub.
 
+## [1.7.0] – 2026-11
+
+### Changed
+- «Stay in touch» on the sponsor form is now a card with title, text and a switch in the club colour instead of a plain checkbox; tapping anywhere on the card toggles it. Still never preselected and not needed for the pledge.
+- *Vereinseinstellungen › Kontakt halten*: the title is configurable too (default «Newsletter vom <club>», up to 80 characters). The wording stored with each consent is title and text together; the CSV export shows it as «title – text».
+
 ## [1.6.0] – 2026-11
 
 ### Added

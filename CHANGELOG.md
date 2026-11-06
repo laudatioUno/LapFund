@@ -3,6 +3,12 @@
 All notable changes to LapFund. Versions follow [semantic versioning](https://semver.org/).
 The section of a version is used as the release notes on GitHub.
 
+## [1.8.0] – 2026-11
+
+### Added
+- Link preview in WhatsApp, iMessage & co. for the sponsor link (Open Graph): title «Unterstütze Lea beim Sponsorenlauf 2027» (first name only), description with club, date and place, and an image made from the logo – 1200 × 630 JPEG, the logo centred on white with a band in the club (or event) colour. No last name, no pledges or amounts.
+- `apple-touch-icon` from the logo (180 × 180), used by iMessage and when a page is added to the home screen.
+
 ## [1.7.0] – 2026-11
 
 ### Changed

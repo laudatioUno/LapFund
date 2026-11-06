@@ -219,7 +219,43 @@ final class SponsorController extends Controller
             'errors' => $errors,
             'token' => (string) $p['invite_token'],
             'stay_in_touch' => $this->app->contactOptIn(),
+            'og' => $this->preview($p, $event),
         ], $status);
+    }
+
+    /**
+     * Link preview in WhatsApp, iMessage & co. (Open Graph): first name, event, date and
+     * place; the logo as image. Nothing about pledges or amounts.
+     *
+     * @return array<string, string>
+     */
+    private function preview(array $p, array $event): array
+    {
+        $brand = $this->app->branding()->forEvent($event);
+        $t = $this->app->translator;
+        $when = array_filter([$this->longDate($event['event_date'] ?? null), trim((string) ($event['location'] ?? ''))]);
+        $logo = (string) $brand['logo'];
+
+        return [
+            'title' => $t->t('public.invite.og_title', ['name' => $p['first_name'], 'event' => $event['name']]),
+            'description' => $t->t('public.invite.og_description', ['club' => $brand['club_name'], 'when' => $when !== [] ? ' · ' . implode(', ', $when) : '']),
+            'site_name' => (string) $brand['club_name'],
+            'url' => $this->absolute('/i/' . $p['invite_token']),
+            'image' => $logo !== '' ? $this->absolute('/preview/' . pathinfo($logo, PATHINFO_FILENAME) . '/' . strtolower(substr((string) $brand['primary_color'], 1)) . '.jpg') : '',
+            'image_alt' => $t->t('public.invite.og_image_alt', ['club' => $brand['club_name']]),
+        ];
+    }
+
+    /** «Samstag, 12. Juni 2027» */
+    private function longDate(?string $date): string
+    {
+        if ($date === null || preg_match('/^(\d{4})-(\d{2})-(\d{2})/', $date, $m) !== 1 || !checkdate((int) $m[2], (int) $m[3], (int) $m[1])) {
+            return '';
+        }
+        $t = $this->app->translator;
+        $weekday = (int) date('w', (int) mktime(12, 0, 0, (int) $m[2], (int) $m[3], (int) $m[1]));
+
+        return $t->t('app.weekday.' . $weekday) . ', ' . (int) $m[3] . '. ' . $t->t('app.month.' . (int) $m[2]) . ' ' . $m[1];
     }
 
     private function guardPending(): void

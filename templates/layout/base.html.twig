@@ -9,6 +9,24 @@
   <link rel="stylesheet" href="{{ asset('css/app.css') }}">
   <link rel="stylesheet" href="{{ url('/theme.css') }}?c={{ brand.primary_color|trim('#') }}{% if theme_event is defined %}&amp;e={{ theme_event }}{% endif %}">
   <link rel="icon" href="{{ asset('img/favicon.svg') }}" type="image/svg+xml">
+  {% if brand.logo is defined and brand.logo %}<link rel="apple-touch-icon" href="{{ url('/preview/' ~ brand.logo|replace({'.png': ''}) ~ '/icon.png') }}">{% endif %}
+  {% if og is defined %}
+  {# Link preview in WhatsApp, iMessage & co. #}
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{{ og.site_name }}">
+  <meta property="og:title" content="{{ og.title }}">
+  <meta property="og:description" content="{{ og.description }}">
+  <meta property="og:url" content="{{ og.url }}">
+  <meta property="og:locale" content="de_CH">
+  {% if og.image %}
+  <meta property="og:image" content="{{ og.image }}">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{{ og.image_alt }}">
+  <meta name="twitter:card" content="summary_large_image">
+  {% endif %}
+  {% endif %}
   <script src="{{ asset('js/app.js') }}" defer></script>
 </head>
 <body class="{% block body_class %}{% endblock %}">

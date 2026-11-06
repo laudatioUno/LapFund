@@ -298,12 +298,4 @@ final class PublicController extends Controller
             throw new HttpException(503);
         }
     }
-
-    /** Absolute link: the configured address of the website, else the current host. */
-    private function absolute(string $path): string
-    {
-        $base = $this->app->mailSettings()->values()['app_url'];
-
-        return $base !== '' ? $base . '/' . ltrim($path, '/') : $this->app->request->absoluteUrl($path);
-    }
 }

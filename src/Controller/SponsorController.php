@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LapFund\Controller;
 
+use LapFund\App;
 use LapFund\Http\HttpException;
 use LapFund\Http\Request;
 use LapFund\Http\Response;
@@ -83,9 +84,9 @@ final class SponsorController extends Controller
 
         $result = $this->app->pledgeService()->create($event, $p, $checked['data'], 'online');
         // Optional consent to stay in touch (newsletter), only if the club offers it
-        $optIn = $this->app->contactOptInText();
+        $optIn = $this->app->contactOptIn();
         if ($optIn !== null && $request->input('stay_in_touch') === '1') {
-            $this->app->contacts()->subscribe((string) $checked['data']['sponsor_email'], (string) $checked['data']['sponsor_name'], $optIn, $event, $result['id']);
+            $this->app->contacts()->subscribe((string) $checked['data']['sponsor_email'], (string) $checked['data']['sponsor_name'], App::consentWording($optIn), $event, $result['id']);
         }
         $pledge = $this->app->pledgeService()->find($result['id']);
         if ($pledge !== null) {
@@ -217,7 +218,7 @@ final class SponsorController extends Controller
             'input' => $input,
             'errors' => $errors,
             'token' => (string) $p['invite_token'],
-            'stay_in_touch_text' => $this->app->contactOptInText(),
+            'stay_in_touch' => $this->app->contactOptIn(),
         ], $status);
     }
 

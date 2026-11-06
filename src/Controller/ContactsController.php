@@ -25,7 +25,7 @@ final class ContactsController extends Controller
             'rows' => $this->app->contacts()->search($filter),
             'counts' => $this->app->contacts()->counts(),
             'events' => $this->app->contacts()->events(),
-            'enabled' => $this->app->contactOptInText() !== null,
+            'enabled' => $this->app->contactOptIn() !== null,
         ]);
     }
 
@@ -37,7 +37,7 @@ final class ContactsController extends Controller
         $rows = $this->app->contacts()->search($filter, 10000);
         $t = fn (string $key): string => $this->app->translator->t('admin.contacts.col.' . $key);
         $body = Csv::build([$t('name'), $t('email'), $t('consent_at'), $t('source'), $t('consent_text')], array_map(fn (array $r): array => [
-            $r['name'], $r['email'], $this->app->formatter->date($r['consent_at']), $r['source_event_name'], $r['consent_text'],
+            $r['name'], $r['email'], $this->app->formatter->date($r['consent_at']), $r['source_event_name'], str_replace("\n", ' – ', (string) $r['consent_text']),
         ], $rows));
         $this->app->audit()->log((int) $admin['id'], 'contacts_exported', 'contact', null, null, ['count' => count($rows)]);
 

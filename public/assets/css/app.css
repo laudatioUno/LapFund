@@ -347,6 +347,22 @@ a.chip:hover { background: var(--line); }
 .inline-check--top { align-items: flex-start; }
 .inline-check--top input { margin-top: 3px; flex-shrink: 0; }
 .req { color: var(--err-ink); font-weight: 700; }
+
+/* «Stay in touch» switch on the sponsor form: the whole card toggles a checkbox */
+.optin { display: block; cursor: pointer; position: relative; }
+.optin input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+.optin__box { display: flex; gap: 14px; align-items: center; padding: 16px 18px; border: 1px solid var(--line-strong); border-radius: 14px; background: var(--surface); }
+.optin__icon { flex: 0 0 auto; font-size: 1.6rem; line-height: 1; }
+.optin__body { flex: 1; min-width: 0; }
+.optin__title { display: block; font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; line-height: 1.25; }
+.optin__text { display: block; margin-top: 4px; font-size: .82rem; line-height: 1.4; }
+.optin__switch { flex: 0 0 58px; height: 34px; border-radius: 17px; background: #C9D2DC; position: relative; }
+.optin__switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 28px; height: 28px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); transition: left .15s; }
+.optin input:checked + .optin__box { border: 2px solid var(--accent); padding: 15px 17px; background: #F1F6FB; background: color-mix(in srgb, var(--accent) 7%, white); }
+.optin input:checked + .optin__box .optin__switch { background: var(--accent); }
+.optin input:checked + .optin__box .optin__switch::after { left: 27px; }
+.optin input:focus-visible + .optin__box { outline: 3px solid var(--accent); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .optin__switch::after { transition: none; } }
 .section-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .pledge-list__status { text-align: right; }
 .pledge-list__msg { grid-column: 1 / -1; color: var(--ink-2); font-style: italic; }

@@ -41,11 +41,18 @@
         </label>
         {% if errors.consent is defined %}<p class="field__error">{{ t(errors.consent) }}</p>{% endif %}
       </div>
-      {% if stay_in_touch_text %}
+      {% if stay_in_touch %}
         <div class="field">
-          <label class="inline-check inline-check--top">
-            <input type="checkbox" name="stay_in_touch" value="1"{{ input.stay_in_touch ?? false ? ' checked' }}>
-            <span>{{ stay_in_touch_text }}</span>
+          <label class="optin">
+            <input type="checkbox" name="stay_in_touch" value="1" role="switch"{{ input.stay_in_touch ?? false ? ' checked' }}>
+            <span class="optin__box">
+              <span class="optin__icon" aria-hidden="true">📬</span>
+              <span class="optin__body">
+                <span class="optin__title">{{ stay_in_touch.title }}</span>
+                <span class="optin__text">{{ stay_in_touch.text }}</span>
+              </span>
+              <span class="optin__switch" aria-hidden="true"></span>
+            </span>
           </label>
         </div>
       {% endif %}

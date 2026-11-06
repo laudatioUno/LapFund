@@ -60,7 +60,7 @@ jobs:
           if echo "$VERSION" | grep -q -- '-'; then echo "prerelease=--prerelease" >> "$GITHUB_OUTPUT"; fi
 
       # Downloaded libraries are kept between runs, so a run rarely needs GitHub downloads.
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         if: steps.v.outputs.new == 'true'
         with:
           path: ~/.cache/composer

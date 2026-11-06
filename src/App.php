@@ -47,7 +47,7 @@ use LapFund\View\View;
  */
 final class App
 {
-    public const VERSION = '1.7.0';
+    public const VERSION = '1.8.0';
 
     public Config $config;
     public readonly Translator $translator;
@@ -432,6 +432,11 @@ final class App
     public function images(): ImageUpload
     {
         return $this->service(ImageUpload::class, fn () => new ImageUpload($this->root . '/storage/uploads'));
+    }
+
+    public function linkPreview(): \LapFund\Service\LinkPreview
+    {
+        return $this->service(\LapFund\Service\LinkPreview::class, fn () => new \LapFund\Service\LinkPreview($this->images(), $this->root . '/storage/cache/preview'));
     }
 
     public function migrator(): Migrator

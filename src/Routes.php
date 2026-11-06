@@ -57,6 +57,8 @@ final class Routes
         $r->get('/cron/{key:[A-Za-z0-9]+}', $c(MailController::class, 'cron'));
         $r->get('/theme.css', $c(AssetController::class, 'theme'));
         $r->get('/media/{file:[a-f0-9]+\.png}', $c(AssetController::class, 'media'));
+        $r->get('/preview/{logo:[a-f0-9]+}/{color:[a-f0-9]+}.jpg', $c(AssetController::class, 'previewImage'));
+        $r->get('/preview/{logo:[a-f0-9]+}/icon.png', $c(AssetController::class, 'previewIcon'));
 
         // Installer
         $r->get('/install', $c(InstallController::class, 'show'));

@@ -77,6 +77,8 @@ Auf ihrer Seite finden die Kinder (oder ihre Eltern):
 - die Möglichkeit, Zusagen von der Papierliste selbst einzutragen und Bargeld als erhalten abzuhaken,
 - die Sponsorenliste als PDF zum Ausdrucken.
 
+Wird der Sponsor-Link in WhatsApp, iMessage & Co. verschickt, zeigt die Vorschau das Vereinslogo (in einem Bild mit Balken in der Clubfarbe), «Unterstütze Lea beim …» mit dem Vornamen sowie Verein, Datum und Ort. Ohne Logo erscheint die Vorschau ohne Bild. WhatsApp merkt sich die Vorschau eines Links: Ein Link, der schon vor dem Update verschickt wurde, kann ohne Bild bleiben.
+
 ### Was die Sponsoren sehen
 
 Über den Link des Kindes tragen sich Sponsoren ein: pauschal oder pro Runde, Zahlung mit Twint oder bar. Sie erhalten eine Bestätigung mit den Zahlungsangaben. Pauschale Twint-Beträge können sie sofort bezahlen.

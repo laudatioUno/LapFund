@@ -72,6 +72,9 @@ return [
     'me.logged_out' => 'Du bist abgemeldet.',
 
     'invite.title' => 'Sponsorenlauf von {name}',
+    'invite.og_title' => 'Unterstütze {name} beim {event}',
+    'invite.og_description' => '{club}{when}. Pro Runde oder pauschal – hier zusagen.',
+    'invite.og_image_alt' => 'Logo {club}',
     'invite.purpose' => 'Wir sammeln für: {purpose}',
     'invite.lap_length' => 'eine Runde = {m} m',
     'invite.message_from' => 'Nachricht von {name}',

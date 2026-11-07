@@ -110,10 +110,11 @@ final class SettingsController extends Controller
 
         $settings = $this->app->settings();
         // The default text is not stored, so it follows a new club name
-        if ($input['contacts_title'] === $this->app->contactTitle('')) {
+        $newClub = ['club' => $input['club_name']];
+        if (in_array($input['contacts_title'], [$this->app->contactTitle(''), $this->app->translator->t('admin.settings.contacts_default_title', $newClub)], true)) {
             $input['contacts_title'] = '';
         }
-        if ($input['contacts_text'] === $this->app->contactText('')) {
+        if (in_array($input['contacts_text'], [$this->app->contactText(''), $this->app->translator->t('admin.settings.contacts_default', $newClub)], true)) {
             $input['contacts_text'] = '';
         }
         $all = $settings->all();

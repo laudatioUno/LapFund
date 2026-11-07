@@ -363,6 +363,11 @@ a.chip:hover { background: var(--line); }
 .optin input:checked + .optin__box .optin__switch::after { left: 27px; }
 .optin input:focus-visible + .optin__box { outline: 3px solid var(--accent); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { .optin__switch::after { transition: none; } }
+/* Club settings: preview of the switch; fields greyed out while it is switched off */
+.contacts-preview__frame { max-width: 520px; padding: 16px; border-radius: 14px; background: var(--bg); border: 1px dashed var(--line-strong); }
+.contacts-fields.is-off input, .contacts-fields.is-off textarea { background: var(--bg); color: var(--muted); cursor: not-allowed; }
+.contacts-fields.is-off label { color: var(--muted); }
+.contacts-preview.is-off .contacts-preview__frame { opacity: .45; }
 .section-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .pledge-list__status { text-align: right; }
 .pledge-list__msg { grid-column: 1 / -1; color: var(--ink-2); font-style: italic; }

@@ -3,6 +3,16 @@
 All notable changes to LapFund. Versions follow [semantic versioning](https://semver.org/).
 The section of a version is used as the release notes on GitHub.
 
+## [1.9.0] – 2026-11
+
+### Added
+- *Vereinseinstellungen › Kontakt halten*: live preview of the switch as sponsors see it (title, text, club colour; can be tried out). Empty fields show the default text; a changed club name shows up at once.
+
+### Changed
+- While «Schalter im Sponsorenformular anzeigen» is off, title and text are greyed out and cannot be edited; what is there is kept and saved.
+- The example under the title uses the club's own name instead of a fixed one.
+- A renamed club: title and text still on the default keep following the club name.
+
 ## [1.8.0] – 2026-11
 
 ### Added

@@ -92,6 +92,59 @@
     update();
   }
 
+  // Club settings › Kontakt halten: fields locked while the switch is off, live preview
+  var contacts = document.querySelector('[data-contacts]');
+  if (contacts) {
+    var toggle = document.getElementById('f-contacts_enabled');
+    var title = document.getElementById('f-contacts_title');
+    var text = document.getElementById('f-contacts_text');
+    var clubInput = document.getElementById('f-club_name');
+    var previewBox = document.querySelector('.contacts-preview');
+    var previewTitle = document.querySelector('[data-preview-title]');
+    var previewText = document.querySelector('[data-preview-text]');
+    var previewOff = document.querySelector('[data-preview-off]');
+    var example = document.querySelector('[data-contacts-example]');
+    var defaults = function (club) {
+      return {
+        title: contacts.getAttribute('data-default-title').split('{club}').join(club),
+        text: contacts.getAttribute('data-default-text').split('{club}').join(club)
+      };
+    };
+    var club = contacts.getAttribute('data-club');
+    var render = function () {
+      var now = defaults(clubInput && clubInput.value.trim() !== '' ? clubInput.value.trim() : club);
+      previewTitle.textContent = title.value.trim() !== '' ? title.value.trim() : now.title;
+      previewText.textContent = text.value.trim() !== '' ? text.value.trim() : now.text;
+      if (example) { example.textContent = now.title; }
+    };
+    var lock = function () {
+      var off = !toggle.checked;
+      [title, text].forEach(function (field) {
+        field.readOnly = off;
+        if (off) { field.setAttribute('aria-disabled', 'true'); } else { field.removeAttribute('aria-disabled'); }
+      });
+      contacts.classList.toggle('is-off', off);
+      previewBox.classList.toggle('is-off', off);
+      previewOff.hidden = !off;
+    };
+    // A renamed club: texts still on the default follow the new name (as when saving)
+    if (clubInput) {
+      clubInput.addEventListener('input', function () {
+        var before = defaults(club);
+        var now = defaults(clubInput.value.trim() !== '' ? clubInput.value.trim() : club);
+        if (title.value.trim() === before.title) { title.value = now.title; }
+        if (text.value.trim() === before.text) { text.value = now.text; }
+        club = clubInput.value.trim() !== '' ? clubInput.value.trim() : club;
+        render();
+      });
+    }
+    title.addEventListener('input', render);
+    text.addEventListener('input', render);
+    toggle.addEventListener('change', lock);
+    lock();
+    render();
+  }
+
   // Mail progress (fallback without cron): every few seconds one send step, then update the numbers.
   var tick = document.querySelector('form[data-mail-tick]');
   if (tick && window.fetch && window.FormData) {

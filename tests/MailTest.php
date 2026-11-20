@@ -26,6 +26,29 @@ final class MailTest extends TestCase
         self::assertFalse(SmtpTransport::translate('SMTP connect() failed.')->permanent);
     }
 
+    public function testMessageHasRealLineBreaks(): void
+    {
+        $html = "<!doctype html>\n<html>\n<body>\n<p>Hallo Lena</p>\n<p>du bist beim Rüebli-Rennen dabei!</p>\n</body>\n</html>\n";
+        $text = "Hallo Lena\n\ndu bist beim Rüebli-Rennen dabei!\r\nZu deiner Seite:\nhttps://example.test/t/abc\n";
+        $raw = SmtpTransport::compose(
+            ['from_email' => 'sponsor@abitar.ch', 'from_name' => 'RHCD'],
+            ['to_email' => 'lena@example.test', 'to_name' => 'Lena Muster', 'from_name' => '', 'subject' => 'Dein Zugang zum Rüebli-Rennen',
+                'body_html' => $html, 'body_text' => $text, 'inline_images' => []],
+        );
+
+        // Line breaks of the templates must not be encoded as «=0A» (one endless line per part)
+        self::assertStringNotContainsString('=0A', $raw);
+        self::assertStringNotContainsString('=0D', $raw);
+        foreach (explode("\r\n", $raw) as $line) {
+            self::assertLessThanOrEqual(998, strlen($line));
+        }
+        self::assertStringContainsString("\r\nHallo Lena\r\n\r\ndu bist beim R=C3=BCebli-Rennen dabei!\r\nZu deiner Seite:\r\n", $raw);
+        self::assertStringContainsString("\r\n<p>Hallo Lena</p>\r\n", $raw);
+        // Message-ID with the sender's domain, not the server's host name
+        self::assertMatchesRegularExpression('/^Message-ID: <[^@>]+@abitar\.ch>\r$/m', $raw);
+        self::assertStringContainsString('Content-Transfer-Encoding: quoted-printable', $raw);
+    }
+
     public function testPlaceholders(): void
     {
         $text = MailComposer::placeholders('{vorname}, dein Zugang zum {event} ({verein}) {unbekannt}', [

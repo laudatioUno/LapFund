@@ -3,6 +3,13 @@
 All notable changes to LapFund. Versions follow [semantic versioning](https://semver.org/).
 The section of a version is used as the release notes on GitHub.
 
+## [1.9.1] – 2026-11
+
+### Fixed
+- Mail format: every line break of the mail templates was sent as «=0A» inside the quoted-printable text, so the HTML and the text part of every mail were each one line of several thousand characters. Mail programs showed it correctly, but spam filters see this as a sign of bulk mail. Line breaks are now converted to CRLF before encoding (all mail types: invitation, new link, links, pledge confirmation, new sponsor, payment details, result and correction, payment request, reminder, correction, thank-you, test mail).
+- Message-ID (and SMTP HELO) now use the domain of the sender address instead of the server's internal host name, which also differed between cron and web requests.
+- Buttons and coloured boxes in mails use `background-color` (button also `bgcolor`) instead of the `background` shorthand. Spam filters such as SpamAssassin did not see the button colour and rated the white button text as «text in the same colour as the background» (HTML_FONT_LOW_CONTRAST). Looks the same as before.
+
 ## [1.9.0] – 2026-11
 
 ### Added

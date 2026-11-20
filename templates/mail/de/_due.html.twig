@@ -12,7 +12,7 @@
 {% elseif twint %}
   <p style="margin:0 0 8px;font-weight:bold;">{{ t('mail.pledge.twint_title') }}</p>
   <p style="margin:0 0 8px;">{{ t('mail.pledge.twint_text', {amount: owed}) }}</p>
-  <p style="margin:0 0 12px;padding:10px 12px;background:#F3F6F9;border-radius:8px;font-family:monospace;font-size:15px;">{{ twint_message }}</p>
+  <p style="margin:0 0 12px;padding:10px 12px;background-color:#F3F6F9;border-radius:8px;font-family:monospace;font-size:15px;">{{ twint_message }}</p>
   {% if twint_qr %}<p style="margin:0 0 16px;"><img src="cid:twint" width="200" alt="{{ t('pledge.payment.twint_qr_alt') }}" style="display:block;width:200px;height:auto;border:1px solid #DCE3EA;border-radius:8px;"></p>{% endif %}
 {% else %}
   <p style="margin:0 0 16px;">{{ t('mail.pledge.cash_text', {name: pledge.first_name, amount: owed}) }}</p>

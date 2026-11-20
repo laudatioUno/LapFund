@@ -10,6 +10,9 @@ The section of a version is used as the release notes on GitHub.
 - Message-ID (and SMTP HELO) now use the domain of the sender address instead of the server's internal host name, which also differed between cron and web requests.
 - Buttons and coloured boxes in mails use `background-color` (button also `bgcolor`) instead of the `background` shorthand. Spam filters such as SpamAssassin did not see the button colour and rated the white button text as «text in the same colour as the background» (HTML_FONT_LOW_CONTRAST). Looks the same as before.
 
+### Changed
+- Default subject of the invitation mail is now «Jetzt Sponsoren sammeln für {event}» (was «Dein Zugang zum {event}»), and of the new-link mail «{event}: dein neuer Link zum Sponsorensammeln» (was «Neuer Zugang zum {event}»). The old wording together with a single personal link looks like a phishing or account-access mail to spam filters: an invitation with the default subject landed in the GMX spam folder, the same invitation with a custom subject did not. A subject set in the event settings still takes precedence.
+
 ## [1.9.0] – 2026-11
 
 ### Added

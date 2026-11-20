@@ -32,7 +32,7 @@ final class MailTest extends TestCase
         $text = "Hallo Lena\n\ndu bist beim Rüebli-Rennen dabei!\r\nZu deiner Seite:\nhttps://example.test/t/abc\n";
         $raw = SmtpTransport::compose(
             ['from_email' => 'sponsor@abitar.ch', 'from_name' => 'RHCD'],
-            ['to_email' => 'lena@example.test', 'to_name' => 'Lena Muster', 'from_name' => '', 'subject' => 'Dein Zugang zum Rüebli-Rennen',
+            ['to_email' => 'lena@example.test', 'to_name' => 'Lena Muster', 'from_name' => '', 'subject' => 'Jetzt Sponsoren sammeln für Rüebli-Rennen',
                 'body_html' => $html, 'body_text' => $text, 'inline_images' => []],
         );
 

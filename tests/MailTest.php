@@ -31,7 +31,7 @@ final class MailTest extends TestCase
         $html = "<!doctype html>\n<html>\n<body>\n<p>Hallo Lena</p>\n<p>du bist beim Rüebli-Rennen dabei!</p>\n</body>\n</html>\n";
         $text = "Hallo Lena\n\ndu bist beim Rüebli-Rennen dabei!\r\nZu deiner Seite:\nhttps://example.test/t/abc\n";
         $raw = SmtpTransport::compose(
-            ['from_email' => 'sponsor@abitar.ch', 'from_name' => 'RHCD'],
+            ['from_email' => 'sponsor@club-a.example', 'from_name' => 'Club A'],
             ['to_email' => 'lena@example.test', 'to_name' => 'Lena Muster', 'from_name' => '', 'subject' => 'Jetzt Sponsoren sammeln für Rüebli-Rennen',
                 'body_html' => $html, 'body_text' => $text, 'inline_images' => []],
         );
@@ -44,9 +44,18 @@ final class MailTest extends TestCase
         }
         self::assertStringContainsString("\r\nHallo Lena\r\n\r\ndu bist beim R=C3=BCebli-Rennen dabei!\r\nZu deiner Seite:\r\n", $raw);
         self::assertStringContainsString("\r\n<p>Hallo Lena</p>\r\n", $raw);
-        // Message-ID with the sender's domain, not the server's host name
-        self::assertMatchesRegularExpression('/^Message-ID: <[^@>]+@abitar\.ch>\r$/m', $raw);
         self::assertStringContainsString('Content-Transfer-Encoding: quoted-printable', $raw);
+    }
+
+    public function testMessageIdUsesTheConfiguredSenderDomain(): void
+    {
+        $mail = ['to_email' => 'lena@example.test', 'to_name' => 'Lena', 'from_name' => '', 'subject' => 'Test',
+            'body_html' => "<p>Hallo</p>\n", 'body_text' => "Hallo\n", 'inline_images' => []];
+        // Taken from the sender address in the mail settings, whatever the installation is
+        foreach (['sponsor@club-a.example' => 'club-a.example', 'Lauf@Mail.Club-B.Example' => 'mail.club-b.example'] as $from => $domain) {
+            $raw = SmtpTransport::compose(['from_email' => $from, 'from_name' => ''], $mail);
+            self::assertMatchesRegularExpression('/^Message-ID: <[^@>]+@' . preg_quote($domain, '/') . '>\r$/m', $raw);
+        }
     }
 
     public function testPlaceholders(): void

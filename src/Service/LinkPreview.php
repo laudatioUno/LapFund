@@ -17,6 +17,8 @@ final class LinkPreview
     public const WIDTH = 1200;
     public const HEIGHT = 630;
     public const ICON = 180;
+    /** Logo in mails: shown at 48 × 48, made at double size for sharp screens. */
+    public const MAIL_LOGO = 96;
     private const VERSION = 'v1';
 
     public function __construct(private readonly ImageUpload $images, private readonly string $cacheDir)
@@ -62,6 +64,33 @@ final class LinkPreview
             }
             $canvas = $this->canvas(self::ICON, self::ICON);
             $this->place($canvas, $logoImage, 150, 150);
+            $this->save($target, fn (string $tmp): bool => imagepng($canvas, $tmp, 9));
+        }
+
+        return is_file($target) ? $target : null;
+    }
+
+    /**
+     * Small logo for mails (96 × 96, logo centred on white like the mail header).
+     * The uploaded logo can be up to 600 px and some 200 KB; embedded as is, it made
+     * up almost the whole mail («0 % text» for spam filters).
+     *
+     * @return string|null path of the image, or null if there is no usable logo
+     */
+    public function mailLogo(string $logo): ?string
+    {
+        $source = $this->images->path($logo);
+        if ($source === null) {
+            return null;
+        }
+        $target = $this->cacheDir . '/' . pathinfo($logo, PATHINFO_FILENAME) . '-mail-' . self::VERSION . '.png';
+        if (!is_file($target)) {
+            $logoImage = @imagecreatefrompng($source);
+            if ($logoImage === false) {
+                return null;
+            }
+            $canvas = $this->canvas(self::MAIL_LOGO, self::MAIL_LOGO);
+            $this->place($canvas, $logoImage, self::MAIL_LOGO, self::MAIL_LOGO);
             $this->save($target, fn (string $tmp): bool => imagepng($canvas, $tmp, 9));
         }
 

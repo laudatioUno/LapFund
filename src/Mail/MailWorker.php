@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LapFund\Mail;
 
+use LapFund\Service\LinkPreview;
 use LapFund\Database\Database;
 
 /**
@@ -22,6 +23,7 @@ final class MailWorker
         private readonly MailSettings $settings,
         private readonly MailTransport $transport,
         private readonly string $uploadDir,
+        private readonly ?LinkPreview $preview = null,
     ) {
     }
 
@@ -126,7 +128,10 @@ final class MailWorker
         foreach (json_decode($json, true) ?: [] as $image) {
             $file = (string) ($image['file'] ?? '');
             if (preg_match('/^[a-f0-9]+\.png$/', $file) === 1) {
-                $out[] = ['cid' => (string) $image['cid'], 'path' => $this->uploadDir . '/' . $file];
+                $cid = (string) $image['cid'];
+                // The logo is shown small; embed the small version (the Twint QR code stays as it is)
+                $small = $cid === 'logo' && $this->preview !== null ? $this->preview->mailLogo($file) : null;
+                $out[] = ['cid' => $cid, 'path' => $small ?? $this->uploadDir . '/' . $file];
             }
         }
 

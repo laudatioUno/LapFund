@@ -139,7 +139,7 @@ final class MailController extends Controller
                 'subject' => $mail['subject'],
                 'body_html' => $mail['body_html'],
                 'body_text' => $mail['body_text'],
-                'inline_images' => array_map(fn (array $i) => ['cid' => $i['cid'], 'path' => $this->app->root . '/storage/uploads/' . $i['file']], $mail['inline_images']),
+                'inline_images' => array_map(fn (array $i) => ['cid' => $i['cid'], 'path' => ($i['cid'] === 'logo' ? $this->app->linkPreview()->mailLogo($i['file']) : null) ?? $this->app->root . '/storage/uploads/' . $i['file']], $mail['inline_images']),
             ]);
             $id = $this->app->mailQueue()->enqueue($mail + ['created_by' => (int) $admin['id']]);
             $this->app->mailQueue()->claim($id);

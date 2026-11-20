@@ -272,6 +272,7 @@ final class App
             $this->mailSettings(),
             $this->mailTransport(),
             $this->root . '/storage/uploads',
+            $this->linkPreview(),
         ));
     }
 

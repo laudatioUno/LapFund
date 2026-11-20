@@ -55,4 +55,18 @@ final class LinkPreviewTest extends TestCase
         [$w, $h, $type] = getimagesize((string) $preview->icon('0123456789abcdef0123456789abcdef.png'));
         self::assertSame([180, 180, IMAGETYPE_PNG], [$w, $h, $type], 'square icon, at least 108 px');
     }
+
+    public function testMailLogo(): void
+    {
+        $preview = new LinkPreview(new ImageUpload($this->dir . '/uploads'), $this->dir . '/cache');
+        $path = (string) $preview->mailLogo('0123456789abcdef0123456789abcdef.png');
+        [$w, $h, $type] = getimagesize($path);
+        self::assertSame([96, 96, IMAGETYPE_PNG], [$w, $h, $type], 'shown at 48 × 48 in the mail, made at double size');
+        self::assertLessThan(20 * 1024, filesize($path), 'a few KB instead of the full-size upload');
+        // logo centred and kept in proportion: 600 × 300 → 96 × 48, white above and below
+        $img = imagecreatefrompng($path);
+        self::assertSame([255, 255, 255], array_values(array_slice(imagecolorsforindex($img, imagecolorat($img, 48, 5)), 0, 3)));
+        self::assertGreaterThan(150, imagecolorsforindex($img, imagecolorat($img, 48, 48))['red']);
+        self::assertNull($preview->mailLogo('ffffffffffffffffffffffffffffffff.png'), 'no logo file');
+    }
 }

@@ -11,6 +11,7 @@ The section of a version is used as the release notes on GitHub.
 - Buttons and coloured boxes in mails use `background-color` (button also `bgcolor`) instead of the `background` shorthand. Spam filters such as SpamAssassin did not see the button colour and rated the white button text as «text in the same colour as the background» (HTML_FONT_LOW_CONTRAST). Looks the same as before.
 
 ### Changed
+- Logo in mails: a small version (96 × 96 PNG, made once and kept in `storage/cache/preview`) is embedded instead of the uploaded logo (up to 600 px, often 200 KB or more). Shown at 48 × 48 as before. A mail with logo is now about 30 KB instead of several hundred KB; mail-tester.com had reported «0 % text» because the image made up almost the whole mail.
 - Default subject of the invitation mail is now «Jetzt Sponsoren sammeln für {event}» (was «Dein Zugang zum {event}»), and of the new-link mail «{event}: dein neuer Link zum Sponsorensammeln» (was «Neuer Zugang zum {event}»). The old wording together with a single personal link looks like a phishing or account-access mail to spam filters: an invitation with the default subject landed in the GMX spam folder, the same invitation with a custom subject did not. A subject set in the event settings still takes precedence.
 
 ## [1.9.0] – 2026-11

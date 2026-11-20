@@ -3,6 +3,17 @@
 All notable changes to LapFund. Versions follow [semantic versioning](https://semver.org/).
 The section of a version is used as the release notes on GitHub.
 
+## [1.9.1] – 2026-11
+
+### Fixed
+- Mail format: every line break of the mail templates was sent as «=0A» inside the quoted-printable text, so the HTML and the text part of every mail were each one line of several thousand characters. Mail programs showed it correctly, but spam filters see this as a sign of bulk mail. Line breaks are now converted to CRLF before encoding (all mail types: invitation, new link, links, pledge confirmation, new sponsor, payment details, result and correction, payment request, reminder, correction, thank-you, test mail).
+- Message-ID (and SMTP HELO) now use the domain of the sender address instead of the server's internal host name, which also differed between cron and web requests.
+- Buttons and coloured boxes in mails use `background-color` (button also `bgcolor`) instead of the `background` shorthand. Spam filters such as SpamAssassin did not see the button colour and rated the white button text as «text in the same colour as the background» (HTML_FONT_LOW_CONTRAST). Looks the same as before.
+
+### Changed
+- Logo in mails: a small version (96 × 96 PNG, made once and kept in `storage/cache/preview`) is embedded instead of the uploaded logo (up to 600 px, often 200 KB or more). Shown at 48 × 48 as before. A mail with logo is now about 30 KB instead of several hundred KB; mail-tester.com had reported «0 % text» because the image made up almost the whole mail.
+- Default subject of the invitation mail is now «Jetzt Sponsoren sammeln für {event}» (was «Dein Zugang zum {event}»), and of the new-link mail «{event}: dein neuer Link zum Sponsorensammeln» (was «Neuer Zugang zum {event}»). The old wording together with a single personal link looks like a phishing or account-access mail to spam filters: an invitation with the default subject landed in the GMX spam folder, the same invitation with a custom subject did not. A subject set in the event settings still takes precedence.
+
 ## [1.9.0] – 2026-11
 
 ### Added

@@ -9,14 +9,14 @@ return [
     'footer.contact' => 'Fragen an:',
     'footer.privacy' => 'Datenschutzerklärung',
 
-    'invite.subject' => 'Dein Zugang zum {event}',
+    'invite.subject' => 'Jetzt Sponsoren sammeln für {event}',
     'invite.intro' => 'du bist beim {event} dabei! Auf deiner persönlichen Seite findest du deinen Sponsorenlink, den du an Familie, Nachbarn und Freunde schicken kannst.',
     'invite.when_where' => 'Datum: {date} · Ort: {location}',
     'invite.button' => 'Zu deiner Seite',
     'invite.what_you_find' => 'Dort siehst du auch, wer dich schon unterstützt, und kannst eine kurze Nachricht für deine Sponsoren schreiben.',
     'invite.keep_link' => 'Bewahre diese Mail gut auf: Der Knopf ist dein persönlicher Zugang. Gib ihn nicht weiter. Zum Teilen gibt es auf deiner Seite einen eigenen Sponsorenlink.',
 
-    'new_link.subject' => 'Neuer Zugang zum {event}',
+    'new_link.subject' => '{event}: dein neuer Link zum Sponsorensammeln',
     'new_link.text' => 'für den {event} gibt es einen neuen Zugang zu deiner Seite. Der bisherige Link funktioniert nicht mehr.',
 
     'links.subject' => 'Deine Links – {club}',

@@ -27,6 +27,7 @@ final class EventController extends EventScopedController
             'events' => $this->app->events()->listFor($user, $showArchived),
             'show_archived' => $showArchived,
             'can_create' => $user['role'] === 'club_admin',
+            'licensing' => $this->licenseView(),
         ]);
     }
 
@@ -34,7 +35,7 @@ final class EventController extends EventScopedController
     {
         $this->admin('events.create');
 
-        return $this->createForm(['name' => '', 'event_date' => '', 'location' => '', 'description' => '', 'admins' => []], []);
+        return $this->createForm(['name' => '', 'event_date' => '', 'location' => '', 'description' => '', 'admins' => [], 'with_mail' => false, 'terms' => false], []);
     }
 
     public function store(Request $request, array $params): Response
@@ -46,7 +47,10 @@ final class EventController extends EventScopedController
             'location' => $request->input('location'),
             'description' => $request->input('description'),
             'admins' => $this->selectedAdmins($request),
+            'with_mail' => $request->input('with_mail') === '1',
+            'terms' => $request->input('terms') === '1',
         ];
+        $licensing = $this->app->licensing();
         $errors = [];
         if ($e = Validation::required($input['name'], 120)) {
             $errors['name'] = $e;
@@ -57,11 +61,41 @@ final class EventController extends EventScopedController
         if (mb_strlen($input['location']) > 160) {
             $errors['location'] = 'validation.too_long';
         }
+        if ($licensing->enabled() && $licensing->credit() === null && !$input['terms']) {
+            $errors['terms'] = 'license.book.terms_required';
+        }
         if ($errors !== []) {
             return $this->createForm($input, $errors, 422);
         }
 
+        [$id, $booking] = $this->app->db()->transaction(fn () => $this->createEvent($input, $user));
+        if ($booking !== null) {
+            $licensing->afterBooking($booking);
+        }
+        $this->app->audit()->log((int) $user['id'], 'event_created', 'event', $id, null, [
+            'name' => $input['name'], 'event_id' => $id, 'admins' => $input['admins'],
+        ]);
+        if ($booking === null) {
+            $this->flash('success', 'events.created', ['name' => $input['name']]);
+        } elseif ($booking['status'] === 'paid') {
+            $this->flash('success', 'license.book.created_paid', ['name' => $input['name']]);
+        } else {
+            $this->flash('success', 'license.book.created_open', ['name' => $input['name']]);
+        }
+
+        return $this->redirect('/admin/events/' . $id);
+    }
+
+    /**
+     * Creates the event and, on a customer instance, books the run.
+     *
+     * @return array{0: int, 1: array<string, mixed>|null}
+     */
+    private function createEvent(array $input, array $user): array
+    {
+        $licensing = $this->app->licensing();
         $id = $this->app->events()->create([
+            'license_state' => $licensing->initialState(),
             'name' => $input['name'],
             'event_date' => $input['event_date'] !== '' ? $input['event_date'] : null,
             'location' => $input['location'],
@@ -71,12 +105,9 @@ final class EventController extends EventScopedController
             'created_by' => (int) $user['id'],
         ]);
         $this->app->events()->setAdmins($id, $input['admins']);
-        $this->app->audit()->log((int) $user['id'], 'event_created', 'event', $id, null, [
-            'name' => $input['name'], 'event_id' => $id, 'admins' => $input['admins'],
-        ]);
-        $this->flash('success', 'events.created', ['name' => $input['name']]);
+        $booking = $licensing->enabled() ? $licensing->book($id, $user, $input['with_mail']) : null;
 
-        return $this->redirect('/admin/events/' . $id);
+        return [$id, $booking];
     }
 
     public function show(Request $request, array $params): Response
@@ -95,11 +126,22 @@ final class EventController extends EventScopedController
             ['done' => $this->event['texts']['welcome'] !== '', 'label' => 'events.check_texts', 'link' => $this->eventPath('/settings#texts')],
         ];
 
+        $licensing = $this->app->licensing();
+        $booking = $licensing->enabled() ? $licensing->forEvent($id) : null;
+        $pending = $this->isPending();
+
         return $this->renderEvent('admin/events/show.html.twig', 'overview', [
             'statuses' => EventStatus::ORDER,
             'status_index' => EventStatus::index($status),
             'next_status' => EventStatus::next($status),
-            'previous_status' => $this->event['anonymized_at'] !== null ? null : EventStatus::previous($status),
+            'next_locked' => $pending && EventStatus::next($status) === EventStatus::COLLECTING,
+            'previous_status' => $this->event['anonymized_at'] !== null || $this->isFinal() ? null : EventStatus::previous($status),
+            'licensing' => $this->licenseView(),
+            'booking' => $booking,
+            'booking_total' => $booking !== null ? \LapFund\Service\Licensing::total($booking) : 0,
+            'pay_url' => $booking !== null && $booking['status'] === 'open' ? $licensing->payUrl($booking) : null,
+            'can_delete' => $pending && $this->user['role'] === 'club_admin',
+            'can_receipt' => $booking !== null && $booking['status'] === 'paid' && $this->user['role'] === 'club_admin',
             'can_archive' => EventStatus::allowsArchive($status),
             'teams' => $teams,
             'participant_count' => $count,
@@ -123,6 +165,11 @@ final class EventController extends EventScopedController
         }
         if ($from === 'closed' && $this->event['anonymized_at'] !== null) {
             $this->flash('error', 'events.reopen_anonymized');
+
+            return $this->redirect($this->eventPath());
+        }
+        if ($to === EventStatus::COLLECTING && $this->isPending()) {
+            $this->flash('error', 'license.locked_collecting');
 
             return $this->redirect($this->eventPath());
         }
@@ -171,6 +218,46 @@ final class EventController extends EventScopedController
         return $this->redirect($this->eventPath());
     }
 
+    /** A booked run that is not paid yet can be deleted again (customer instances). */
+    public function delete(Request $request, array $params): Response
+    {
+        $this->loadEvent($params, 'event.archive');
+        if (!$this->isPending() || $request->input('confirm_name') !== $this->event['name']) {
+            $this->flash('error', 'license.delete_not_allowed');
+
+            return $this->redirect($this->eventPath());
+        }
+        $id = (int) $this->event['id'];
+        $this->app->db()->transaction(function () use ($id): void {
+            $this->app->licensing()->cancelForEvent($id);
+            $this->app->db()->run('DELETE FROM events WHERE id = ?', [$id]);
+        });
+        foreach (['logo_file', 'twint_qr_file'] as $column) {
+            if ((string) ($this->event[$column] ?? '') !== '') {
+                $this->app->images()->delete((string) $this->event[$column]);
+            }
+        }
+        $this->app->audit()->log((int) $this->user['id'], 'event_deleted', 'event', null, ['name' => $this->event['name']], null);
+        $this->flash('success', 'license.deleted', ['name' => $this->event['name']]);
+
+        return $this->redirect('/admin/events');
+    }
+
+    /** Receipt of the paid run as PDF (club admins). */
+    public function receipt(Request $request, array $params): Response
+    {
+        $this->loadEvent($params, 'event.archive');
+        $booking = $this->app->licensing()->enabled() ? $this->app->licensing()->forEvent((int) $this->event['id']) : null;
+        if ($booking === null || $booking['status'] !== 'paid') {
+            throw new \LapFund\Http\HttpException(404);
+        }
+
+        return new Response($this->app->licensing()->receiptPdf($booking), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . \LapFund\Service\Licensing::receiptFilename($booking) . '"',
+        ]);
+    }
+
     public function settings(Request $request, array $params): Response
     {
         $this->loadEvent($params, 'event.edit');
@@ -206,6 +293,11 @@ final class EventController extends EventScopedController
             'reference_prefix' => PaymentReference::normalize($request->input('reference_prefix')),
             'admins' => $this->perm['assign_admins'] ? $this->selectedAdmins($request) : $this->app->events()->adminIds((int) $event['id']),
         ];
+        if ($this->identityLocked()) {
+            // A paid run keeps its name and date once the sponsor search has started.
+            $input['name'] = (string) $event['name'];
+            $input['event_date'] = (string) ($event['event_date'] ?? '');
+        }
 
         $errors = [];
         if ($e = Validation::required($input['name'], 120)) {
@@ -367,6 +459,7 @@ final class EventController extends EventScopedController
             'all_admins' => $this->assignableAdmins(),
             'look' => $this->app->branding()->forEvent($this->event),
             'club' => $this->app->branding()->club(),
+            'identity_locked' => $this->identityLocked(),
         ], $status);
     }
 
@@ -376,7 +469,38 @@ final class EventController extends EventScopedController
             'input' => $input,
             'errors' => $errors,
             'all_admins' => $this->assignableAdmins(),
+            'licensing' => $this->licenseView(),
         ], $status);
+    }
+
+    /** What the event pages show about booking runs; null on self-hosted instances. */
+    private function licenseView(): ?array
+    {
+        $licensing = $this->app->licensing();
+        if (!$licensing->enabled()) {
+            return null;
+        }
+        $license = $licensing->license();
+
+        return [
+            'price_run' => $license->priceRun(),
+            'price_mail' => $license->priceMail(),
+            'credit' => $licensing->credit(),
+            'offers_mail' => $licensing->offersMail(),
+            'mail_included' => $licensing->mailIncluded(),
+            'terms_url' => $license->termsUrl(),
+        ];
+    }
+
+    private function isPending(): bool
+    {
+        return $this->app->licensing()->enabled() && ($this->event['license_state'] ?? 'active') === 'pending';
+    }
+
+    /** Name and date of a paid run are fixed once the sponsor search has started. */
+    private function identityLocked(): bool
+    {
+        return $this->app->licensing()->enabled() && $this->event['status'] !== EventStatus::PREPARATION;
     }
 
     /** @return list<array<string, mixed>> */

@@ -5,8 +5,12 @@
 {% block content %}
   <header class="page-head">
     <h1 class="h1">{{ t('app.nav.events') }}</h1>
-    {% if can_create %}<a href="{{ url('/admin/events/new') }}" class="btn btn--primary">{{ t('events.create') }}</a>{% endif %}
+    {% if can_create %}<a href="{{ url('/admin/events/new') }}" class="btn btn--primary">{% if licensing %}+ {{ licensing.credit ? t('license.book.button_credit') : t('license.book.button', {price: licensing.price_run|price}) }}{% else %}{{ t('events.create') }}{% endif %}</a>{% endif %}
   </header>
+
+  {% if licensing and licensing.credit and can_create %}
+    <div class="notice notice--info">{{ t('license.credit_notice') }}</div>
+  {% endif %}
 
   {% if can_create %}
     <p class="small">
@@ -22,7 +26,7 @@
     <section class="card empty">
       <h2 class="h2">{{ t('events.none_title') }}</h2>
       <p class="muted">{{ can_create ? t('events.none_club') : t('events.none_event_admin') }}</p>
-      {% if can_create %}<p><a href="{{ url('/admin/events/new') }}" class="btn btn--primary">{{ t('events.create') }}</a></p>{% endif %}
+      {% if can_create %}<p><a href="{{ url('/admin/events/new') }}" class="btn btn--primary">{{ licensing ? (licensing.credit ? t('license.book.button_credit') : t('license.book.button', {price: licensing.price_run|price})) : t('events.create') }}</a></p>{% endif %}
     </section>
   {% else %}
     <div class="event-cards">
@@ -32,6 +36,10 @@
             <span class="badge badge--status-{{ e.status }}">{{ t('events.status.' ~ e.status) }}</span>
             {% if e.archived_at %}<span class="badge badge--inactive">{{ t('events.archived_badge') }}</span>{% endif %}
             {% if e.is_assigned %}<span class="badge badge--assigned">{{ t('events.you_are_admin') }}</span>{% endif %}
+            {% if licensing %}
+              {% if e.license_state == 'pending' %}<span class="badge badge--license-pending">● {{ t('license.state.pending') }}</span>
+              {% else %}<span class="badge badge--license-active">✓ {{ t('license.state.active') }}</span>{% endif %}
+            {% endif %}
           </span>
           <span class="event-card__name">{{ e.name }}</span>
           <span class="muted small">
@@ -43,6 +51,13 @@
           </span>
         </a>
       {% endfor %}
+      {% if licensing and can_create and not show_archived %}
+        <a href="{{ url('/admin/events/new') }}" class="card event-card event-card--book">
+          <span class="event-card--book__plus" aria-hidden="true">+</span>
+          <span class="strong">{{ licensing.credit ? t('license.book.button_credit') : t('license.book.card') }}</span>
+          {% if not licensing.credit %}<span class="muted small">{{ t('license.book.per_run', {price: licensing.price_run|price}) }}</span>{% endif %}
+        </a>
+      {% endif %}
     </div>
   {% endif %}
 {% endblock %}

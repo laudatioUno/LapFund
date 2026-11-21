@@ -1,0 +1,13 @@
+{% extends 'mail/de/_layout.txt.twig' %}
+{% block content %}{{ t('mail.hello', {name: name}) }}
+
+{{ t('mail.license.welcome_intro', {instance: instance}) }}
+
+{{ t('mail.license.welcome_steps') }}
+
+{{ t('admin.users.username') }}: {{ username }}
+
+{{ t('mail.license.welcome_button') }}: {{ invite_url }}
+
+{{ t('mail.license.welcome_valid') }}
+{% endblock %}

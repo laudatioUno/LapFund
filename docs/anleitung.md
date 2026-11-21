@@ -29,6 +29,8 @@ Ein Event durchläuft fünf Status. Du schaltest ihn auf der Event-Übersicht mi
 
 **Events › Event erstellen**: Name, Datum, Ort und die Event-Admins wählen. Nur zugewiesene Event-Admins können Runden erfassen und Zahlungen abhaken.
 
+**Bei einer gemieteten Instanz (xy.lapfund.ch)** heisst der Knopf **Lauf buchen** und zeigt den Preis. Den ersten Lauf hast du mit der Bestellung schon bezahlt: Du legst ihn einfach an, er ist sofort freigeschaltet. Jeder weitere Lauf wird gebucht: Du kannst ihn gleich vorbereiten, bezahlst per **Mit TWINT bezahlen** (Betrag und Zahlungszweck sind vorausgefüllt) und nach dem Zahlungseingang wird er freigeschaltet. Erst dann lässt sich die Sponsorensuche starten. Die Quittung kommt per Mail und liegt in der Übersicht des Laufs. Ein noch nicht bezahlter Lauf kann wieder gelöscht werden; ein freigeschalteter nicht mehr. Sobald die Sponsorensuche läuft, sind Name und Datum fest.
+
 ### Einstellungen des Events
 
 Im Event unter **Einstellungen**:
@@ -178,6 +180,8 @@ Die Dateien enthalten Personendaten: nur so lange aufbewahren wie nötig, nicht 
 
 Wenn alles bezahlt ist: Status auf **Abgeschlossen** stellen. Danach lässt sich nichts mehr ändern, die Auswertung bleibt.
 
+Bei einer gemieteten Instanz ist **Abgeschlossen** endgültig: Der Lauf kann nicht mehr zurückgestellt werden; Auswertung und Export bleiben.
+
 Der Vereins-Admin kann ein abgeschlossenes Event **archivieren**; es verschwindet dann aus den Listen.
 
 ### Was mit den Daten passiert
@@ -188,7 +192,7 @@ Der Vereins-Admin kann ein abgeschlossenes Event **archivieren**; es verschwinde
 ## 6. Für den Vereins-Admin
 
 - **Admin-Konten**: Neue Admins erhalten einen Einladungslink (72 Stunden gültig). Dort können Zugang und Zwei-Faktor zurückgesetzt werden.
-- **Mailversand**: SMTP-Zugang, Versandlimit und Testmail; das Mailprotokoll zeigt jeden Versand.
+- **Mailversand**: SMTP-Zugang, Versandlimit und Testmail; das Mailprotokoll zeigt jeden Versand. Mit der gebuchten Option «Mailversand über lapfund.ch» entfallen die SMTP-Angaben.
 - **Vereinseinstellungen**: Name, Logo, Farbe, Kontaktadresse, Datenschutzerklärung und Impressum, Aufbewahrungsfristen, **Kontakt halten** (Schalter für den Newsletter im Sponsorenformular ein- oder ausschalten, Titel und Text festlegen – mit Live-Vorschau, wie es Sponsoren sehen; solange der Schalter aus ist, sind Titel und Text gesperrt, bleiben aber gespeichert; gespeichert wird bei jedem Kontakt der Wortlaut, dem er zugestimmt hat).
 - **Kontakte**: alle Sponsoren, die dem Kontakt zugestimmt haben, mit Datum, Wortlaut der Zustimmung und Herkunft (Event, für welches Kind). Mit **CSV-Export für Newsletter-Tool** lädst du die aktiven Kontakte herunter; meldet sich jemand bei euch ab, setzt du ihn auf **Abmelden** oder löschst ihn. Diese Kontakte bleiben, wenn ein Event anonymisiert wird. Ergänzt eure Datenschutzerklärung entsprechend.
 - **Änderungsprotokoll**: alle Änderungen aller Events, filterbar nach Event und Bereich.

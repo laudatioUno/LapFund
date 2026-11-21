@@ -48,6 +48,13 @@ final class MailController extends Controller
             'per_hour' => trim($request->input('per_hour')),
             'has_password' => $this->app->mailSettings()->values()['has_password'],
         ];
+        $system = $this->app->mailSettings()->usesSystem();
+        if ($system) {
+            // «Mailversand» booked: the operator's SMTP from config.php, nothing to enter here.
+            $current = $this->app->mailSettings()->values();
+            $input = ['from_email' => $current['from_email'], 'host' => $current['host'], 'port' => (string) $current['port'],
+                'encryption' => $current['encryption'], 'username' => $current['username'], 'password' => ''] + $input;
+        }
         $errors = [];
         if ($input['app_url'] === '' || Validation::optionalUrl($input['app_url']) !== null || str_contains($input['app_url'], '?')) {
             $errors['app_url'] = 'validation.url';
@@ -85,6 +92,14 @@ final class MailController extends Controller
         }
 
         $before = $this->app->mailSettings()->values();
+        if ($system) {
+            $this->app->mailSettings()->saveBasics($input['app_url'], $input['from_name'], (int) $input['per_minute'], (int) $input['per_hour']);
+            $after = ['app_url' => $input['app_url'], 'from_name' => $input['from_name'], 'per_minute' => (int) $input['per_minute'], 'per_hour' => (int) $input['per_hour']];
+            $this->app->audit()->log((int) $admin['id'], 'mail_settings_updated', 'settings', null, array_intersect_key($before, $after), $after);
+            $this->flash('success', 'mail.settings.saved');
+
+            return $this->redirect('/admin/mail');
+        }
         $values = [
             'app_url' => $input['app_url'],
             'from_email' => $input['from_email'],
@@ -226,6 +241,7 @@ final class MailController extends Controller
             'errors' => $errors,
             'encryptions' => MailSettings::ENCRYPTIONS,
             'configured' => $this->app->mailSettings()->isConfigured(),
+            'system_mail' => $this->app->mailSettings()->usesSystem(),
             'counts' => $this->app->mailQueue()->counts(),
             'cron_url' => $this->app->mailSettings()->url('/cron/' . $this->app->mailSettings()->cronKey()),
             'worker_path' => $this->app->root . '/bin/worker.php',

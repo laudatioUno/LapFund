@@ -1,9 +1,45 @@
 {% extends 'layout/admin.html.twig' %}
+{% import 'partials/macros.html.twig' as m %}
 
 {% block title %}{{ event.name }}{% endblock %}
 
 {% block content %}
   {% include 'partials/event_header.html.twig' %}
+
+  {% if booking and booking.status == 'open' %}
+    <section class="card stack license-box" aria-labelledby="license-title">
+      <p><span class="badge badge--license-pending">● {{ t('license.state.pending') }}</span></p>
+      <h2 class="h2" id="license-title">{{ t('license.open.title') }}</h2>
+      <p>{{ t('license.open.text') }}</p>
+      <div class="license-box__grid">
+        <div>
+          <p class="strong">{{ t('license.open.possible') }}</p>
+          <ul class="license-list">
+            <li class="is-ok">{{ t('license.open.possible_1') }}</li>
+            <li class="is-ok">{{ t('license.open.possible_2') }}</li>
+            <li class="is-ok">{{ t('license.open.possible_3') }}</li>
+          </ul>
+          <p class="strong">{{ t('license.open.after') }}</p>
+          <ul class="license-list">
+            <li class="is-locked">{{ t('license.open.after_1') }}</li>
+            <li class="is-locked">{{ t('license.open.after_2') }}</li>
+          </ul>
+        </div>
+        <div class="license-pay">
+          <p class="muted small">{{ t('license.open.to_pay') }}</p>
+          <p class="license-pay__amount">{{ booking_total|price }}</p>
+          {% if booking.amount_mail_cents > 0 %}<p class="muted small">{{ t('license.open.amount_parts', {run: booking.amount_run_cents|price, mail: booking.amount_mail_cents|price}) }}</p>{% endif %}
+          <div class="copy-row">
+            <label for="license-ref" class="small">{{ t('license.open.reference') }}</label>
+            <input id="license-ref" type="text" value="{{ booking.reference }}" readonly class="input--mono">
+            <button type="button" class="btn btn--secondary btn--small" data-copy-target="license-ref" data-copied="{{ t('app.copied') }}">{{ t('app.copy') }}</button>
+          </div>
+          {% if pay_url %}<a class="btn btn--twint btn--block" href="{{ pay_url }}" target="_blank" rel="noopener">{{ t('license.open.pay') }}</a>{% endif %}
+          <p class="muted small">{{ t('license.open.pay_hint', {date: booking.booked_at|date_ch, name: booking.booked_by_name}) }}</p>
+        </div>
+      </div>
+    </section>
+  {% endif %}
 
   <section class="card stack" aria-labelledby="status-title">
     <h2 class="h2" id="status-title">{{ t('events.status_title') }}</h2>
@@ -27,7 +63,9 @@
             <button type="submit" class="btn btn--secondary">← {{ t('events.move_back', {status: t('events.status.' ~ previous_status)}) }}</button>
           </form>
         {% endif %}
-        {% if next_status %}
+        {% if next_status and next_locked %}
+          <button type="button" class="btn btn--primary" disabled>{{ t('events.move_to', {status: t('events.status.' ~ next_status)}) }} →</button>
+        {% elseif next_status %}
           <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/status') }}" data-confirm="{{ t('events.confirm_next.' ~ next_status) }}">
             {{ csrf_field() }}
             <input type="hidden" name="status" value="{{ next_status }}">
@@ -35,6 +73,8 @@
           </form>
         {% endif %}
       </div>
+      {% if next_status and next_locked %}<p class="muted small">🔒 {{ t('license.locked_collecting') }}</p>{% endif %}
+      {% if event_final %}<p class="muted small">🔒 {{ t('license.final_hint') }}</p>{% endif %}
     {% else %}
       <p class="muted small">{{ t('events.status_only_event_admin') }}</p>
     {% endif %}
@@ -92,6 +132,30 @@
           <p class="muted small">{{ t('events.anonymize_help') }}</p>
         {% endif %}
       {% endif %}
+    </section>
+  {% endif %}
+
+  {% if can_receipt %}
+    <section class="card stack" aria-labelledby="booking-title">
+      <h2 class="h2" id="booking-title">{{ t('license.paid.title') }}</h2>
+      <dl class="facts">
+        <div><dt>{{ t('license.open.reference') }}</dt><dd><code>{{ booking.reference }}</code></dd></div>
+        <div><dt>{{ t('license.paid.amount') }}</dt><dd>{{ booking_total|price }}</dd></div>
+        <div><dt>{{ t('license.paid.paid_on') }}</dt><dd>{{ booking.paid_at|date_ch }} · {{ t('license.paid.via_' ~ booking.paid_via) }}</dd></div>
+      </dl>
+      <p><a href="{{ url('/admin/events/' ~ event.id ~ '/receipt.pdf') }}" class="btn btn--secondary">{{ t('license.paid.receipt') }}</a></p>
+    </section>
+  {% endif %}
+
+  {% if can_delete %}
+    <section class="card stack" aria-labelledby="delete-title">
+      <h2 class="h2" id="delete-title">{{ t('license.delete.title') }}</h2>
+      <p class="muted">{{ t('license.delete.text') }}</p>
+      <form method="post" action="{{ url('/admin/events/' ~ event.id ~ '/delete') }}" class="stack" data-confirm="{{ t('license.delete.confirm') }}">
+        {{ csrf_field() }}
+        {{ m.field('confirm_name', t('license.delete.confirm_name', {name: event.name}), '', {}, 'text', {autocomplete: 'off'}) }}
+        <div><button type="submit" class="btn btn--danger">{{ t('license.delete.submit') }}</button></div>
+      </form>
     </section>
   {% endif %}
 

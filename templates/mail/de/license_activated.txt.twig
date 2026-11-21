@@ -1,0 +1,12 @@
+{% extends 'mail/de/_layout.txt.twig' %}
+{% block content %}{{ t('mail.hello', {name: first_name}) }}
+
+{% if booking.paid_via == 'website' %}{{ t('mail.license.activated_credit', {event: booking.event_name}) }}{% else %}{{ t('mail.license.activated_paid', {amount: total|price, reference: booking.reference, event: booking.event_name}) }}{% endif %}
+
+
+{{ t('mail.license.activated_next') }}
+
+{{ t('mail.license.activated_button') }}: {{ event_url }}
+
+{{ t('mail.license.activated_receipt') }}
+{% endblock %}

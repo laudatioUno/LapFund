@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<title>{{ t('license.receipt.title') }} {{ booking.reference }}</title>
+<style>
+  @page { margin: 20mm 20mm 22mm; }
+  body { font-family: "DejaVu Sans", sans-serif; font-size: 10pt; color: #14212E; line-height: 1.45; }
+  .issuer { font-size: 9pt; color: #3B4A58; }
+  .to { margin-top: 26pt; }
+  h1 { font-size: 20pt; margin: 34pt 0 4pt; }
+  .meta td { padding: 1pt 14pt 1pt 0; font-size: 9.5pt; }
+  .meta td.l { color: #586776; }
+  table.items { width: 100%; border-collapse: collapse; margin-top: 22pt; }
+  table.items th { text-align: left; font-size: 8.5pt; color: #3B4A58; border-bottom: 1pt solid #14212E; padding: 4pt 0; }
+  table.items td { padding: 7pt 0; border-bottom: 0.6pt solid #B9C5D1; vertical-align: top; }
+  .r { text-align: right; }
+  .total td { border-bottom: 0; border-top: 1.2pt solid #14212E; font-weight: bold; font-size: 11pt; padding-top: 8pt; }
+  .paid { margin-top: 20pt; padding: 8pt 10pt; background: #E1F4E7; color: #1B6B3A; font-weight: bold; }
+  .muted { color: #586776; font-size: 8.5pt; }
+</style>
+</head>
+<body>
+  <div class="issuer">{{ issuer|nl2br }}</div>
+
+  <div class="to">
+    <strong>{{ booking.club_name }}</strong><br>
+    {{ booking.booked_by_name }}<br>
+    {{ booking.booked_by_email }}
+  </div>
+
+  <h1>{{ t('license.receipt.title') }}</h1>
+  <table class="meta">
+    <tr><td class="l">{{ t('license.receipt.number') }}</td><td>{{ booking.reference }}</td></tr>
+    <tr><td class="l">{{ t('license.receipt.date') }}</td><td>{{ paid_on }}</td></tr>
+    <tr><td class="l">{{ t('license.receipt.instance') }}</td><td>{{ instance }}</td></tr>
+  </table>
+
+  <table class="items">
+    <thead><tr><th>{{ t('license.receipt.item') }}</th><th class="r">{{ t('license.receipt.amount') }}</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>{{ t('license.receipt.item_run', {event: booking.event_name}) }}{% if booking.event_date %}<br><span class="muted">{{ booking.event_date|date('d.m.Y') }}</span>{% endif %}</td>
+        <td class="r">{{ booking.amount_run_cents|money }}</td>
+      </tr>
+      {% if booking.amount_mail_cents > 0 %}
+      <tr>
+        <td>{{ t('license.receipt.item_mail') }}</td>
+        <td class="r">{{ booking.amount_mail_cents|money }}</td>
+      </tr>
+      {% endif %}
+      <tr class="total"><td>{{ t('license.receipt.total') }}</td><td class="r">{{ total|money }}</td></tr>
+    </tbody>
+  </table>
+
+  <div class="paid">{{ booking.paid_via == 'website' ? t('license.receipt.paid_website', {date: paid_on}) : t('license.receipt.paid_twint', {date: paid_on}) }}</div>
+
+  {% if note %}<p class="muted">{{ note|nl2br }}</p>{% endif %}
+  <p class="muted">{{ t('license.receipt.footer', {version: version}) }}</p>
+</body>
+</html>

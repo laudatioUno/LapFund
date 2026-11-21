@@ -23,6 +23,16 @@ final class Formatter
         return $this->currency . ' ' . number_format($cents / 100, 2, $this->decimal, $this->thousands);
     }
 
+    /** Price as on the website: CHF 99.– for whole francs, otherwise like money(). */
+    public function price(int $cents): string
+    {
+        if ($cents % 100 !== 0) {
+            return $this->money($cents);
+        }
+
+        return $this->currency . ' ' . number_format(intdiv($cents, 100), 0, $this->decimal, $this->thousands) . $this->decimal . '–';
+    }
+
     /** Formats a UTC timestamp from the database in local time. */
     public function datetime(?string $utc, string $format = 'd.m.Y H:i'): string
     {

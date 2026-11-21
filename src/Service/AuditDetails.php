@@ -16,7 +16,7 @@ final class AuditDetails
     /** Technical keys that are not shown. */
     private const SKIP = ['event_id', 'group', 'batch_id', 'team_id', 'admins', 'bytes', 'anonymized', 'texts', 'logo_file', 'twint_qr_file', 'password', 'smtp_password'];
 
-    private const MONEY = ['amount_cents', 'paid_amount_cents', 'goal_cents'];
+    private const MONEY = ['amount_cents', 'paid_amount_cents', 'goal_cents', 'license_amount'];
 
     /** On/off settings stored as 0/1. */
     private const FLAGS = ['notify_new_sponsor', 'thank_on_payment', 'contacts_enabled'];
@@ -91,6 +91,7 @@ final class AuditDetails
             'type' => 'pledge.type.',
             'kind' => 'reports.export.',
             'twint_mode' => 'events.twint_mode.',
+            'license_via' => 'license.via.',
             default => null,
         };
         if ($prefix !== null && is_string($value) && $this->translator->has($prefix . $value)) {

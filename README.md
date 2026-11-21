@@ -65,6 +65,23 @@
 8. Open **Mailversand**, enter the SMTP account and send a test mail.
 9. Set up the cron job (see below).
 
+### Hosted customer instances (booking per run)
+
+For instances you host for a club (e.g. `musterdorf.lapfund.ch`), LapFund can sell runs one by one. Without the `license` section in `config/config.php`, nothing of this is active.
+
+1. Upload the release and create an empty database as usual, but write `config/config.php` yourself from `config/config.example.php`: `db`, `app` (with a new `key`), the `license` section (prices, your Twint link, your mail address, `setup_key`, `secret`, issuer of the receipts) and `mail` (your SMTP account).
+2. Open `https://<instance>/install?key=<setup_key>`. Enter the club name, the address of the instance and name and e-mail of the club admin from the order, and tick whether the first run and the option «Mailversand» were paid with the order. The tables are created and the club admin gets an invitation mail through your SMTP account. You never get a login: the club admin sets the password and the two-factor login himself.
+3. If the invitation expires (72 hours), open the same address again and send a new one. Once the club admin has accepted, the page is locked.
+
+In the instance:
+
+- **Events › Lauf buchen**: the club admin books a run (price from `config.php`, the option «Mailversand» can be added once). A run paid with the order is created as active right away.
+- A booked run can be prepared (teams, participants, texts) but the sponsor search cannot start until it is paid. An unpaid run can be deleted again.
+- You get a mail with the booking and a signed **Lauf freischalten** link. It opens a confirmation page (mail scanners that open links do not activate anything); the button there activates the run. The club gets a mail with the receipt as PDF; the receipt can also be downloaded from the event.
+- On the server: `php bin/license.php list --open` and `php bin/license.php activate LF-MUST-0003`.
+- With «Mailversand», all mails of the instance are sent through your SMTP account; the club does not enter SMTP settings.
+- Once the sponsor search has started, name and date of the run are fixed. A closed run cannot be reopened or changed, only viewed and exported.
+
 ### Cron job
 
 One cron job every minute sends the queued mails and, once a day, runs the data retention:

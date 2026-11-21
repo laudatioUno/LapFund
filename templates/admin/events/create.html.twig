@@ -1,13 +1,14 @@
 {% extends 'layout/admin.html.twig' %}
 {% import 'partials/macros.html.twig' as m %}
 
-{% block title %}{{ t('events.create') }}{% endblock %}
+{% set page_title = licensing ? t('license.book.title') : t('events.create') %}
+{% block title %}{{ page_title }}{% endblock %}
 
 {% block content %}
   <header class="page-head">
     <div>
       <a href="{{ url('/admin/events') }}" class="back">← {{ t('app.nav.events') }}</a>
-      <h1 class="h1">{{ t('events.create') }}</h1>
+      <h1 class="h1">{{ page_title }}</h1>
     </div>
   </header>
 
@@ -22,7 +23,45 @@
 
     {% include 'admin/events/_admins.html.twig' with {selected: input.admins} %}
 
-    <div><button type="submit" class="btn btn--primary">{{ t('events.create') }}</button></div>
-    <p class="muted small">{{ t('events.create_hint') }}</p>
+    {% if licensing %}
+      {% if licensing.credit %}
+        <div class="license-price license-price--paid">
+          <p class="license-price__row"><strong>{{ t('license.book.credit_title') }}</strong><span class="badge badge--license-active">✓ {{ t('license.book.credit_badge') }}</span></p>
+          <p class="muted small">{{ licensing.credit == 'run_mail' ? t('license.book.credit_text_mail') : t('license.book.credit_text') }}</p>
+        </div>
+        <div><button type="submit" class="btn btn--primary">{{ t('license.book.submit_credit') }}</button></div>
+      {% else %}
+        <div class="license-price" data-license-price data-run="{{ licensing.price_run }}" data-mail="{{ licensing.price_mail }}">
+          <p class="license-price__row"><strong>{{ t('license.book.item_run') }}</strong><span>{{ licensing.price_run|price }}</span></p>
+          {% if licensing.offers_mail %}
+            <label class="inline-check inline-check--top">
+              <input type="checkbox" name="with_mail" value="1"{{ input.with_mail ? ' checked' }} data-license-mail>
+              <span><strong>{{ t('license.book.mail_option', {price: licensing.price_mail|price}) }}</strong><br><span class="muted small">{{ t('license.book.mail_option_help') }}</span></span>
+            </label>
+          {% elseif licensing.mail_included %}
+            <p class="muted small">✓ {{ t('license.book.mail_included') }}</p>
+          {% endif %}
+          <p class="license-price__row license-price__total"><span>{{ t('license.book.total') }}</span><span data-license-total>{{ (licensing.price_run + (input.with_mail and licensing.offers_mail ? licensing.price_mail : 0))|price }}</span></p>
+          <p class="muted small">{{ t('license.book.includes') }}</p>
+          <ol class="license-steps small">
+            <li>{{ t('license.book.step1') }}</li>
+            <li>{{ t('license.book.step2') }}</li>
+            <li>{{ t('license.book.step3') }}</li>
+          </ol>
+        </div>
+        <div class="field{{ errors.terms is defined ? ' field--error' }}">
+          <label class="inline-check inline-check--top">
+            <input type="checkbox" name="terms" value="1"{{ input.terms ? ' checked' }}{% if errors.terms is defined %} aria-invalid="true" aria-describedby="e-terms"{% endif %}>
+            <span>{% if licensing.terms_url %}{{ t('license.book.terms_before') }}<a href="{{ licensing.terms_url }}" target="_blank" rel="noopener">{{ t('license.book.terms_link') }}</a>{{ t('license.book.terms_after') }}{% else %}{{ t('license.book.terms_plain') }}{% endif %}</span>
+          </label>
+          {% if errors.terms is defined %}<p class="field__error" id="e-terms">{{ t(errors.terms) }}</p>{% endif %}
+        </div>
+        <div><button type="submit" class="btn btn--primary">{{ t('license.book.submit') }}</button></div>
+        <p class="muted small">{{ t('license.book.delete_hint') }}</p>
+      {% endif %}
+    {% else %}
+      <div><button type="submit" class="btn btn--primary">{{ t('events.create') }}</button></div>
+      <p class="muted small">{{ t('events.create_hint') }}</p>
+    {% endif %}
   </form>
 {% endblock %}

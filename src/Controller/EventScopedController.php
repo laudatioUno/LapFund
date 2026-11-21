@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LapFund\Controller;
 
+use LapFund\Domain\EventStatus;
 use LapFund\Http\HttpException;
 use LapFund\Http\Response;
 use LapFund\Security\Permissions;
@@ -39,6 +40,22 @@ abstract class EventScopedController extends Controller
         }
         $this->event = $event;
         $this->perm = Permissions::eventFlags($this->user, $assigned) + ['assigned' => $assigned];
+        if ($this->isFinal() && $this->app->request->isPost() && !in_array($action, self::ALLOWED_WHEN_FINAL, true)) {
+            $this->flash('error', 'license.closed_final');
+            throw new RedirectException($this->app->request->url($this->eventPath()));
+        }
+    }
+
+    /** What still works on a closed event of a customer instance (exports are GET requests). */
+    private const ALLOWED_WHEN_FINAL = ['event.archive', 'event.anonymize'];
+
+    /**
+     * On customer instances a closed event is final: it cannot be reopened or
+     * changed any more, only viewed and exported.
+     */
+    protected function isFinal(): bool
+    {
+        return $this->app->license()->enabled() && ($this->event['status'] ?? '') === EventStatus::CLOSED;
     }
 
     /** @param array<string, mixed> $data */
@@ -48,6 +65,8 @@ abstract class EventScopedController extends Controller
             'event' => $this->event,
             'perm' => $this->perm,
             'event_tab' => $tab,
+            'event_final' => $this->isFinal(),
+            'event_pending' => $this->app->license()->enabled() && ($this->event['license_state'] ?? 'active') === 'pending',
         ], $status);
     }
 

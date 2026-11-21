@@ -1,0 +1,87 @@
+{% extends 'layout/auth.html.twig' %}
+{% import 'partials/macros.html.twig' as m %}
+
+{% block title %}{{ t('install.license.title') }}{% endblock %}
+{% block body_class %}page-auth page-auth--wide{% endblock %}
+
+{% block content %}
+  <h1 class="h1">{{ t('install.license.title') }}</h1>
+
+  {% if state == 'db_failed' %}
+    <div class="notice notice--error" role="alert">{{ t('install.db_failed') }}</div>
+    <p class="muted">{{ detail }}</p>
+
+  {% elseif state == 'setup' %}
+    <p class="lead">{{ t('install.license.intro') }}</p>
+
+    {% if not requirements_ok %}
+      <ul class="checks">
+        {% for c in checks %}{% if not c.ok %}<li class="checks__item is-fail"><span class="checks__icon" aria-hidden="true">✕</span><span>{{ c.label }}</span></li>{% endif %}{% endfor %}
+      </ul>
+      <div class="notice notice--error" role="alert">{{ t('install.requirements_failed') }}</div>
+    {% endif %}
+
+    {% if problems is not empty %}
+      <div class="notice notice--error" role="alert">
+        <strong>{{ t('install.license.problems') }}</strong>
+        <ul>{% for p in problems %}<li>{{ t(p) }}</li>{% endfor %}</ul>
+      </div>
+    {% else %}
+      <dl class="facts">
+        <div><dt>{{ t('install.license.price_run') }}</dt><dd>{{ license.priceRun|price }}</dd></div>
+        <div><dt>{{ t('install.license.price_mail') }}</dt><dd>{{ license.priceMail|price }}</dd></div>
+        <div><dt>{{ t('install.license.operator') }}</dt><dd>{{ license.operatorEmail }}</dd></div>
+      </dl>
+
+      <form method="post" action="{{ url('/install') }}" class="stack" novalidate>
+        {{ csrf_field() }}
+        <input type="hidden" name="key" value="{{ key }}">
+        {{ m.form_error(errors) }}
+
+        <fieldset class="fieldset">
+          <legend class="h2">{{ t('install.club') }}</legend>
+          {{ m.field('club_name', t('install.club_name'), input.club_name, errors, 'text', {required: true, maxlength: 100}) }}
+          {{ m.field('app_url', t('install.license.app_url'), input.app_url, errors, 'url', {required: true, help: t('install.license.app_url_help')}) }}
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="h2">{{ t('install.license.admin') }}</legend>
+          <p class="muted">{{ t('install.license.admin_help') }}</p>
+          <div class="grid-2">
+            {{ m.field('admin_name', t('admin.users.display_name'), input.admin_name, errors, 'text', {required: true, maxlength: 100}) }}
+            {{ m.field('admin_email', t('admin.users.email'), input.admin_email, errors, 'email', {required: true}) }}
+          </div>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="h2">{{ t('install.license.order') }}</legend>
+          <label class="inline-check inline-check--top"><input type="checkbox" name="credit" value="1"{{ input.credit ? ' checked' }}> <span>{{ t('install.license.credit') }}<br><span class="muted small">{{ t('install.license.credit_help') }}</span></span></label>
+          <label class="inline-check inline-check--top"><input type="checkbox" name="mail" value="1"{{ input.mail ? ' checked' }}> <span>{{ t('install.license.mail') }}<br><span class="muted small">{{ t('install.license.mail_help') }}</span></span></label>
+        </fieldset>
+
+        <button type="submit" class="btn btn--primary btn--block"{% if not requirements_ok %} disabled{% endif %}>{{ t('install.license.submit') }}</button>
+        <p class="muted small">{{ t('install.license.submit_help') }}</p>
+      </form>
+    {% endif %}
+
+  {% elseif state == 'invited' %}
+    {% if mail_error %}
+      <div class="notice notice--error" role="alert"><strong>{{ t('install.license.mail_failed') }}</strong><br><span class="small">{{ mail_error }}</span></div>
+    {% elseif notice %}
+      <div class="notice notice--success" role="status">{{ t(notice, {email: admin_email}) }}</div>
+    {% else %}
+      <div class="notice notice--success" role="status">{{ t('install.license.invited', {email: admin_email}) }}</div>
+    {% endif %}
+    <p>{{ t('install.license.invited_text') }}</p>
+    <form method="post" action="{{ url('/install/resend') }}">
+      {{ csrf_field() }}
+      <input type="hidden" name="key" value="{{ key }}">
+      <button type="submit" class="btn btn--secondary">{{ t('install.license.resend') }}</button>
+    </form>
+    <p class="muted small">{{ t('install.license.resend_help') }}</p>
+
+  {% else %}
+    <div class="notice notice--success" role="status">{{ t('install.license.done') }}</div>
+    <p class="muted">{{ t('install.license.done_text') }}</p>
+  {% endif %}
+{% endblock %}

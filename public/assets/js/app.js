@@ -213,4 +213,21 @@
       }
     });
   });
+
+  // Booking a run: total with or without the option «Mailversand»
+  var price = document.querySelector('[data-license-price]');
+  if (price) {
+    var mailBox = price.querySelector('[data-license-mail]');
+    var totalEl = price.querySelector('[data-license-total]');
+    var format = function (cents) {
+      return cents % 100 === 0 ? 'CHF ' + (cents / 100) + '.–' : 'CHF ' + (cents / 100).toFixed(2);
+    };
+    if (mailBox && totalEl) {
+      mailBox.addEventListener('change', function () {
+        var run = parseInt(price.getAttribute('data-run'), 10);
+        var mail = parseInt(price.getAttribute('data-mail'), 10);
+        totalEl.textContent = format(run + (mailBox.checked ? mail : 0));
+      });
+    }
+  }
 })();

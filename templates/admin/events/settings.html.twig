@@ -12,9 +12,9 @@
 
     <section class="card stack" aria-labelledby="base-title">
       <h2 class="h2" id="base-title">{{ t('events.section.base') }}</h2>
-      {{ m.field('name', t('events.field.name'), input.name, errors, 'text', {required: true, maxlength: 120}) }}
+      {{ m.field('name', t('events.field.name'), input.name, errors, 'text', identity_locked ? {required: true, maxlength: 120, readonly: true, help: t('license.identity_locked')} : {required: true, maxlength: 120}) }}
       <div class="grid-2">
-        {{ m.field('event_date', t('events.field.date'), input.event_date, errors, 'date', {optional: true}) }}
+        {{ m.field('event_date', t('events.field.date'), input.event_date, errors, 'date', identity_locked ? {optional: true, readonly: true} : {optional: true}) }}
         {{ m.field('location', t('events.field.location'), input.location, errors, 'text', {optional: true, maxlength: 160}) }}
       </div>
       {{ m.textarea('description', t('events.field.description'), input.description, errors, {optional: true, rows: 3, help: t('events.field.description_help')}) }}

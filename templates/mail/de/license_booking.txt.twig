@@ -1,0 +1,19 @@
+{% extends 'mail/de/_layout.txt.twig' %}
+{% block content %}{{ t('mail.license.booking_title') }}
+
+{{ t('mail.license.booking_intro', {instance: instance}) }}
+
+{{ t('license.open.reference') }}: {{ booking.reference }}
+{{ t('license.activate.club') }}: {{ booking.club_name }}
+{{ t('license.activate.event') }}: {{ booking.event_name }}{% if booking.event_date %}, {{ booking.event_date|date('d.m.Y') }}{% endif %}
+
+{{ t('license.activate.booked_by') }}: {{ booking.booked_by_name }} <{{ booking.booked_by_email }}>
+{{ t('license.paid.amount') }}: {{ total|price }}{% if booking.amount_mail_cents > 0 %} ({{ t('license.open.amount_parts', {run: booking.amount_run_cents|price, mail: booking.amount_mail_cents|price}) }}){% endif %}
+
+{{ t('mail.license.booked_at') }}: {{ booked_at }}
+
+{{ t('mail.license.booking_when_paid') }}
+{{ activate_url }}
+
+{{ t('mail.license.booking_link_note') }}
+{% endblock %}

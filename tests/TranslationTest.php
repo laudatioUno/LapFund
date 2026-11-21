@@ -40,6 +40,8 @@ final class TranslationTest extends TestCase
         'reports.export.' => ['participants', 'pledges', 'payments', 'participants_help', 'pledges_help', 'payments_help'],
         'admin.audit.file.' => ['added', 'replaced', 'removed'],
         'reports.export.file.' => ['participants', 'pledges', 'payments'],
+        'license.paid.via_' => ['twint', 'website'],
+        'license.via.' => ['link', 'cli', 'credit'],
     ];
 
     /** Keys of config/config.php and permission names that look like translation keys. */
@@ -96,7 +98,7 @@ final class TranslationTest extends TestCase
         $keys = [];
         $patterns = [
             "/\\bt\\(\\s*'([a-z0-9_]+\\.[a-z0-9_.]+)'/",
-            "/'((?:app|auth|admin|install|errors|validation|upload|events|participants|mail|mails|public|pledge|pdf|laps|payments|pledges|reports)\\.[a-z0-9_.]+)'/",
+            "/'((?:app|auth|admin|install|errors|validation|upload|events|participants|mail|mails|public|pledge|pdf|laps|payments|pledges|reports|license)\\.[a-z0-9_.]+)'/",
         ];
         $files = [...$this->phpFiles($root . '/src'), ...$this->phpFiles($root . '/templates', 'twig')];
         foreach (array_unique($files) as $file) {

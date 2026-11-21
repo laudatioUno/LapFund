@@ -23,12 +23,19 @@
       <h2 class="h2" id="sender-title">{{ t('mail.settings.sender') }}</h2>
       <p class="muted">{{ t('mail.settings.sender_help') }}</p>
       <div class="grid-2">
-        {{ m.field('from_email', t('mail.settings.from_email'), input.from_email, errors, 'email', {required: true, help: t('mail.settings.from_email_help')}) }}
+        {{ m.field('from_email', t('mail.settings.from_email'), input.from_email, errors, 'email', system_mail ? {readonly: true, help: t('license.mail_settings.from_email')} : {required: true, help: t('mail.settings.from_email_help')}) }}
         {{ m.field('from_name', t('mail.settings.from_name'), input.from_name, errors, 'text', {required: true, maxlength: 120, help: t('mail.settings.from_name_help')}) }}
       </div>
       {{ m.field('app_url', t('mail.settings.app_url'), input.app_url, errors, 'url', {required: true, help: t('mail.settings.app_url_help')}) }}
     </section>
 
+    {% if system_mail %}
+    <section class="card stack" aria-labelledby="smtp-title">
+      <h2 class="h2" id="smtp-title">{{ t('mail.settings.smtp') }}</h2>
+      <p><span class="badge badge--license-active">✓ {{ t('license.mail_settings.badge') }}</span></p>
+      <p class="muted">{{ t('license.mail_settings.text') }}</p>
+    </section>
+    {% else %}
     <section class="card stack" aria-labelledby="smtp-title">
       <h2 class="h2" id="smtp-title">{{ t('mail.settings.smtp') }}</h2>
       <p class="muted">{{ t('mail.settings.smtp_help') }}</p>
@@ -55,6 +62,7 @@
         </div>
       </div>
     </section>
+    {% endif %}
 
     <section class="card stack" aria-labelledby="limit-title">
       <h2 class="h2" id="limit-title">{{ t('mail.settings.limit') }}</h2>

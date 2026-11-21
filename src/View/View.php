@@ -44,6 +44,7 @@ final class View
         $this->twig->addFilter(new TwigFilter('datetime', fn (?string $v) => $this->app->formatter->datetime($v)));
         $this->twig->addFilter(new TwigFilter('date_ch', fn (?string $v) => $this->app->formatter->date($v)));
         $this->twig->addFilter(new TwigFilter('money', fn (int $cents) => $this->app->formatter->money($cents)));
+        $this->twig->addFilter(new TwigFilter('price', fn (int $cents) => $this->app->formatter->price($cents)));
         $details = new \LapFund\Service\AuditDetails($t, $app->formatter);
         $this->twig->addFunction(new TwigFunction('audit_details', static fn (array $entry) => $details->describe($entry)));
     }

@@ -13,7 +13,12 @@ final class AssetController extends Controller
     /** CSS variables for the club color. Generated, because inline styles are blocked by the CSP. */
     public function theme(Request $request, array $params): Response
     {
-        $b = $this->app->branding()->club();
+        try {
+            $b = $this->app->branding()->club();
+        } catch (\PDOException) {
+            // Customer instance before its setup: config.php exists, the tables not yet.
+            $b = (new \LapFund\Service\Branding(null))->club();
+        }
         // Pages of an event use its own color (PE-02); ?e=<event id>
         $eventId = $request->input('e');
         if ($eventId !== '' && ctype_digit($eventId) && $this->app->config->isInstalled()) {

@@ -1,0 +1,16 @@
+{% extends 'mail/de/_layout.html.twig' %}
+{% block content %}
+<p style="margin:0 0 16px;font-size:20px;font-weight:bold;">{{ t('mail.license.booking_title') }}</p>
+<p style="margin:0 0 16px;">{{ t('mail.license.booking_intro', {instance: instance}) }}</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:15px;margin:0 0 16px;">
+<tr><td style="padding:6px 0;color:#586776;width:40%;border-bottom:1px solid #DCE3EA;">{{ t('license.open.reference') }}</td><td style="padding:6px 0;border-bottom:1px solid #DCE3EA;"><strong>{{ booking.reference }}</strong></td></tr>
+<tr><td style="padding:6px 0;color:#586776;border-bottom:1px solid #DCE3EA;">{{ t('license.activate.club') }}</td><td style="padding:6px 0;border-bottom:1px solid #DCE3EA;">{{ booking.club_name }}</td></tr>
+<tr><td style="padding:6px 0;color:#586776;border-bottom:1px solid #DCE3EA;">{{ t('license.activate.event') }}</td><td style="padding:6px 0;border-bottom:1px solid #DCE3EA;">{{ booking.event_name }}{% if booking.event_date %}<br>{{ booking.event_date|date('d.m.Y') }}{% endif %}</td></tr>
+<tr><td style="padding:6px 0;color:#586776;border-bottom:1px solid #DCE3EA;">{{ t('license.activate.booked_by') }}</td><td style="padding:6px 0;border-bottom:1px solid #DCE3EA;">{{ booking.booked_by_name }}<br>{{ booking.booked_by_email }}</td></tr>
+<tr><td style="padding:6px 0;color:#586776;border-bottom:1px solid #DCE3EA;">{{ t('license.paid.amount') }}</td><td style="padding:6px 0;border-bottom:1px solid #DCE3EA;"><strong>{{ total|price }}</strong>{% if booking.amount_mail_cents > 0 %}<br>{{ t('license.open.amount_parts', {run: booking.amount_run_cents|price, mail: booking.amount_mail_cents|price}) }}{% endif %}</td></tr>
+<tr><td style="padding:6px 0;color:#586776;">{{ t('mail.license.booked_at') }}</td><td style="padding:6px 0;">{{ booked_at }}</td></tr>
+</table>
+<p style="margin:0;">{{ t('mail.license.booking_when_paid') }}</p>
+{% include 'mail/de/_button.html.twig' with {href: activate_url, label: t('mail.license.booking_button')} %}
+<p style="margin:0;font-size:13px;color:#586776;">{{ t('mail.license.booking_link_note') }}</p>
+{% endblock %}

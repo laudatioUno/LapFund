@@ -1,0 +1,38 @@
+{% extends 'layout/auth.html.twig' %}
+
+{% block title %}{{ t('license.activate.title') }}{% endblock %}
+
+{% block content %}
+  {% if activated %}
+    <p><span class="badge badge--license-active">✓ {{ t('license.state.active') }}</span></p>
+    <h1 class="h1">{{ t('license.activate.done_title') }}</h1>
+    <p>{{ t('license.activate.done_text', {event: booking.event_name, club: booking.club_name}) }}</p>
+  {% elseif booking.status == 'paid' %}
+    <p><span class="badge badge--license-active">✓ {{ t('license.state.active') }}</span></p>
+    <h1 class="h1">{{ t('license.activate.already_title') }}</h1>
+    <p>{{ t('license.activate.already_text', {date: booking.paid_at|datetime}) }}</p>
+  {% elseif booking.status == 'cancelled' %}
+    <h1 class="h1">{{ t('license.activate.cancelled_title') }}</h1>
+    <p>{{ t('license.activate.cancelled_text') }}</p>
+  {% else %}
+    <h1 class="h1">{{ t('license.activate.title') }}</h1>
+  {% endif %}
+
+  <dl class="facts">
+    <div><dt>{{ t('license.open.reference') }}</dt><dd><code>{{ booking.reference }}</code></dd></div>
+    <div><dt>{{ t('license.activate.club') }}</dt><dd>{{ booking.club_name }}</dd></div>
+    <div><dt>{{ t('license.activate.event') }}</dt><dd>{{ booking.event_name }}{% if booking.event_date %} · {{ booking.event_date|date('d.m.Y') }}{% endif %}</dd></div>
+    <div><dt>{{ t('license.activate.booked_by') }}</dt><dd>{{ booking.booked_by_name }}<br><span class="muted small">{{ booking.booked_by_email }}</span></dd></div>
+    <div><dt>{{ t('license.paid.amount') }}</dt><dd><strong>{{ total|price }}</strong>{% if booking.amount_mail_cents > 0 %} <span class="muted small">({{ t('license.open.amount_parts', {run: booking.amount_run_cents|price, mail: booking.amount_mail_cents|price}) }})</span>{% endif %}</dd></div>
+  </dl>
+
+  {% if not activated and booking.status == 'open' %}
+    <div class="notice notice--warning">{{ t('license.activate.check', {amount: total|price, reference: booking.reference}) }}</div>
+    <form method="post" action="{{ url('/license/activate/' ~ booking.reference) }}" class="stack">
+      {{ csrf_field() }}
+      <input type="hidden" name="sig" value="{{ sig }}">
+      <button type="submit" class="btn btn--primary btn--block">{{ t('license.activate.submit') }}</button>
+    </form>
+    <p class="muted small">{{ t('license.activate.hint') }}</p>
+  {% endif %}
+{% endblock %}

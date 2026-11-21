@@ -47,7 +47,7 @@ use LapFund\View\View;
  */
 final class App
 {
-    public const VERSION = '1.9.1';
+    public const VERSION = '1.10.0';
 
     public Config $config;
     public readonly Translator $translator;
@@ -87,7 +87,7 @@ final class App
      */
     private function sendMailsAfterResponse(): void
     {
-        if (!function_exists('fastcgi_finish_request') || !$this->config->isInstalled()) {
+        if (!function_exists('fastcgi_finish_request') || !$this->config->isInstalled() || str_starts_with($this->request->path, '/install')) {
             return;
         }
         try {
@@ -140,7 +140,8 @@ final class App
         if (!$this->config->isInstalled() && !$installing && !str_starts_with($request->path, '/theme.css')) {
             return Response::redirect($request->url('/install'));
         }
-        if ($this->config->isInstalled() && $installing && $request->path !== '/install/done') {
+        // A customer instance is set up on /install after config.php was written by hand.
+        if ($this->config->isInstalled() && $installing && $request->path !== '/install/done' && !$this->license()->enabled()) {
             throw new HttpException(404);
         }
 
@@ -239,7 +240,49 @@ final class App
 
     public function mailSettings(): MailSettings
     {
-        return $this->service(MailSettings::class, fn () => new MailSettings($this->settings(), (string) $this->config->get('app.cron_secret', '')));
+        return $this->service(MailSettings::class, fn () => new MailSettings(
+            $this->settings(),
+            (string) $this->config->get('app.cron_secret', ''),
+            $this->license()->enabled() ? $this->license()->mailConfig() : [],
+        ));
+    }
+
+    /** Licence settings from config.php (hosted customer instances). */
+    public function license(): \LapFund\Service\License
+    {
+        return $this->service(\LapFund\Service\License::class, fn () => \LapFund\Service\License::fromConfig($this->config));
+    }
+
+    /** Booking, activation and receipts of runs on customer instances. */
+    public function licensing(): \LapFund\Service\Licensing
+    {
+        return $this->service(\LapFund\Service\Licensing::class, fn () => new \LapFund\Service\Licensing(
+            $this->db(),
+            $this->license(),
+            $this->settings(),
+            $this->events(),
+            $this->mailSettings(),
+            $this->mailComposer(),
+            $this->view(),
+            $this->pdf(),
+            $this->audit(),
+            $this->translator,
+            $this->formatter,
+            fn () => $this->systemTransport(),
+            fn (\Throwable $e) => $this->logError($e),
+        ));
+    }
+
+    /** SMTP of the operator, for mails that must not go through the club's account. */
+    public function systemTransport(): MailTransport
+    {
+        return $this->services['system_transport'] ??= new SmtpTransport($this->mailSettings()->forSystem());
+    }
+
+    /** For tests: replaces the operator's SMTP. */
+    public function useSystemTransport(MailTransport $transport): void
+    {
+        $this->services['system_transport'] = $transport;
     }
 
     public function mailQueue(): MailQueue

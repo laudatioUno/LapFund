@@ -9,6 +9,7 @@
       {%- if opts.autocomplete is defined %} autocomplete="{{ opts.autocomplete }}"{% endif %}
       {%- if opts.required ?? false %} required{% endif %}
       {%- if opts.autofocus ?? false %} autofocus{% endif %}
+      {%- if opts.readonly ?? false %} readonly{% endif %}
       {%- if opts.inputmode is defined %} inputmode="{{ opts.inputmode }}"{% endif %}
       {%- if opts.pattern is defined %} pattern="{{ opts.pattern }}"{% endif %}
       {%- if opts.maxlength is defined %} maxlength="{{ opts.maxlength }}"{% endif %}

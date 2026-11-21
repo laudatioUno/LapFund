@@ -10,9 +10,14 @@
   </div>
   <div class="page-head__badges">
     {% if event.archived_at %}<span class="badge badge--inactive">{{ t('events.archived_badge') }}</span>{% endif %}
+    {% if event_pending ?? false %}<span class="badge badge--license-pending">● {{ t('license.state.pending') }}</span>{% endif %}
     <span class="badge badge--status-{{ event.status }}">{{ t('events.status.' ~ event.status) }}</span>
   </div>
 </header>
+
+{% if (event_final ?? false) and event_tab != 'overview' %}
+  <div class="notice notice--info">{{ t('license.final_hint') }}</div>
+{% endif %}
 
 {% if not perm.assigned and perm.edit %}
   <div class="notice notice--info">{{ t('events.not_assigned_hint') }}</div>

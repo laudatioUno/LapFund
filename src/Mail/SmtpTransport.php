@@ -70,6 +70,9 @@ final class SmtpTransport implements MailTransport
                 $m->addEmbeddedImage($image['path'], $image['cid'], $image['cid'] . '.png', PHPMailer::ENCODING_BASE64, 'image/png');
             }
         }
+        foreach ($mail['attachments'] ?? [] as $file) {
+            $m->addStringAttachment($file['content'], $file['name'], PHPMailer::ENCODING_BASE64, $file['type']);
+        }
         $m->addCustomHeader('Auto-Submitted', 'auto-generated');
     }
 

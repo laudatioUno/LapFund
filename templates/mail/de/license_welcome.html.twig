@@ -1,0 +1,10 @@
+{% extends 'mail/de/_layout.html.twig' %}
+{% block content %}
+<p style="margin:0 0 16px;font-size:20px;font-weight:bold;">{{ t('mail.hello', {name: name}) }}</p>
+<p style="margin:0 0 16px;">{{ t('mail.license.welcome_intro', {instance: instance}) }}</p>
+<p style="margin:0 0 16px;">{{ t('mail.license.welcome_steps') }}</p>
+<p style="margin:0 0 4px;color:#3B4A58;">{{ t('admin.users.username') }}: <strong>{{ username }}</strong></p>
+{% include 'mail/de/_button.html.twig' with {href: invite_url, label: t('mail.license.welcome_button')} %}
+<p style="margin:0 0 12px;font-size:14px;color:#3B4A58;">{{ t('mail.license.welcome_valid') }}</p>
+<p style="margin:0;font-size:13px;color:#586776;word-break:break-all;">{{ t('mail.link_fallback') }}<br><a href="{{ invite_url }}" style="color:#3B4A58;">{{ invite_url }}</a></p>
+{% endblock %}

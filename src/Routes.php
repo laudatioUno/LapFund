@@ -11,6 +11,7 @@ use LapFund\Controller\EventController;
 use LapFund\Controller\EventMailController;
 use LapFund\Controller\InstallController;
 use LapFund\Controller\LapsController;
+use LapFund\Controller\LicenseController;
 use LapFund\Controller\MailController;
 use LapFund\Controller\ParticipantController;
 use LapFund\Controller\PaymentsController;
@@ -64,6 +65,11 @@ final class Routes
         $r->get('/install', $c(InstallController::class, 'show'));
         $r->post('/install', $c(InstallController::class, 'install'));
         $r->get('/install/done', $c(InstallController::class, 'done'));
+        $r->post('/install/resend', $c(InstallController::class, 'resend'));
+
+        // Activation of a booked run by the operator (customer instances)
+        $r->get('/license/activate/{ref:LF-[A-Z0-9]+-[0-9]+}', $c(LicenseController::class, 'confirm'));
+        $r->post('/license/activate/{ref:LF-[A-Z0-9]+-[0-9]+}', $c(LicenseController::class, 'activate'));
 
         // Login
         $r->get('/admin/login', $c(AuthController::class, 'loginForm'));
@@ -113,6 +119,8 @@ final class Routes
         $r->post('/admin/events/{id}/status', $c(EventController::class, 'status'));
         $r->post('/admin/events/{id}/archive', $c(EventController::class, 'archive'));
         $r->post('/admin/events/{id}/anonymize', $c(EventController::class, 'anonymize'));
+        $r->post('/admin/events/{id}/delete', $c(EventController::class, 'delete'));
+        $r->get('/admin/events/{id}/receipt.pdf', $c(EventController::class, 'receipt'));
         $r->get('/admin/events/{id}/settings', $c(EventController::class, 'settings'));
         $r->post('/admin/events/{id}/settings', $c(EventController::class, 'updateSettings'));
 

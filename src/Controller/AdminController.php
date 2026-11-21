@@ -30,6 +30,9 @@ final class AdminController extends Controller
         return $this->render('admin/dashboard.html.twig', [
             'events' => array_slice($this->app->events()->listFor($user), 0, 6),
             'can_create' => $isClub,
+            'create_label' => $this->app->licensing()->enabled()
+                ? ($this->app->licensing()->credit() !== null ? $this->t('license.book.button_credit') : $this->t('license.book.button', ['price' => $this->app->formatter->price($this->app->license()->priceRun())]))
+                : $this->t('events.create'),
             'checklist' => $checklist,
             'pending_migrations' => $isClub ? $this->app->migrator()->pending() : [],
         ]);

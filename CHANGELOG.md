@@ -3,6 +3,22 @@
 All notable changes to LapFund. Versions follow [semantic versioning](https://semver.org/).
 The section of a version is used as the release notes on GitHub.
 
+## [1.10.0] – 2026-11
+
+### Added
+- Hosted customer instances can sell runs one by one (section `license` in `config/config.php`; without it nothing changes):
+  - **Setup without operator login**: the operator writes `config.php` and opens `/install?key=<setup_key>`, enters the club and its first club admin and whether the first run and the option «Mailversand» were paid with the order. The club admin gets an invitation mail (through the operator's SMTP) and sets password and two-factor login himself. The page can resend the invitation and locks once it was accepted.
+  - **Events › Lauf buchen** (club admins): price from `config.php`, option «Mailversand» (paid once, valid for all runs), confirmation of the terms. Badges «Zahlung offen» / «Freigeschaltet» on the event cards. A first run paid with the order is created as active.
+  - **Payment pending**: the run can be prepared, but the sponsor search (and with it the invitations) stays locked. The overview shows amount, payment reference (e.g. `LF-MUST-0003`) and a «Mit TWINT bezahlen» button with amount and reference filled in. An unpaid run can be deleted (confirmation with the name); its booking is kept as cancelled.
+  - **Activation**: the operator gets a mail with the booking and an HMAC-signed link. It opens a confirmation page, so link scanners in mail programs cannot activate anything; a second click only shows the state. Alternatively `php bin/license.php list [--open]` and `php bin/license.php activate <reference>`.
+  - **Receipt** as PDF: attached to the mail «… ist freigeschaltet» and downloadable on the event overview (club admins). Names and amounts are stored with the booking, so the receipt stays the same.
+  - With «Mailversand», the instance sends all mails through the operator's SMTP from `config.php`; the mail settings then only show sender name, website address and limits.
+  - Locks on customer instances: name and date of a run are fixed once the sponsor search has started; a closed run is final (no way back, no changes; overview, reports and exports stay).
+- Mail transport supports attachments.
+
+### Changed
+- Events that exist when updating count as activated (database update `011_licensing`).
+
 ## [1.9.1] – 2026-11
 
 ### Fixed
